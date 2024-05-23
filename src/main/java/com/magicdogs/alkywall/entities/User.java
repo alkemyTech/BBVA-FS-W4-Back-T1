@@ -28,6 +28,10 @@ public class User {
     @Column(name = "email", nullable = false)
     private String email;
 
+    @Column(name = "password", nullable = false)
+    private String password;
+
+
    // @Column(name = "roleId", nullable = false)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idRole")
