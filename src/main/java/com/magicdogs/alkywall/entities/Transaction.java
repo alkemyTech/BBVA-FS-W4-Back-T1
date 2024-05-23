@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.antlr.v4.runtime.misc.NotNull;
+
 
 import java.time.LocalDateTime;
 
@@ -22,7 +22,6 @@ public class Transaction {
     private Long idTransaction;
 
     @Column(name="amount", nullable = false)
-    @NotNull
     private Double amount;
 
     @Column (name="type", nullable = false)
@@ -32,8 +31,9 @@ public class Transaction {
     @Column(name="description")
     private String description;
 
+    //@Column (name="accountId", nullable = false)
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="accountId", nullable = false)
+    @JoinColumn(name="idAccount", nullable = false)
     private Account account;
 
     @Column(name="transactionDate")

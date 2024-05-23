@@ -21,9 +21,10 @@ public class FixedTermDeposit {
     @Column(name = "amount", nullable = false)
     private Double amount;
 
+    //@Column (name="accountId", nullable = false)
     @ManyToOne
     @JoinColumn(name = "idAccount", nullable = false)
-    private Account accountId;
+    private Account account;
 
     @Column(name = "interest", nullable = false)
     private Double interest;

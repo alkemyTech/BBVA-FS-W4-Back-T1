@@ -15,7 +15,7 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_role")
+    @Column(name = "idRole")
     private Long idRole;
 
     @Enumerated(EnumType.STRING)
@@ -25,10 +25,10 @@ public class Role {
     @Column(nullable = true)
     private String description;
 
-    @Column(name = "creation_date")
+    @Column(name = "creationDate")
     private LocalDateTime creationDate;
 
-    @Column(name = "update_date")
+    @Column(name = "updateDate")
     private LocalDateTime updateDate;
 
     @PrePersist

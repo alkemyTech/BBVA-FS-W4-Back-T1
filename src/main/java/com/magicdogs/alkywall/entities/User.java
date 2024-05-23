@@ -16,6 +16,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column (name="idUser", nullable = false)
     private Long idUser;
 
     @Column(name = "firstName", nullable = false)
@@ -27,10 +28,10 @@ public class User {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "roleId", nullable = false)
+   // @Column(name = "roleId", nullable = false)
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_role")
-    private Role roleId;
+    @JoinColumn(name = "idRole")
+    private Role role;
 
     @Column(name = "updateDate")
     private LocalDateTime updateDate;

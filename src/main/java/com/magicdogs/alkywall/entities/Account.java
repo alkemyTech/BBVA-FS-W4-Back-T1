@@ -1,7 +1,6 @@
 package com.magicdogs.alkywall.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,29 +17,34 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idAccount")
-    private Long id;
+    private Long idAccount;
+
     @Enumerated(EnumType.STRING)
-    @NotNull
-    @Column(name = "currency")
+    @Column(name = "currency", nullable = false)
     private CurrencyType currency;
-    @NotNull
-    @Column(name = "transactionLimit")
+
+    @Column(name = "transactionLimit", nullable = false)
     private Double transactionLimit;
-    @NotNull
-    @Column(name = "balance")
+
+    @Column(name = "balance", nullable = false)
     private Double balance;
-    @NotNull
-    @Column(name = "createDate")
+
+   // @Column (name="userId", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "idUser")
+    private User user;
+
+    @Column(name = "creationDate")
     private LocalDateTime creationDate;
-    @NotNull
+
     @Column(name = "updateDate")
     private LocalDateTime updateDate;
-    @NotNull
-    @Column(name = "softDelete")
+
+    @Column(name = "softDelete", nullable = false)
     private Boolean softDelete;
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_user")
-    private User user;
+
+    @Column(name="cbu", nullable=false)
+    private String cbu;
 
     @PrePersist
     protected void onCreate() {
