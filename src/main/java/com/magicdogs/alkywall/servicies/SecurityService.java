@@ -4,16 +4,26 @@ import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
 import com.magicdogs.alkywall.entities.User;
 import com.magicdogs.alkywall.repositories.UserRepository;
-import org.modelmapper.ModelMapper;
+import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+//import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.stereotype.Component;
 
+@Component
+@AllArgsConstructor
 public class SecurityService {
     private UserRepository userRepository;
-    private ModelMapper modelMapper;
+    //private ModelMapper modelMapper;
+    private final AuthenticationManager authenticationManager;
+    private final JWTService jwtService;
 
-    public UserLoginDTO login (UserLoginDTO us) throws AuthenticationException {
+    //private final PasswordEncoder passwordEncoder;
 
-        User user = userRepository.findByEmail(us.getEmail());
+    public String login (UserLoginDTO us) throws AuthenticationException {
+
+        /*User user = userRepository.findByEmail(us.getEmail());
         if(user != null && us.getPassword().equals(user.getPassword())){
             us.setLastName(user.getFirstName());
             us.setFistName(user.getFirstName());
@@ -21,14 +31,15 @@ public class SecurityService {
         }
         else{
             us.setAutenticado(false);
-        }
-        return  us;
-      /*  var authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
+        }*/
+       // return  us;
+        // ACA LO S BUCA A ALA BSE DE DATOS.
+        var authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(us.getEmail(), us.getPassword())
         );
 
-        var user = (TaskUser) authentication.getPrincipal();
-        return jwtService.createToken(user.getUsername(), 60);*/
+        var user2 = (User) authentication.getPrincipal();
+        return jwtService.createToken(user2.getEmail(), 60);
     }
 
 
