@@ -51,9 +51,14 @@ public class SecurityController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserRegisterDTO registerRequest) {
+    public ResponseEntity<?> register(@RequestBody UserRegisterDTO registerRequest, HttpServletResponse response) {
         try {
             var newUser = securityService.registerUser(registerRequest);
+
+            var userLoginDTO = new UserLoginDTO(registerRequest.email(), registerRequest.password());
+            var token = securityService.login(userLoginDTO);
+            addJwtToCookie(response, token);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
