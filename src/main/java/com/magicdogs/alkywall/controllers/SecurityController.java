@@ -10,11 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.Cookie;
 import org.springframework.validation.annotation.Validated;
+import com.magicdogs.alkywall.dto.UserRegisterDTO;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 
 @RestController
 @RequestMapping("/auth")
@@ -28,26 +29,10 @@ public class SecurityController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserLoginDTO userLoginDTO,HttpServletResponse response){
-
-       /* try {
-        //var token = authenticationService.login(loginRequest.user(), loginRequest.pass());
-           // addJwtToCookie(response, token);
-            System.out.println(userLoginDTO.toString());
-            UserLoginDTO userEncontrado = securityService.login(userLoginDTO);
-            System.out.println(userEncontrado.toString());
-            if(userEncontrado.getAutenticado())  return ResponseEntity.ok().build();
-
-       } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
-        }
-       // return new UserLoginDTO();
-
-*/
         try {
             var token = securityService.login(userLoginDTO);
             addJwtToCookie(response, token);
 
-            // ESTO VA EN EL SERVICE?
             UserDto userReturn = securityService.searchUser(userLoginDTO);
             return ResponseEntity.ok(userReturn);
         } catch (AuthenticationException e) {
@@ -65,4 +50,24 @@ public class SecurityController {
         response.addCookie(cookie);
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody UserRegisterDTO registerRequest) {
+        try {
+            var newUser = securityService.registerUser(registerRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/register-admin")
+    public ResponseEntity<?> registerAdmin(@RequestBody UserRegisterDTO registerRequest) {
+        try {
+            var newAdmin = securityService.registerAdmin(registerRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newAdmin);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }

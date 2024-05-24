@@ -1,4 +1,4 @@
 package com.magicdogs.alkywall.dto;
 
-public class UserRegisterDTO {
+public record UserRegisterDTO(String firstName, String lastName, String email, String password) {
 }
