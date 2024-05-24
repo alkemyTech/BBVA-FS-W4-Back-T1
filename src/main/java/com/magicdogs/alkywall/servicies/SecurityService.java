@@ -1,9 +1,8 @@
 package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.dto.UserRegisterDTO;
-import com.magicdogs.alkywall.entities.Role;
-import com.magicdogs.alkywall.entities.RoleNameEnum;
-import com.magicdogs.alkywall.entities.User;
+import com.magicdogs.alkywall.entities.*;
+import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.RoleRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
@@ -19,6 +18,7 @@ public class SecurityService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final AccountRepository accountRepository;
 
 
     public UserRegisterDTO registerUser(UserRegisterDTO registerRequest){
@@ -40,7 +40,11 @@ public class SecurityService {
 
         //var newUser = modelMapper.map(registerRequest, User.class);
         var newUser = new User(null, registerRequest.firstName(), registerRequest.lastName(), registerRequest.email(), passwordEncoder.encode(registerRequest.password()), role, null, null, 0);
+        var accountARS = new Account(null, CurrencyType.ARS, 300000.00, 0.00, newUser, null, null, false, "0");
+        var accountUSD = new Account(null, CurrencyType.USD, 1000.00, 0.00, newUser, null, null, false, "0");
         userRepository.save(newUser);
+        accountRepository.save(accountARS);
+        accountRepository.save(accountUSD);
         return registerRequest;
     }
 }
