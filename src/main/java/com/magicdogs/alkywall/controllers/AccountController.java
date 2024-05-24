@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/accounts")
@@ -19,7 +20,8 @@ public class AccountController {
     private final AccountService accountService;
 
     @GetMapping("{userId}")
-    public ResponseEntity<List<AccountDTO>> accountListByUser(@PathVariable("userId") Long id){
+    public ResponseEntity<Optional<List<AccountDTO>>> accountListByUser(@PathVariable("userId") Long id){
+
         return ResponseEntity.ok(accountService.accountsByUser(id));
     }
 }
