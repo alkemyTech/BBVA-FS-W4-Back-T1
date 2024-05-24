@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.controllers;
 
+import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
 import com.magicdogs.alkywall.servicies.SecurityService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,7 +46,10 @@ public class SecurityController {
         try {
             var token = securityService.login(userLoginDTO);
             addJwtToCookie(response, token);
-            return ResponseEntity.ok().build();
+
+            // ESTO VA EN EL SERVICE?
+            UserDto userReturn = securityService.searchUser(userLoginDTO);
+            return ResponseEntity.ok(userReturn);
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
