@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.controllers;
 
+import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.User;
@@ -20,13 +21,19 @@ public class AccountController {
 
     @GetMapping("{userId}")
     public ResponseEntity<Optional<List<AccountDTO>>> accountListByUser(@PathVariable("userId") Long id){
-
-        return ResponseEntity.ok(accountService.accountsByUser(id));
+        Optional<List<AccountDTO>> optionalAccounts = accountService.accountsByUser(id);
+        if(optionalAccounts.isPresent()){return ResponseEntity.ok(optionalAccounts);}
+        else {throw new RuntimeException("No se encontraron cuentas para el usuario con ID "+id);}
     }
 
     @PostMapping("/")
     public ResponseEntity<AccountDTO> createAccount(User user, @RequestBody Account account) {
         AccountDTO accountDTO = accountService.createAccount(user, account.getCurrency());
         return ResponseEntity.ok(accountDTO);
+    }
+
+    @GetMapping("balance")
+    public ResponseEntity<AccountBalanceDTO> accountBalance(){
+        return ResponseEntity.ok(null);
     }
 }

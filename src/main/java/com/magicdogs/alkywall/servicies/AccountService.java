@@ -1,10 +1,9 @@
 package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.config.ModelMapperConfig;
+import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
-import com.magicdogs.alkywall.entities.Account;
-import com.magicdogs.alkywall.entities.CurrencyType;
-import com.magicdogs.alkywall.entities.User;
+import com.magicdogs.alkywall.entities.*;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -43,5 +42,20 @@ public class AccountService {
 
         Account savedAccount = accountRepository.save(account);
         return modelMapperConfig.accountToDTO(savedAccount);
+    }
+
+    public AccountBalanceDTO getAccountBalance(){
+        List<Transaction> transactions = null;
+        List<FixedTermDeposit> fixedTerms = null;
+        Double incomes = 0.0;
+        Double payments = 0.0;
+        Double balance;
+        for(Transaction t: transactions){
+            if(t.getType().equals(TypeTransaction.INCOME)){incomes += t.getAmount();}
+            else {payments += t.getAmount();}
+        }
+        balance = incomes - payments;
+
+        return null;
     }
 }
