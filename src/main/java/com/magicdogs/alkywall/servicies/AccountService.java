@@ -4,9 +4,11 @@ import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.entities.*;
+import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -23,7 +25,8 @@ public class AccountService {
     private final ModelMapperConfig modelMapperConfig;
 
     public Optional<List<AccountDTO>> accountsByUser(Long userId){
-        Optional<List<Account>> accountsOptional = accountRepository.findByUserIdUser(userId);
+        Optional<List<Account>> accountsOptional = Optional.ofNullable(accountRepository.findByUserIdUser(userId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found")));
         return accountsOptional.map(accounts -> accounts.stream().map(modelMapperConfig::accountToDTO).toList());
     }
 

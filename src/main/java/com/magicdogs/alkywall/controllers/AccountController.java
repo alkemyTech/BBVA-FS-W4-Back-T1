@@ -5,6 +5,7 @@ import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.CurrencyType;
 import com.magicdogs.alkywall.entities.User;
+import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.servicies.AccountService;
 import com.magicdogs.alkywall.servicies.JWTService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,10 +27,13 @@ public class AccountController {
 
 
     @GetMapping("{userId}")
-    public ResponseEntity<Optional<List<AccountDTO>>> accountListByUser(@PathVariable("userId") Long id){
+    public ResponseEntity<List<AccountDTO>> accountListByUser(@PathVariable("userId") Long id) {
         Optional<List<AccountDTO>> optionalAccounts = accountService.accountsByUser(id);
-        if(optionalAccounts.isPresent()){return ResponseEntity.ok(optionalAccounts);}
-        else {throw new RuntimeException("No se encontraron cuentas para el usuario con ID "+id);}
+        if (optionalAccounts.isPresent() && !optionalAccounts.get().isEmpty()) {
+            return ResponseEntity.ok(optionalAccounts.get());
+        } else {
+            throw new ApiException(HttpStatus.NOT_FOUND, "No se encontraron cuentas para el usuario con ID " + id);
+        }
     }
 
     @PostMapping("")
