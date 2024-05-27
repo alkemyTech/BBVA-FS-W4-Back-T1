@@ -66,9 +66,9 @@ public class SecurityService {
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
-        var newUser = new User(null, registerRequest.firstName(), registerRequest.lastName(), registerRequest.email(), passwordEncoder.encode(registerRequest.password()), role, null, null, 0);
-        var accountARS = new Account(null, CurrencyType.ARS, 300000.00, 0.00, newUser, null, null, false, "0");
-        var accountUSD = new Account(null, CurrencyType.USD, 1000.00, 0.00, newUser, null, null, false, "0");
+        var newUser = new User(registerRequest.firstName(), registerRequest.lastName(), registerRequest.email(), passwordEncoder.encode(registerRequest.password()), role, 0);
+        var accountARS = new Account(CurrencyType.ARS, 300000.00, 0.00, newUser, false, "0");
+        var accountUSD = new Account(CurrencyType.USD, 1000.00, 0.00, newUser, false, "0");
         userRepository.save(newUser);
         accountRepository.save(accountARS);
         accountRepository.save(accountUSD);
