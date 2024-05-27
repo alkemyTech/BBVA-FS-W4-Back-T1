@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Component
 @AllArgsConstructor
 public class SecurityService {
+    private final AccountService accountService;
     private UserRepository userRepository;
     private ModelMapper modelMapper;
     private final AuthenticationManager authenticationManager;
@@ -67,8 +68,8 @@ public class SecurityService {
                 .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
         var newUser = new User(registerRequest.firstName(), registerRequest.lastName(), registerRequest.email(), passwordEncoder.encode(registerRequest.password()), role, 0);
-        var accountARS = new Account(CurrencyType.ARS, 300000.00, 0.00, newUser, false, "0");
-        var accountUSD = new Account(CurrencyType.USD, 1000.00, 0.00, newUser, false, "0");
+        var accountARS = new Account(CurrencyType.ARS, 300000.00, 0.00, newUser, false, accountService.generateUniqueCbu());
+        var accountUSD = new Account(CurrencyType.USD, 1000.00, 0.00, newUser, false, accountService.generateUniqueCbu());
         userRepository.save(newUser);
         accountRepository.save(accountARS);
         accountRepository.save(accountUSD);
