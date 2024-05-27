@@ -1,16 +1,15 @@
 package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.config.ModelMapperConfig;
-import com.magicdogs.alkywall.dto.AccountCreateDTO;
+import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
-import com.magicdogs.alkywall.entities.Account;
-import com.magicdogs.alkywall.entities.CurrencyType;
-import com.magicdogs.alkywall.entities.User;
+import com.magicdogs.alkywall.entities.*;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -74,4 +73,42 @@ public class AccountService {
     private boolean isCbuUnique(String cbu) {
         return accountRepository.findByCbu(cbu).isEmpty();
     }
+
+    public List<AccountBalanceDTO> getAccountBalance(String userEmail){
+        Optional<List<Account>> accounts = accountRepository.findByUserEmail(userEmail);
+        List<Transaction> transactions = null; //transactionService.getTransactionsAccount(account) --> List
+        List<FixedTermDeposit> fixedTerms = null; // fixedTermsDeposit.getFixedTermsAccount(account) --> List
+        Double arsBalance = 0.0;
+        Double usdBalance = 0.0;
+        List<AccountBalanceDTO> accountsBalanceDTO = new ArrayList<>();
+        if(accounts.isPresent()){
+            for(Account ac: accounts.get()){
+                //Falta traer las transacciones y plazos fijos de cada cuenta y setearlo en el DTO
+                if(ac.getCurrency().equals(CurrencyType.ARS)){
+                    arsBalance = ac.getBalance();
+                }else if(ac.getCurrency().equals(CurrencyType.USD)){
+                    usdBalance = ac.getBalance();
+                }
+                AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO(arsBalance, usdBalance, null, null);
+                accountsBalanceDTO.add(accountBalanceDTO);
+            }
+        }
+
+        return accountsBalanceDTO;
+    }
+
+    /**
+     * Calcula el balance de las transacciones entrantes
+     * @param transactions
+     * @return balance de la cuenta
+     */
+    /*private Double getBalance(List<Transaction> transactions){
+        Double incomes = 0.0;
+        Double payments = 0.0;
+        for(Transaction t: transactions){
+            if(t.getType().equals(TypeTransaction.INCOME)){incomes += t.getAmount();}
+            else if (t.getType().equals(TypeTransaction.PAYMENT)){payments += t.getAmount();}
+        }
+        return incomes-payments;
+    }*/
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -29,8 +30,7 @@ public class Account {
     @Column(name = "balance", nullable = false)
     private Double balance;
 
-   // @Column (name="userId", nullable = false)
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idUser")
     private User user;
 
@@ -45,6 +45,21 @@ public class Account {
 
     @Column(name="cbu", nullable=false)
     private String cbu;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> transactions;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FixedTermDeposit> fixedTermDeposits;
+
+    public Account(CurrencyType currencyType, double transactionLimit, double balance, User user, boolean softDelete, String cbu) {
+        this.currency = currencyType;
+        this.transactionLimit = transactionLimit;
+        this.balance = balance;
+        this.user = user;
+        this.softDelete = softDelete;
+        this.cbu = cbu;
+    }
 
     @PrePersist
     protected void onCreate() {

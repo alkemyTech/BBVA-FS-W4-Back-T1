@@ -39,6 +39,13 @@ public class Transaction {
     @Column(name="transactionDate")
     private LocalDateTime transactionDate;
 
+    public Transaction(double amount, TypeTransaction typeTransaction, String description, Account account) {
+        this.amount = amount;
+        this.type = typeTransaction;
+        this.description = description;
+        this.account = account;
+    }
+
     @PrePersist
     protected void onCreate() {
         transactionDate = LocalDateTime.now();

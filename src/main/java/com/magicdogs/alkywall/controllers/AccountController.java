@@ -1,6 +1,6 @@
 package com.magicdogs.alkywall.controllers;
 
-import com.magicdogs.alkywall.dto.AccountCreateDTO;
+import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.CurrencyType;
@@ -22,12 +22,14 @@ import java.util.Optional;
 public class AccountController {
 
     private final AccountService accountService;
-    private JWTService jwtService;
+    private final JWTService jwtService;
+
 
     @GetMapping("{userId}")
     public ResponseEntity<Optional<List<AccountDTO>>> accountListByUser(@PathVariable("userId") Long id){
-
-        return ResponseEntity.ok(accountService.accountsByUser(id));
+        Optional<List<AccountDTO>> optionalAccounts = accountService.accountsByUser(id);
+        if(optionalAccounts.isPresent()){return ResponseEntity.ok(optionalAccounts);}
+        else {throw new RuntimeException("No se encontraron cuentas para el usuario con ID "+id);}
     }
 
     @PostMapping("")
@@ -40,5 +42,12 @@ public class AccountController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
+    @GetMapping("balance")
+    public ResponseEntity<List<AccountBalanceDTO>> accountsBalance(HttpServletRequest request){
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        return ResponseEntity.ok(accountService.getAccountBalance(userEmail));
     }
 }
