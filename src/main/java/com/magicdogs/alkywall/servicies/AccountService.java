@@ -1,6 +1,7 @@
 package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.config.ModelMapperConfig;
+import com.magicdogs.alkywall.dto.AccountCreateDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.CurrencyType;
@@ -24,15 +25,13 @@ public class AccountService {
         return accountsOptional.map(accounts -> accounts.stream().map(modelMapperConfig::accountToDTO).toList());
     }
 
-    public AccountDTO createAccount(User user, CurrencyType currency) {
+    public AccountCreateDTO createAccount(User user, CurrencyType currency) {
         Optional<Account> existingAccount = accountRepository.findByUserAndCurrency(user, currency);
         if (existingAccount.isPresent()) {
-            throw new IllegalStateException("La cuenta ya existe.");
+            throw new IllegalStateException("Account already exists.");
         }
 
         Account account = new Account();
-        account.setUser(user);
-        account.setCurrency(currency);
         account.setBalance(0.0);
 
         if (currency == CurrencyType.ARS) {
@@ -42,6 +41,6 @@ public class AccountService {
         }
 
         Account savedAccount = accountRepository.save(account);
-        return modelMapperConfig.accountToDTO(savedAccount);
+        return modelMapperConfig.accountCreateToDTO(savedAccount);
     }
 }

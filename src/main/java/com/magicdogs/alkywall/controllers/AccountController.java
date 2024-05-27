@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.controllers;
 
+import com.magicdogs.alkywall.dto.AccountCreateDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.User;
@@ -25,8 +26,8 @@ public class AccountController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<AccountDTO> createAccount(User user, @RequestBody Account account) {
-        AccountDTO accountDTO = accountService.createAccount(user, account.getCurrency());
-        return ResponseEntity.ok(accountDTO);
+    public ResponseEntity<AccountCreateDTO> createAccount(User user, @RequestBody Account account) {
+        AccountCreateDTO accountCreateDTO = accountService.createAccount(user, account.getCurrency());
+        return ResponseEntity.ok(accountCreateDTO);
     }
 }
