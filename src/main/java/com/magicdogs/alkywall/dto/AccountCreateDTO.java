@@ -22,5 +22,5 @@ public class AccountCreateDTO {
     @NotNull
     @NotBlank
     @NotEmpty
-    private User user;
+    private String cbu;
 }
