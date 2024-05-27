@@ -36,8 +36,6 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-
-   // @Column(name = "roleId", nullable = false)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idRole")
     private Role role;
@@ -47,6 +45,18 @@ public class User implements UserDetails {
 
     @Column(name = "creationDate")
     private LocalDateTime creationDate;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Account> accounts;
+
+    public User( String firstName, String lastName, String email, String password, Role role, int softDelete) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.softDelete = softDelete;
+    }
 
     @PrePersist
     protected void onCreate() {
@@ -65,6 +75,15 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.getName().name()));
+    }
+
+    public Account getAccountIn(CurrencyType currencyType) {
+        for (Account account : accounts) {
+            if (account.getCurrency().equals(currencyType)) {
+                return account;
+            }
+        }
+        return null;
     }
 
     @Override
