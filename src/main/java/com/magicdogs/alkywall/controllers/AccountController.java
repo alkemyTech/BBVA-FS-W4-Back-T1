@@ -5,6 +5,8 @@ import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.User;
 import com.magicdogs.alkywall.servicies.AccountService;
+import com.magicdogs.alkywall.servicies.JWTService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,7 @@ import java.util.Optional;
 public class AccountController {
 
     private final AccountService accountService;
+    private final JWTService jwtService;
 
     @GetMapping("{userId}")
     public ResponseEntity<Optional<List<AccountDTO>>> accountListByUser(@PathVariable("userId") Long id){
@@ -33,7 +36,9 @@ public class AccountController {
     }
 
     @GetMapping("balance")
-    public ResponseEntity<AccountBalanceDTO> accountBalance(){
-        return ResponseEntity.ok(null);
+    public ResponseEntity<List<AccountBalanceDTO>> accountsBalance(HttpServletRequest request){
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        return ResponseEntity.ok(accountService.getAccountBalance(userEmail));
     }
 }

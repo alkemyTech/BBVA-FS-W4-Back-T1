@@ -42,11 +42,17 @@ public class User implements UserDetails {
     @JoinColumn(name = "idRole")
     private Role role;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Account> accounts;
+
     @Column(name = "updateDate")
     private LocalDateTime updateDate;
 
     @Column(name = "creationDate")
     private LocalDateTime creationDate;
+
+    public User(Object o, String s, String s1, String email, String encode, Role role, Object o1, Object o2, int i) {
+    }
 
     @PrePersist
     protected void onCreate() {
