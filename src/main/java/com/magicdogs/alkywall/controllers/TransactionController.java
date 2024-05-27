@@ -26,25 +26,17 @@ public class TransactionController {
     public ResponseEntity<?> sendArs(@RequestBody TransactionDTO transactionDTO, HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
+        transactionService.sendMoney(transactionDTO, CurrencyType.ARS, userEmail);
+        return ResponseEntity.ok().build();
 
-        try {
-            transactionService.sendMoney(transactionDTO, CurrencyType.ARS, userEmail);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        }
     }
+
     @PostMapping("/sendUsd")
     public ResponseEntity<?> sendUsd(@RequestBody TransactionDTO transactionDTO, HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
-
-        try {
-            transactionService.sendMoney(transactionDTO, CurrencyType.USD, userEmail);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        }
+        transactionService.sendMoney(transactionDTO, CurrencyType.USD, userEmail);
+        return ResponseEntity.ok().build();
     }
 
 }
