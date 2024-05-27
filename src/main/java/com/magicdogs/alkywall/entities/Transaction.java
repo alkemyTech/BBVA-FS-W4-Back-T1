@@ -41,7 +41,7 @@ public class Transaction {
 
     public Transaction(double amount, TypeTransaction typeTransaction, String description, Account account) {
         this.amount = amount;
-        this.type = type;
+        this.type = typeTransaction;
         this.description = description;
         this.account = account;
     }

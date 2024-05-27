@@ -1,12 +1,9 @@
 package com.magicdogs.alkywall.config;
 
+import com.magicdogs.alkywall.dto.AccountCreateDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
-import com.magicdogs.alkywall.dto.FixedTermsBalanceDTO;
-import com.magicdogs.alkywall.dto.TransactionBalanceDTO;
 import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.entities.Account;
-import com.magicdogs.alkywall.entities.FixedTermDeposit;
-import com.magicdogs.alkywall.entities.Transaction;
 import com.magicdogs.alkywall.entities.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
@@ -24,9 +21,6 @@ public class ModelMapperConfig {
 
     public AccountDTO accountToDTO(Account account){return modelMapper().map(account, AccountDTO.class);}
 
-    public TransactionBalanceDTO transactionBalanceToDTO(Transaction transaction){
-        return modelMapper().map(transaction, TransactionBalanceDTO.class);}
+    public AccountCreateDTO accountCreateToDTO(Account account){return modelMapper().map(account, AccountCreateDTO.class);}
 
-    public FixedTermsBalanceDTO fixedTermsBalanceToDTO(FixedTermDeposit fixedTermDeposit){
-        return modelMapper().map(fixedTermDeposit, FixedTermsBalanceDTO.class);}
 }
