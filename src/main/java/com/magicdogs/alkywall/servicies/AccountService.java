@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.servicies;
 
+import com.magicdogs.alkywall.Constants;
 import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
@@ -42,9 +43,9 @@ public class AccountService {
         var account = new Account(currency, 0.00, 0.00, user, false, generateUniqueCbu());
 
         if (currency == CurrencyType.ARS) {
-            account.setTransactionLimit(300000.00);
+            account.setTransactionLimit(Constants.getTransactionLimitArs());
         } else if (currency == CurrencyType.USD) {
-            account.setTransactionLimit(1000.00);
+            account.setTransactionLimit(Constants.getTransactionLimitUsd());
         }
 
         Account savedAccount = accountRepository.save(account);
