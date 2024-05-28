@@ -74,41 +74,32 @@ public class AccountService {
         return accountRepository.findByCbu(cbu).isEmpty();
     }
 
+    /**
+     * Retorna el balance de cada cuenta con
+     * su historial de transacciones y plazos fijos.
+     * Las cuentas se diferencian por su tipo de moneda
+     * @param userEmail
+     * @return DTO con el balance de las cuentas
+     */
     public List<AccountBalanceDTO> getAccountBalance(String userEmail){
         Optional<List<Account>> accounts = accountRepository.findByUserEmail(userEmail);
-        List<Transaction> transactions = null; //transactionService.getTransactionsAccount(account) --> List
-        List<FixedTermDeposit> fixedTerms = null; // fixedTermsDeposit.getFixedTermsAccount(account) --> List
-        Double arsBalance = 0.0;
-        Double usdBalance = 0.0;
         List<AccountBalanceDTO> accountsBalanceDTO = new ArrayList<>();
+
         if(accounts.isPresent()){
             for(Account ac: accounts.get()){
-                //Falta traer las transacciones y plazos fijos de cada cuenta y setearlo en el DTO
+                AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO();
                 if(ac.getCurrency().equals(CurrencyType.ARS)){
-                    arsBalance = ac.getBalance();
+                    accountBalanceDTO.setAccountArs(ac.getBalance());
+                    accountBalanceDTO.setHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionBalanceToDTO).toList());
+                    accountBalanceDTO.setFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
                 }else if(ac.getCurrency().equals(CurrencyType.USD)){
-                    usdBalance = ac.getBalance();
+                    accountBalanceDTO.setAccountUsd(ac.getBalance());
+                    accountBalanceDTO.setHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionBalanceToDTO).toList());
+                    accountBalanceDTO.setFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
                 }
-                AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO(arsBalance, usdBalance, null, null);
                 accountsBalanceDTO.add(accountBalanceDTO);
             }
         }
-
         return accountsBalanceDTO;
     }
-
-    /**
-     * Calcula el balance de las transacciones entrantes
-     * @param transactions
-     * @return balance de la cuenta
-     */
-    /*private Double getBalance(List<Transaction> transactions){
-        Double incomes = 0.0;
-        Double payments = 0.0;
-        for(Transaction t: transactions){
-            if(t.getType().equals(TypeTransaction.INCOME)){incomes += t.getAmount();}
-            else if (t.getType().equals(TypeTransaction.PAYMENT)){payments += t.getAmount();}
-        }
-        return incomes-payments;
-    }*/
 }

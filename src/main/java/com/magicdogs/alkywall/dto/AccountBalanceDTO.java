@@ -1,7 +1,6 @@
 package com.magicdogs.alkywall.dto;
 
 import com.magicdogs.alkywall.entities.FixedTermDeposit;
-import com.magicdogs.alkywall.entities.Transaction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +14,6 @@ public class AccountBalanceDTO {
 
     private Double accountArs;
     private Double accountUsd;
-    List<Transaction> history;
-    List<FixedTermDeposit> fixedTerms;
+    List<TransactionBalanceDTO> history;
+    List<FixedTermsBalanceDTO> fixedTerms;
 }
