@@ -61,14 +61,14 @@ public class SecurityService {
     }
 
     private UserRegisterDTO register(UserRegisterDTO registerRequest, RoleNameEnum roleName) {
-        if (userRepository.findByEmail(registerRequest.email()).isPresent()) {
+        if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             throw new IllegalArgumentException("User already exists");
         }
 
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
-        var newUser = new User(registerRequest.firstName(), registerRequest.lastName(), registerRequest.email(), passwordEncoder.encode(registerRequest.password()), role, 0);
+        var newUser = new User(registerRequest.getFirstName(), registerRequest.getLastName(), registerRequest.getEmail(), passwordEncoder.encode(registerRequest.getPassword()), role, 0);
         var accountARS = new Account(CurrencyType.ARS, Constants.getTransactionLimitArs(), 0.00, newUser, false, accountService.generateUniqueCbu());
         var accountUSD = new Account(CurrencyType.USD, Constants.getTransactionLimitUsd(), 0.00, newUser, false, accountService.generateUniqueCbu());
         userRepository.save(newUser);
