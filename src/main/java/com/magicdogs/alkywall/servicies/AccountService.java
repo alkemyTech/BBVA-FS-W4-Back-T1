@@ -2,7 +2,6 @@ package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.AccountBalanceDTO;
-import com.magicdogs.alkywall.dto.AccountCreateDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.entities.*;
 import com.magicdogs.alkywall.exceptions.ApiException;
@@ -31,8 +30,7 @@ public class AccountService {
         return accountsOptional.map(accounts -> accounts.stream().map(modelMapperConfig::accountToDTO).toList());
     }
 
-    public AccountCreateDTO createAccount(String userEmail, CurrencyType currency) {
-
+    public AccountDTO createAccount(String userEmail, CurrencyType currency) {
         var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -50,8 +48,20 @@ public class AccountService {
         }
 
         Account savedAccount = accountRepository.save(account);
+        return modelMapperConfig.accountToDTO(savedAccount);
+    }
 
-        return modelMapperConfig.accountCreateToDTO(savedAccount);
+    public AccountDTO updateAccount(Long id, String userEmail, Double transactionLimit) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+
+        var account = accountRepository.findByIdAccountAndUser(id, user)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Account does not exists"));
+
+        account.setTransactionLimit(transactionLimit);
+
+        Account savedAccount = accountRepository.save(account);
+        return modelMapperConfig.accountToDTO(savedAccount);
     }
 
     public String generateUniqueCbu() {
