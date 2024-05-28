@@ -1,15 +1,16 @@
 package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.dto.TransactionDTO;
+import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.CurrencyType;
 import com.magicdogs.alkywall.entities.Transaction;
 import com.magicdogs.alkywall.entities.TypeTransaction;
-import com.magicdogs.alkywall.exceptions.AccountNotFoundException;
-import com.magicdogs.alkywall.exceptions.NotEnoughException;
+import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.TransactionRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,42 +22,54 @@ public class TransactionService {
 
 
     public void sendMoney(TransactionDTO transactionDTO, CurrencyType currencyType, String userEmail) {
-        var account_destination = accountRepository.findById(transactionDTO.getDestinationIdAccount());
-        var user_origin = userRepository.findByEmail(userEmail);
-        if (user_origin.isPresent()) {
-            var account_origin = user_origin.get().getAccountIn(currencyType);
-            if (account_destination.isPresent() && account_origin != null) {
-                if(account_origin.getCurrency() == currencyType && account_destination.get().getCurrency() == currencyType) {
-                    if (account_origin.getBalance() >= transactionDTO.getAmount()) {
-                        if (account_origin.getTransactionLimit() >= transactionDTO.getAmount()) {
+        var accountDestination = accountRepository.findById(transactionDTO.getDestinationIdAccount())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Destination account not found"));
 
-                            var transaction_income_destination = new Transaction(transactionDTO.getAmount(), TypeTransaction.INCOME, transactionDTO.getDescription(), account_destination.get());
-                            var transaction_payment_origin = new Transaction(transactionDTO.getAmount(), TypeTransaction.PAYMENT, transactionDTO.getDescription(), account_origin);
+        var userOrigin = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Origin user not found"));
 
-                            transactionRepository.save(transaction_income_destination);
-                            transactionRepository.save(transaction_payment_origin);
-
-                            // Actualizamos el balance de la cuenta como si fuese el saldo:
-                            account_origin.setBalance(account_origin.getBalance() - transactionDTO.getAmount());
-                            accountRepository.save(account_origin);
-                            account_destination.get().setBalance(account_destination.get().getBalance() + transactionDTO.getAmount());
-                            accountRepository.save(account_destination.get());
-
-
-                        } else {
-                            throw new NotEnoughException("Not enough limit");
-                        }
-                    } else {
-                        throw new NotEnoughException("Not enough balance");
-                    }
-                }
-                else{
-                    throw new NotEnoughException("Not match the currency type");
-                }
-            } else {
-                throw new AccountNotFoundException("Account not found");
-            }
+        var accountOrigin = userOrigin.getAccountIn(currencyType);
+        if (accountOrigin == null) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Origin account not found for the given currency");
         }
 
+        validateCurrencyType(accountOrigin, accountDestination, currencyType);
+        validateBalanceAndLimit(accountOrigin, transactionDTO.getAmount());
+
+        processTransaction(accountOrigin, accountDestination, transactionDTO);
     }
+
+    private void validateCurrencyType(Account accountOrigin, Account accountDestination, CurrencyType currencyType) {
+        if (accountOrigin.getCurrency() != currencyType || accountDestination.getCurrency() != currencyType) {
+            throw new ApiException(HttpStatus.CONFLICT, "Currency type mismatch");
+        }
+    }
+
+    private void validateBalanceAndLimit(Account accountOrigin, double amount) {
+        if (accountOrigin.getBalance() < amount) {
+            throw new ApiException(HttpStatus.CONFLICT, "Not enough balance");
+        }
+        if (accountOrigin.getTransactionLimit() < amount) {
+            throw new ApiException(HttpStatus.CONFLICT, "Not enough limit");
+        }
+    }
+
+    private void processTransaction(Account accountOrigin, Account accountDestination, TransactionDTO transactionDTO) {
+        var transactionIncomeDestination = new Transaction(transactionDTO.getAmount(), TypeTransaction.INCOME, transactionDTO.getDescription(), accountDestination);
+        var transactionPaymentOrigin = new Transaction(transactionDTO.getAmount(), TypeTransaction.PAYMENT, transactionDTO.getDescription(), accountOrigin);
+
+        transactionRepository.save(transactionIncomeDestination);
+        transactionRepository.save(transactionPaymentOrigin);
+
+        updateAccountBalances(accountOrigin, accountDestination, transactionDTO.getAmount());
+    }
+
+    private void updateAccountBalances(Account accountOrigin, Account accountDestination, double amount) {
+        accountOrigin.setBalance(accountOrigin.getBalance() - amount);
+        accountDestination.setBalance(accountDestination.getBalance() + amount);
+
+        accountRepository.save(accountOrigin);
+        accountRepository.save(accountDestination);
+    }
+
 }
