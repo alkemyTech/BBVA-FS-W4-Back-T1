@@ -1,6 +1,7 @@
 package com.magicdogs.alkywall.controllers;
 
 import com.magicdogs.alkywall.dto.AccountBalanceDTO;
+import com.magicdogs.alkywall.dto.AccountCreateDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.CurrencyType;
@@ -37,15 +38,11 @@ public class AccountController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createAccount(@RequestBody Account account, HttpServletRequest request) {
-        try {
-            var token = jwtService.getJwtFromCookies(request);
-            var userEmail = jwtService.extractUserId(token);
-
-            return ResponseEntity.ok(accountService.createAccount(userEmail, account.getCurrency()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<?> createAccount(@RequestBody AccountCreateDTO account, HttpServletRequest request) {
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var accountCreateDTO = accountService.createAccount(userEmail, account.getCurrency());
+        return ResponseEntity.ok(accountCreateDTO);
     }
 
     @GetMapping("balance")

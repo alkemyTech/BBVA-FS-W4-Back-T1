@@ -2,6 +2,7 @@ package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.AccountBalanceDTO;
+import com.magicdogs.alkywall.dto.AccountCreateDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.entities.*;
 import com.magicdogs.alkywall.exceptions.ApiException;
@@ -30,30 +31,27 @@ public class AccountService {
         return accountsOptional.map(accounts -> accounts.stream().map(modelMapperConfig::accountToDTO).toList());
     }
 
-    public Account createAccount(String userEmail, CurrencyType currency) {
+    public AccountCreateDTO createAccount(String userEmail, CurrencyType currency) {
 
-        var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
 
         Optional<Account> existingAccount = accountRepository.findByUserAndCurrency(user, currency);
         if (existingAccount.isPresent()) {
-            throw new IllegalArgumentException("Account already exists");
+            throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "Account already exists");
         }
 
-        Account account = new Account();
-        account.setBalance(0.0);
-        account.setUser(user);
-        account.setCbu(generateUniqueCbu());
-        account.setSoftDelete(false);
+        var account = new Account(currency, 0.00, 0.00, user, false, generateUniqueCbu());
 
         if (currency == CurrencyType.ARS) {
-            account.setTransactionLimit(300000.0);
-            account.setCurrency(CurrencyType.ARS);
+            account.setTransactionLimit(300000.00);
         } else if (currency == CurrencyType.USD) {
-            account.setTransactionLimit(1000.0);
-            account.setCurrency(CurrencyType.USD);
+            account.setTransactionLimit(1000.00);
         }
 
-        return accountRepository.save(account);
+        Account savedAccount = accountRepository.save(account);
+
+        return modelMapperConfig.accountCreateToDTO(savedAccount);
     }
 
     public String generateUniqueCbu() {
