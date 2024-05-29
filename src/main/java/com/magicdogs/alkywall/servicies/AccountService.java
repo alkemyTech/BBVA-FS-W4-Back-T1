@@ -96,22 +96,19 @@ public class AccountService {
     public List<AccountBalanceDTO> getAccountBalance(String userEmail){
         Optional<List<Account>> accounts = accountRepository.findByUserEmail(userEmail);
         List<AccountBalanceDTO> accountsBalanceDTO = new ArrayList<>();
-
-        if(accounts.isPresent()){
-            for(Account ac: accounts.get()){
+        accounts.ifPresent(accountList -> {
+            for(Account ac: accountList){
                 AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO();
+                accountBalanceDTO.setHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionBalanceToDTO).toList());
+                accountBalanceDTO.setFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
                 if(ac.getCurrency().equals(CurrencyType.ARS)){
                     accountBalanceDTO.setAccountArs(ac.getBalance());
-                    accountBalanceDTO.setHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionBalanceToDTO).toList());
-                    accountBalanceDTO.setFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
                 }else if(ac.getCurrency().equals(CurrencyType.USD)){
                     accountBalanceDTO.setAccountUsd(ac.getBalance());
-                    accountBalanceDTO.setHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionBalanceToDTO).toList());
-                    accountBalanceDTO.setFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
                 }
                 accountsBalanceDTO.add(accountBalanceDTO);
             }
-        }
+        });
         return accountsBalanceDTO;
     }
 }
