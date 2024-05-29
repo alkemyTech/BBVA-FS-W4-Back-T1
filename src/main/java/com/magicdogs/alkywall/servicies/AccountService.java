@@ -10,14 +10,14 @@ import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-@Component
+@Service
 @AllArgsConstructor
 public class AccountService {
 
@@ -27,25 +27,25 @@ public class AccountService {
 
     public Optional<List<AccountDTO>> accountsByUser(Long userId){
         Optional<List<Account>> accountsOptional = Optional.ofNullable(accountRepository.findByUserIdUser(userId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found")));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado")));
         return accountsOptional.map(accounts -> accounts.stream().map(modelMapperConfig::accountToDTO).toList());
     }
 
     public AccountDTO createAccount(String userEmail, CurrencyType currency) {
         var user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         Optional<Account> existingAccount = accountRepository.findByUserAndCurrency(user, currency);
         if (existingAccount.isPresent()) {
-            throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "Account already exists");
+            throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "La cuenta ya existe");
         }
 
         var account = new Account(currency, 0.00, 0.00, user, false, generateUniqueCbu());
 
         if (currency == CurrencyType.ARS) {
-            account.setTransactionLimit(Constants.getTransactionLimitArs());
+                account.setTransactionLimit(Constants.getTransactionLimitArs());
         } else if (currency == CurrencyType.USD) {
-            account.setTransactionLimit(Constants.getTransactionLimitUsd());
+                account.setTransactionLimit(Constants.getTransactionLimitUsd());
         }
 
         Account savedAccount = accountRepository.save(account);
@@ -54,10 +54,10 @@ public class AccountService {
 
     public AccountDTO updateAccount(Long id, String userEmail, Double transactionLimit) {
         var user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         var account = accountRepository.findByIdAccountAndUser(id, user)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Account does not exists"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "La cuenta no existe"));
 
         account.setTransactionLimit(transactionLimit);
 
