@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.servicies;
 
+import com.magicdogs.alkywall.Constants;
 import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountCreateDTO;
@@ -44,9 +45,9 @@ public class AccountService {
         var account = new Account(currency, 0.00, 0.00, user, false, generateUniqueCbu());
 
         if (currency == CurrencyType.ARS) {
-            account.setTransactionLimit(300000.00);
+            account.setTransactionLimit(Constants.getTransactionLimitArs());
         } else if (currency == CurrencyType.USD) {
-            account.setTransactionLimit(1000.00);
+            account.setTransactionLimit(Constants.getTransactionLimitUsd());
         }
 
         Account savedAccount = accountRepository.save(account);
@@ -85,22 +86,19 @@ public class AccountService {
     public List<AccountBalanceDTO> getAccountBalance(String userEmail){
         Optional<List<Account>> accounts = accountRepository.findByUserEmail(userEmail);
         List<AccountBalanceDTO> accountsBalanceDTO = new ArrayList<>();
-
-        if(accounts.isPresent()){
-            for(Account ac: accounts.get()){
+        accounts.ifPresent(accountList -> {
+            for(Account ac: accountList){
                 AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO();
+                accountBalanceDTO.setHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionBalanceToDTO).toList());
+                accountBalanceDTO.setFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
                 if(ac.getCurrency().equals(CurrencyType.ARS)){
                     accountBalanceDTO.setAccountArs(ac.getBalance());
-                    accountBalanceDTO.setHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionBalanceToDTO).toList());
-                    accountBalanceDTO.setFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
                 }else if(ac.getCurrency().equals(CurrencyType.USD)){
                     accountBalanceDTO.setAccountUsd(ac.getBalance());
-                    accountBalanceDTO.setHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionBalanceToDTO).toList());
-                    accountBalanceDTO.setFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
                 }
                 accountsBalanceDTO.add(accountBalanceDTO);
             }
-        }
+        });
         return accountsBalanceDTO;
     }
 }
