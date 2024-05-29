@@ -6,6 +6,7 @@ import com.magicdogs.alkywall.servicies.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,7 @@ public class SecurityController {
 
     @Operation(summary = "Iniciar sesión de usuario")
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginDTO userLoginDTO,HttpServletResponse response){
+    public ResponseEntity<?> login(@RequestBody @Valid UserLoginDTO userLoginDTO,HttpServletResponse response){
         try {
             var token = securityService.login(userLoginDTO);
             addJwtToCookie(response, token);
@@ -40,7 +41,7 @@ public class SecurityController {
             UserDto userReturn = securityService.searchUser(userLoginDTO);
             return ResponseEntity.ok(userReturn);
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña invalido: " +e.getMessage() );
         }
     }
 
@@ -56,11 +57,11 @@ public class SecurityController {
 
     @Operation(summary = "Registrar nuevo usuario")
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserRegisterDTO registerRequest, HttpServletResponse response) {
+    public ResponseEntity<?> register(@RequestBody @Valid UserRegisterDTO registerRequest, HttpServletResponse response) {
         try {
             var newUser = securityService.registerUser(registerRequest);
 
-            var userLoginDTO = new UserLoginDTO(registerRequest.email(), registerRequest.password());
+            var userLoginDTO = new UserLoginDTO(registerRequest.getEmail(), registerRequest.getPassword());
             var token = securityService.login(userLoginDTO);
             addJwtToCookie(response, token);
 
