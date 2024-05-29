@@ -7,23 +7,25 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "DTO para iniciar sesion con un usuario")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserLoginDTO {
 
-
-
     @NotEmpty
     @NotNull
     @NotBlank
     @Email
+    @Schema(description = "Correo electrónico del usuario")
     private String email;
+
     @NotEmpty
     @NotNull
     @NotBlank
+    @Schema(description = "Contraseña del usuario")
     private String password;
 
 }
