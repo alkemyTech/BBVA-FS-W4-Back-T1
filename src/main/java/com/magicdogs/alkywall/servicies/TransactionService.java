@@ -23,14 +23,14 @@ public class TransactionService {
 
     public void sendMoney(TransactionDTO transactionDTO, CurrencyType currencyType, String userEmail) {
         var accountDestination = accountRepository.findById(transactionDTO.getDestinationIdAccount())
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Destination account not found"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta destino no encontrada"));
 
         var userOrigin = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Origin user not found"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         var accountOrigin = userOrigin.getAccountIn(currencyType);
         if (accountOrigin == null) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Origin account not found for the given currency");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Cuenta origen no encontrada para la moneda indicada");
         }
 
         validateCurrencyType(accountOrigin, accountDestination, currencyType);
@@ -41,16 +41,16 @@ public class TransactionService {
 
     private void validateCurrencyType(Account accountOrigin, Account accountDestination, CurrencyType currencyType) {
         if (accountOrigin.getCurrency() != currencyType || accountDestination.getCurrency() != currencyType) {
-            throw new ApiException(HttpStatus.CONFLICT, "Currency type mismatch");
+            throw new ApiException(HttpStatus.CONFLICT, "Tipos de monedas distintos");
         }
     }
 
     private void validateBalanceAndLimit(Account accountOrigin, double amount) {
         if (accountOrigin.getBalance() < amount) {
-            throw new ApiException(HttpStatus.CONFLICT, "Not enough balance");
+            throw new ApiException(HttpStatus.CONFLICT, "Balance insuficiente");
         }
         if (accountOrigin.getTransactionLimit() < amount) {
-            throw new ApiException(HttpStatus.CONFLICT, "Not enough limit");
+            throw new ApiException(HttpStatus.CONFLICT, "Limite insuficiente");
         }
     }
 
