@@ -29,7 +29,7 @@ public class SecurityController {
     private SecurityService securityService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginDTO userLoginDTO,HttpServletResponse response){
+    public ResponseEntity<?> login(@RequestBody @Valid UserLoginDTO userLoginDTO,HttpServletResponse response){
         try {
             var token = securityService.login(userLoginDTO);
             addJwtToCookie(response, token);
@@ -37,7 +37,7 @@ public class SecurityController {
             UserDto userReturn = securityService.searchUser(userLoginDTO);
             return ResponseEntity.ok(userReturn);
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña invalido: " +e.getMessage() );
         }
     }
 

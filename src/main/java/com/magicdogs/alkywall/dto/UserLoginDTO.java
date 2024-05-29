@@ -16,14 +16,14 @@ public class UserLoginDTO {
 
 
 
-    @NotEmpty
-    @NotNull
-    @NotBlank
-    @Email
+    @NotEmpty(message = "El correo electrónico no puede estar vacío")
+    @NotNull(message = "El correo electrónico no puede ser nulo")
+    @NotBlank(message = "El correo electrónico no puede estar en blanco")
+    @Email(message = "El correo electrónico debe ser válido")
     private String email;
-    @NotEmpty
-    @NotNull
-    @NotBlank
+    @NotEmpty(message = "La contraseña no puede estar vacía")
+    @NotNull(message = "La contraseña no puede ser nula")
+    @NotBlank(message = "La contraseña no puede estar en blanco")
     private String password;
 
 }
