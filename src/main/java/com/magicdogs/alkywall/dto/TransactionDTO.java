@@ -12,15 +12,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransactionDTO {
-    @NotNull
-    @NotBlank
-    @NotEmpty
+    @NotNull(message = "El id de la cuenta no puede ser nulo")
     private int destinationIdAccount;
 
-    @NotNull
-    @NotBlank
-    @Positive
-    @NotEmpty
+    @NotNull(message = "El monto no puede ser nulo")
+    @Positive(message = "El monto debe ser mayor a cero")
     private double amount;
 
     private String description;
