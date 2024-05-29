@@ -4,6 +4,7 @@ import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
 import com.magicdogs.alkywall.servicies.SecurityService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.http.HttpStatus;
@@ -51,11 +52,11 @@ public class SecurityController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserRegisterDTO registerRequest, HttpServletResponse response) {
+    public ResponseEntity<?> register(@RequestBody @Valid UserRegisterDTO registerRequest, HttpServletResponse response) {
         try {
             var newUser = securityService.registerUser(registerRequest);
 
-            var userLoginDTO = new UserLoginDTO(registerRequest.email(), registerRequest.password());
+            var userLoginDTO = new UserLoginDTO(registerRequest.getEmail(), registerRequest.getPassword());
             var token = securityService.login(userLoginDTO);
             addJwtToCookie(response, token);
 
