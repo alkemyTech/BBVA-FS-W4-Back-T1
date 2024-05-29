@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.controllers;
 
+import com.magicdogs.alkywall.Constants;
 import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
 import com.magicdogs.alkywall.servicies.SecurityService;
@@ -27,8 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Autenticación", description = "Endpoints para la autenticación de usuarios")
 public class SecurityController {
 
-    private static final String JWT_COOKIE_NAME = "jwt-token";
-    private static final int JWT_EXPIRATION_MINUTES = 60;
     private SecurityService securityService;
 
     @Operation(summary = "Iniciar sesión de usuario")
@@ -47,11 +46,11 @@ public class SecurityController {
 
 
     private void addJwtToCookie(HttpServletResponse response, String token) {
-        var cookie = new Cookie(JWT_COOKIE_NAME, token);
+        var cookie = new Cookie(Constants.getJwtCookieName(), token);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/");
-        cookie.setMaxAge(JWT_EXPIRATION_MINUTES * 60);
+        cookie.setMaxAge(Constants.getJwtExpirationMinutes() * 60);
         response.addCookie(cookie);
     }
 

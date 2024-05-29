@@ -1,8 +1,6 @@
 package com.magicdogs.alkywall.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -14,18 +12,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransactionDTO {
-
-    @NotNull
-    @NotBlank
-    @NotEmpty
+    @NotNull(message = "El id de la cuenta no puede ser nulo")
     @Schema(description = "Id de la cuenta destino")
     private int destinationIdAccount;
 
+    @NotNull(message = "El monto no puede ser nulo")
+    @Positive(message = "El monto debe ser mayor a cero")
     @Schema(description = "Cantidad de dinero a enviar")
-    @NotNull
-    @NotBlank
-    @Positive
-    @NotEmpty
     private double amount;
 
     @Schema(description = "Descripcion de la transaccion")
