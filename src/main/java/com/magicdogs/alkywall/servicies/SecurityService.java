@@ -1,7 +1,7 @@
 package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.Constants;
-import com.magicdogs.alkywall.dto.UserDto;
+import com.magicdogs.alkywall.dto.UserDTO;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
 import com.magicdogs.alkywall.entities.User;
 import com.magicdogs.alkywall.repositories.UserRepository;
@@ -40,12 +40,12 @@ public class SecurityService {
         var user2 = (User) authentication.getPrincipal();
         return jwtService.createToken(user2.getEmail(), 60);
     }
-    public UserDto searchUser(UserLoginDTO us){
-        UserDto userReturn;
+    public UserDTO searchUser(UserLoginDTO us){
+        UserDTO userReturn;
 
         Optional<User> userEntity = userRepository.findByEmail(us.getEmail());
         if(userEntity != null){
-            userReturn = modelMapper.map(userEntity.orElse(null), UserDto.class);
+            userReturn = modelMapper.map(userEntity.orElse(null), UserDTO.class);
             return userReturn;
         }
         return null;
