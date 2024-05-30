@@ -1,5 +1,7 @@
 package com.magicdogs.alkywall.servicies;
 
+import com.magicdogs.alkywall.config.ModelMapperConfig;
+import com.magicdogs.alkywall.dto.ListTransactionDTO;
 import com.magicdogs.alkywall.dto.TransactionDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.CurrencyType;
@@ -11,26 +13,35 @@ import com.magicdogs.alkywall.repositories.TransactionRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
-@Component
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+@Service
 @AllArgsConstructor
 public class TransactionService {
     private TransactionRepository transactionRepository;
     private AccountRepository accountRepository;
     private UserRepository userRepository;
+    private final ModelMapperConfig modelMapperConfig;
 
 
     public void sendMoney(TransactionDTO transactionDTO, CurrencyType currencyType, String userEmail) {
         var accountDestination = accountRepository.findById(transactionDTO.getDestinationIdAccount())
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Destination account not found"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta destino no encontrada"));
 
         var userOrigin = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Origin user not found"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         var accountOrigin = userOrigin.getAccountIn(currencyType);
         if (accountOrigin == null) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Origin account not found for the given currency");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Cuenta origen no encontrada para la moneda indicada");
         }
 
         validateCurrencyType(accountOrigin, accountDestination, currencyType);
@@ -41,16 +52,16 @@ public class TransactionService {
 
     private void validateCurrencyType(Account accountOrigin, Account accountDestination, CurrencyType currencyType) {
         if (accountOrigin.getCurrency() != currencyType || accountDestination.getCurrency() != currencyType) {
-            throw new ApiException(HttpStatus.CONFLICT, "Currency type mismatch");
+            throw new ApiException(HttpStatus.CONFLICT, "Tipos de monedas distintos");
         }
     }
 
     private void validateBalanceAndLimit(Account accountOrigin, double amount) {
         if (accountOrigin.getBalance() < amount) {
-            throw new ApiException(HttpStatus.CONFLICT, "Not enough balance");
+            throw new ApiException(HttpStatus.CONFLICT, "Balance insuficiente");
         }
         if (accountOrigin.getTransactionLimit() < amount) {
-            throw new ApiException(HttpStatus.CONFLICT, "Not enough limit");
+            throw new ApiException(HttpStatus.CONFLICT, "Limite insuficiente");
         }
     }
 
@@ -72,4 +83,17 @@ public class TransactionService {
         accountRepository.save(accountDestination);
     }
 
+    public List<ListTransactionDTO> getTransactionsByUserId(Long id, String userEmail) {
+        var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        if (!Objects.equals(user.getIdUser(), id)) {
+            throw new ApiException(HttpStatus.CONFLICT, "Usuario logueado distinto al usuario del id recibido");
+        } else {
+            List<ListTransactionDTO> transactions = new ArrayList<>();
+            for (Account account : user.getAccounts()) {
+                transactions.addAll(account.getTransactions().stream().map(modelMapperConfig::listTransactionDTO).toList());
+            }
+            return transactions;
+
+        }
+    }
 }

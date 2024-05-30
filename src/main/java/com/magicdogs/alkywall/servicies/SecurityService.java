@@ -10,15 +10,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.stereotype.Component;
 import java.util.Optional;
 import com.magicdogs.alkywall.dto.UserRegisterDTO;
 import com.magicdogs.alkywall.entities.*;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.RoleRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @AllArgsConstructor
 public class SecurityService {
     private final AccountService accountService;

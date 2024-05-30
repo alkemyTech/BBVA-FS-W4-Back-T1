@@ -2,6 +2,7 @@ package com.magicdogs.alkywall.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -20,6 +21,12 @@ public class ApiExceptionController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationException(MethodArgumentNotValidException ex) {
         var errorMessage = Objects.requireNonNull(ex.getBindingResult().getFieldError()).getDefaultMessage();
+        return ResponseEntity.badRequest().body(errorMessage);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        var errorMessage = "Dato ingresado inválido: " + ex.getMessage();
         return ResponseEntity.badRequest().body(errorMessage);
     }
 }
