@@ -26,6 +26,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/api-docs/swagger-config").permitAll()
                         .requestMatchers("/users/**").hasRole("ADMIN")
+                        .requestMatchers("/transactions/{userId:[\\d]+}").hasRole("ADMIN")
+                        .requestMatchers("/transactions/**").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

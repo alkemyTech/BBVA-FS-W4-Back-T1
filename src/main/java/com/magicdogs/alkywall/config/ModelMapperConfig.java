@@ -28,4 +28,7 @@ public class ModelMapperConfig {
     public FixedTermsBalanceDTO fixedTermsBalanceToDTO(FixedTermDeposit fixedTermDeposit){
         return modelMapper().map(fixedTermDeposit, FixedTermsBalanceDTO.class);
     }
+
+    public ListTransactionDTO listTransactionDTO(Transaction transaction){return modelMapper().map(transaction, ListTransactionDTO.class);}
+
 }

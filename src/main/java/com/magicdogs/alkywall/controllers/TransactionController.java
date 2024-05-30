@@ -1,7 +1,10 @@
 package com.magicdogs.alkywall.controllers;
 
+import com.magicdogs.alkywall.dto.AccountDTO;
+import com.magicdogs.alkywall.dto.ListTransactionDTO;
 import com.magicdogs.alkywall.dto.TransactionDTO;
 import com.magicdogs.alkywall.entities.CurrencyType;
+import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.servicies.JWTService;
 import com.magicdogs.alkywall.servicies.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,10 +15,10 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @Tag(name = "Transacciones", description = "Endpoints para realizar transacciones")
 @RestController
@@ -43,6 +46,14 @@ public class TransactionController {
         var userEmail = jwtService.extractUserId(token);
         transactionService.sendMoney(transactionDTO, CurrencyType.USD, userEmail);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("{userId}")
+    public ResponseEntity<List<ListTransactionDTO>> transactionListByUser(@PathVariable("userId") Long id, HttpServletRequest request) {
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        List<ListTransactionDTO> transactions = transactionService.getTransactionsByUserId(id, userEmail);
+        return ResponseEntity.ok().body(transactions);
     }
 
 }
