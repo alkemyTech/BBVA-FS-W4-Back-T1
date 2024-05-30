@@ -56,4 +56,14 @@ public class UserController {
         var userUpdated = userService.update(id, userEmail, user);
         return ResponseEntity.ok(userUpdated);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> userDetails(@PathVariable Long id, HttpServletRequest request){
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var userDto = userService.userDetails(id, userEmail);
+
+        return ResponseEntity.ok().body(userDto);
+    }
+
 }
