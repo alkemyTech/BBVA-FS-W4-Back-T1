@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 
 @Component
 @AllArgsConstructor
-public class UserSeeder implements CommandLineRunner {
+public class Seeder implements CommandLineRunner {
 
     private UserRepository userRepository;
     private RoleRepository roleRepository;
@@ -49,7 +49,6 @@ public class UserSeeder implements CommandLineRunner {
                             0
                     );
                     userRepository.save(admin);
-                    System.out.println("Datos de usuario ADMIN creados.");
                 }
             });
 
@@ -67,10 +66,9 @@ public class UserSeeder implements CommandLineRunner {
                             0
                     );
                     userRepository.save(user);
-                    System.out.println("Datos de usuario USER creados.");
                 }
             });
-
+            System.out.println("Datos de usuario creados.");
         } else  {
             System.out.println("Datos de usuario ya existen.");
         }
