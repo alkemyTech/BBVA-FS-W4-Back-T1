@@ -1,9 +1,6 @@
 package com.magicdogs.alkywall.controllers;
 
-import com.magicdogs.alkywall.dto.AccountBalanceDTO;
-import com.magicdogs.alkywall.dto.AccountCreateDTO;
-import com.magicdogs.alkywall.dto.AccountUpdateDTO;
-import com.magicdogs.alkywall.dto.AccountDTO;
+import com.magicdogs.alkywall.dto.*;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.CurrencyType;
 import com.magicdogs.alkywall.entities.User;
@@ -15,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,10 +31,15 @@ public class AccountController {
 
     @Operation(summary = "Obtener lista de cuentas por ID de usuario")
     @GetMapping("{userId}")
-    public ResponseEntity<List<AccountDTO>> accountListByUser(@PathVariable("userId") Long id) {
-        Optional<List<AccountDTO>> optionalAccounts = accountService.accountsByUser(id);
-        if (optionalAccounts.isPresent() && !optionalAccounts.get().isEmpty()) {
-            return ResponseEntity.ok(optionalAccounts.get());
+    public ResponseEntity<AccountPageDTO> accountListByUser(@PathVariable("userId") Long id,
+                                                            @RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "1") int size) {
+        Optional<Page<AccountDTO>> optionalAccounts = accountService.accountsByUser(id, page, size);
+        String next = "", prev = "";
+        if (optionalAccounts.isPresent()  && !optionalAccounts.get().isEmpty()) {
+            if(optionalAccounts.get().hasNext()){next = "/accounts/"+id+"?page="+(page+1);}
+            if(optionalAccounts.get().hasPrevious()){prev = "/accounts/"+id+"?page="+(page-1);}
+            return ResponseEntity.ok(new AccountPageDTO(optionalAccounts.get().getContent(), next, prev));
         } else {
             throw new ApiException(HttpStatus.NOT_FOUND, "No se encontraron cuentas para el usuario con ID " + id);
         }
