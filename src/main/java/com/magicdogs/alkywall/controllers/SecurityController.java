@@ -4,6 +4,8 @@ import com.magicdogs.alkywall.Constants;
 import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
 import com.magicdogs.alkywall.servicies.SecurityService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -23,10 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 @Validated
 @AllArgsConstructor
+@Tag(name = "Autenticación", description = "Endpoints para la autenticación de usuarios")
 public class SecurityController {
 
     private SecurityService securityService;
 
+    @Operation(summary = "Iniciar sesión de usuario")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid UserLoginDTO userLoginDTO,HttpServletResponse response){
         try {
@@ -50,6 +54,7 @@ public class SecurityController {
         response.addCookie(cookie);
     }
 
+    @Operation(summary = "Registrar nuevo usuario")
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid UserRegisterDTO registerRequest, HttpServletResponse response) {
         try {
@@ -65,6 +70,7 @@ public class SecurityController {
         }
     }
 
+    @Operation(summary = "Registrar nuevo usuario administrador")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/register-admin")
     public ResponseEntity<?> registerAdmin(@RequestBody UserRegisterDTO registerRequest) {

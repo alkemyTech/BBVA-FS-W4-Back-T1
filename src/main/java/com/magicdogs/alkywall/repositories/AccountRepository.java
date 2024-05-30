@@ -15,4 +15,5 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     Optional<Account> findByCbu(String cbu);
     Optional<Account> findByUserAndCurrency(User user, CurrencyType currency);
     Optional<List<Account>> findByUserEmail(String email);
+    Optional<Account> findByIdAccountAndUser(Long id, User user);
 }
