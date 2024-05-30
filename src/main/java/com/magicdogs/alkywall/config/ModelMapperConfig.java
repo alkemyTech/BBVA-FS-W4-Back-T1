@@ -30,4 +30,5 @@ public class ModelMapperConfig {
     }
 
     public ListTransactionDTO listTransactionDTO(Transaction transaction){return modelMapper().map(transaction, ListTransactionDTO.class);}
+
 }
