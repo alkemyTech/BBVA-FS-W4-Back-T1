@@ -7,6 +7,7 @@ import com.magicdogs.alkywall.servicies.FixedTermService;
 import com.magicdogs.alkywall.servicies.JWTService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -30,6 +31,12 @@ public class FixedTermController {
         var fixedTermDeposit = fixedTermService.createFixedTermDeposit(fixedTermCreateDTO, userEmail);
         return ResponseEntity.ok(fixedTermDeposit);
 
+    }
+
+    @PostMapping("/simulate")
+    public ResponseEntity<?> createAccount (@RequestBody @Valid FixedTermCreateDTO fixedTermCreateDTO){
+        var fixedTermDeposit = fixedTermService.simulateFixedTerm(fixedTermCreateDTO);
+        return ResponseEntity.ok().body(fixedTermDeposit);
     }
 
 }

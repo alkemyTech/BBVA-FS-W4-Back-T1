@@ -68,5 +68,20 @@ public class FixedTermService {
     }
 
 
+    public FixedTermSimulatedDTO simulateFixedTerm ( FixedTermCreateDTO fixedTermCreateDTO){
+
+        if (fixedTermCreateDTO.getAmount()<=0) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "El monto debe ser positivo");
+        }
+        FixedTermDeposit fixedTermDeposit = modelMapperConfig.fixedTermsCreateDTOToEntitie(fixedTermCreateDTO);
+        fixedTermDeposit.setCreationDate(LocalDateTime.now());
+        fixedTermDeposit.setClosingDate(LocalDateTime.of(fixedTermCreateDTO.getClosingDate(), LocalTime.now()));
+        fixedTermDeposit.setInterest(Constants.getFixedTermInterestPercent());
+        FixedTermSimulatedDTO fixedTermSimulatedDTO = modelMapperConfig.fixedTermsEntitieToSimulatedDTO(fixedTermDeposit);
+        fixedTermSimulatedDTO.setInterestTotal(fixedTermDeposit.interestTotalWin());
+        fixedTermSimulatedDTO.setInterestTodayWin(fixedTermDeposit.interestPartialWin());
+        fixedTermSimulatedDTO.setAmountTotalToReceive(fixedTermDeposit.getAmountTotalToReceive());
+        return fixedTermSimulatedDTO;
+    }
 
 }
