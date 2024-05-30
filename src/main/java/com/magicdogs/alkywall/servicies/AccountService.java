@@ -113,4 +113,7 @@ public class AccountService {
         });
         return accountsBalanceDTO;
     }
+    public Optional<List<Account>> getAccountsByUserEmail(String email){
+        return accountRepository.findByUserEmail(email);
+    }
 }
