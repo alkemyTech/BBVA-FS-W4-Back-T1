@@ -1,7 +1,6 @@
 package com.magicdogs.alkywall.dto;
 
 import com.magicdogs.alkywall.entities.TypeTransaction;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,20 +10,12 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TransactionBalanceDTO {
+public class ListTransactionDTO {
 
-    @Schema(description = "ID de la transacción")
     private Long idTransaction;
-
-    @Schema(description = "Monto de la transacción")
     private Double amount;
-
-    @Schema(description = "Tipo de transacción")
     private TypeTransaction type;
-
-    @Schema(description = "Descripción de la transacción")
     private String description;
-
-    @Schema(description = "Fecha y hora de la transacción")
+    private Long accountIdAccount;
     private LocalDateTime transactionDate;
 }

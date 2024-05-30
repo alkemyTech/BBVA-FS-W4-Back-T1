@@ -1,5 +1,7 @@
 package com.magicdogs.alkywall.servicies;
 
+import com.magicdogs.alkywall.config.ModelMapperConfig;
+import com.magicdogs.alkywall.dto.ListTransactionDTO;
 import com.magicdogs.alkywall.dto.TransactionDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.CurrencyType;
@@ -11,14 +13,23 @@ import com.magicdogs.alkywall.repositories.TransactionRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
-@Component
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+@Service
 @AllArgsConstructor
 public class TransactionService {
     private TransactionRepository transactionRepository;
     private AccountRepository accountRepository;
     private UserRepository userRepository;
+    private final ModelMapperConfig modelMapperConfig;
 
 
     public void sendMoney(TransactionDTO transactionDTO, CurrencyType currencyType, String userEmail) {
@@ -72,4 +83,17 @@ public class TransactionService {
         accountRepository.save(accountDestination);
     }
 
+    public List<ListTransactionDTO> getTransactionsByUserId(Long id, String userEmail) {
+        var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        if (!Objects.equals(user.getIdUser(), id)) {
+            throw new ApiException(HttpStatus.CONFLICT, "Usuario logueado distinto al usuario del id recibido");
+        } else {
+            List<ListTransactionDTO> transactions = new ArrayList<>();
+            for (Account account : user.getAccounts()) {
+                transactions.addAll(account.getTransactions().stream().map(modelMapperConfig::listTransactionDTO).toList());
+            }
+            return transactions;
+
+        }
+    }
 }
