@@ -6,6 +6,9 @@ import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.servicies.AccountService;
 import lombok.AllArgsConstructor;
 import net.datafaker.Faker;
+import com.magicdogs.alkywall.entities.RoleNameEnum;
+import com.magicdogs.alkywall.entities.Role;
+import com.magicdogs.alkywall.entities.User;
 import com.magicdogs.alkywall.repositories.RoleRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -75,7 +78,6 @@ public class Seeder implements CommandLineRunner {
                     createAccountsForUser(user);
                 }
             });
-
             System.out.println("Datos creados.");
         } else {
             System.out.println("Datos ya existen.");
