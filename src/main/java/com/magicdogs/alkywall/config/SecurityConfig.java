@@ -22,6 +22,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api-docs").permitAll()
+                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/api-docs/swagger-config").permitAll()
                         .requestMatchers("/users/**").hasRole("ADMIN")
                         .requestMatchers("/transactions/{userId:[\\d]+}").hasRole("ADMIN")
                         .requestMatchers("/transactions/**").authenticated()
