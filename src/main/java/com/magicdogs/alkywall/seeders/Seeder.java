@@ -1,8 +1,12 @@
 package com.magicdogs.alkywall.seeders;
 
-import com.magicdogs.alkywall.entities.RoleNameEnum;
+import com.magicdogs.alkywall.Constants;
+import com.magicdogs.alkywall.entities.*;
+import com.magicdogs.alkywall.repositories.AccountRepository;
+import com.magicdogs.alkywall.servicies.AccountService;
 import lombok.AllArgsConstructor;
 import net.datafaker.Faker;
+import com.magicdogs.alkywall.entities.RoleNameEnum;
 import com.magicdogs.alkywall.entities.Role;
 import com.magicdogs.alkywall.entities.User;
 import com.magicdogs.alkywall.repositories.RoleRepository;
@@ -12,17 +16,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Locale;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 @Component
 @AllArgsConstructor
 public class Seeder implements CommandLineRunner {
 
-    private UserRepository userRepository;
-    private RoleRepository roleRepository;
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final AccountService accountService;
+    private final AccountRepository accountRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private final Faker faker = new Faker(Locale.forLanguageTag("es"));
+    private final Random random = new Random();
 
     @Override
     public void run(String... args) {
@@ -49,6 +57,7 @@ public class Seeder implements CommandLineRunner {
                             0
                     );
                     userRepository.save(admin);
+                    createAccountsForUser(admin);
                 }
             });
 
@@ -66,11 +75,45 @@ public class Seeder implements CommandLineRunner {
                             0
                     );
                     userRepository.save(user);
+                    createAccountsForUser(user);
                 }
             });
-            System.out.println("Datos de usuario creados.");
-        } else  {
-            System.out.println("Datos de usuario ya existen.");
+            System.out.println("Datos creados.");
+        } else {
+            System.out.println("Datos ya existen.");
+        }
+    }
+
+    private void createAccountsForUser(User user) {
+        boolean createArsAccount = random.nextBoolean();
+        boolean createUsdAccount = random.nextBoolean();
+
+        if (createArsAccount) {
+            var accountARS = new Account(
+                    CurrencyType.ARS,
+                    Constants.getTransactionLimitArs(),
+                    random.nextInt(100000),
+                    user,
+                    false,
+                    accountService.generateUniqueCbu()
+            );
+            accountRepository.save(accountARS);
+        }
+
+        if (createUsdAccount) {
+            var accountUSD = new Account(
+                    CurrencyType.USD,
+                    Constants.getTransactionLimitUsd(),
+                    random.nextInt(500),
+                    user,
+                    false,
+                    accountService.generateUniqueCbu()
+            );
+            accountRepository.save(accountUSD);
+        }
+
+        if (!createArsAccount && !createUsdAccount) {
+            createAccountsForUser(user);
         }
     }
 }
