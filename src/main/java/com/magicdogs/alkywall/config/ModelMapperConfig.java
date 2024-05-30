@@ -17,7 +17,7 @@ public class ModelMapperConfig {
         return new ModelMapper();
     }
 
-    public UserDTO userToDTO(User user){return modelMapper().map(user, UserDTO.class);}
+    public UserDto userToDTO(User user){return modelMapper().map(user, UserDto.class);}
 
     public AccountDTO accountToDTO(Account account){return modelMapper().map(account, AccountDTO.class);}
 

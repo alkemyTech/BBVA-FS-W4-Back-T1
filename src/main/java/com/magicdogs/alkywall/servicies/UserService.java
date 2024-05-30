@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;import com.magicdogs.alkywall.config.ModelMapperConfig;
-import com.magicdogs.alkywall.dto.UserDTO;
+import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.entities.User;
 import java.util.Optional;
 
@@ -23,7 +23,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(email).orElseThrow();
     }
 
-    public Page<UserDTO> getUsers(int pagina, int tamanio){
+    public Page<UserDto> getUsers(int pagina, int tamanio){
         Page<User> users = userRepository.findAll(PageRequest.of(pagina, tamanio));
         return users.map(modelMapperConfig::userToDTO);
     }
