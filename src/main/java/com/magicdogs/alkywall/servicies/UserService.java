@@ -81,4 +81,12 @@ public class UserService implements UserDetailsService {
         return modelMapperConfig.userToDTO(user);
 
     }
+
+
+    public UserDto userDetails(Long id, String email){
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        if(!user.getIdUser().equals(id))  throw new ApiException(HttpStatus.BAD_REQUEST, "No coincide el id con el loggeado");
+        UserDto userDto = modelMapperConfig.userToDTO(user);
+        return userDto;
+    }
 }
