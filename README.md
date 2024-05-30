@@ -121,3 +121,49 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
     - `GET /accounts/balance`
 
 
+## Test Data
+
+Test users have been created to facilitate testing of web functionalities.
+
+### Admin Users
+
+| Email              | Password |
+|--------------------|----------|
+| admin0@example.com | admin0   |
+| admin1@example.com | admin1   |
+| admin2@example.com | admin2   |
+| admin3@example.com | admin3   |
+| admin4@example.com | admin4   |
+| admin5@example.com | admin5   |
+| admin6@example.com | admin6   |
+| admin7@example.com | admin7   |
+| admin8@example.com | admin8   |
+| admin9@example.com | admin9   |
+
+### Regular Users
+
+| Email             | Password |
+|-------------------|----------|
+| user0@example.com | user0    |
+| user1@example.com | user1    |
+| user2@example.com | user2    |
+| user3@example.com | user3    |
+| user4@example.com | user4    |
+| user5@example.com | user5    |
+| user6@example.com | user6    |
+| user7@example.com | user7    |
+| user8@example.com | user8    |
+| user9@example.com | user9    |
+
+### Seeder Instructions
+
+1. **Run the application**: The seeder will run automatically when you start the application.
+2. **Access test users**: Use the email addresses and passwords listed above to log in with different roles and test the functionalities.
+3. **Update test data**: If you make changes to the data structure or functionalities, update the seeder and the data in this document.
+
+### How to use test data
+
+To access the test users:
+1. Start the application.
+2. Use one of the email addresses and passwords from the table above to log in.
+3. Verify the functionalities based on the user's role (admin or regular).
