@@ -2,14 +2,16 @@ package com.magicdogs.alkywall.controllers;
 
 import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountCreateDTO;
-import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.dto.AccountUpdateDTO;
+import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.CurrencyType;
 import com.magicdogs.alkywall.entities.User;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.servicies.AccountService;
 import com.magicdogs.alkywall.servicies.JWTService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -23,12 +25,13 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/accounts")
 @AllArgsConstructor
+@Tag(name = "Cuentas", description = "Endpoints para la gestión de cuentas")
 public class AccountController {
 
     private final AccountService accountService;
     private final JWTService jwtService;
 
-
+    @Operation(summary = "Obtener lista de cuentas por ID de usuario")
     @GetMapping("{userId}")
     public ResponseEntity<List<AccountDTO>> accountListByUser(@PathVariable("userId") Long id) {
         Optional<List<AccountDTO>> optionalAccounts = accountService.accountsByUser(id);
@@ -39,6 +42,7 @@ public class AccountController {
         }
     }
 
+    @Operation(summary = "Crear una nueva cuenta")
     @PostMapping("")
     public ResponseEntity<?> createAccount(@RequestBody @Valid AccountCreateDTO account, HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
@@ -55,6 +59,7 @@ public class AccountController {
         return ResponseEntity.ok(accountDTO);
     }
 
+    @Operation(summary = "Obtener balance de cuentas")
     @GetMapping("balance")
     public ResponseEntity<List<AccountBalanceDTO>> accountsBalance(HttpServletRequest request){
         var token = jwtService.getJwtFromCookies(request);
