@@ -9,9 +9,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserPageDTO {
+public class AccountPageDTO {
 
-    private List<UserDto> users;
+    private List<?> accounts;
     private String nextPage;
     private String prevPage;
 }

@@ -9,6 +9,8 @@ import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +27,10 @@ public class AccountService {
     private final UserRepository userRepository;
     private final ModelMapperConfig modelMapperConfig;
 
-    public Optional<List<AccountDTO>> accountsByUser(Long userId){
-        Optional<List<Account>> accountsOptional = Optional.ofNullable(accountRepository.findByUserIdUser(userId)
+    public Optional<Page<AccountDTO>> accountsByUser(Long userId, int page, int size){
+        Optional<Page<Account>> accountsOptional = Optional.ofNullable(accountRepository.findByUserIdUser(userId, PageRequest.of(page, size))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado")));
-        return accountsOptional.map(accounts -> accounts.stream().map(modelMapperConfig::accountToDTO).toList());
+        return accountsOptional.map(accounts -> accounts.map(modelMapperConfig::accountToDTO));
     }
 
     public AccountDTO createAccount(String userEmail, CurrencyType currency) {
