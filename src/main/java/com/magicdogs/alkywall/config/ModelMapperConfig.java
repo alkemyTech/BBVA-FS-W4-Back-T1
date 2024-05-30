@@ -31,4 +31,5 @@ public class ModelMapperConfig {
 
     public AccountCreateDTO accountCreateToDTO(Account account){return modelMapper().map(account, AccountCreateDTO.class);}
 
+    public ListTransactionDTO listTransactionDTO(Transaction transaction){return modelMapper().map(transaction, ListTransactionDTO.class);}
 }
