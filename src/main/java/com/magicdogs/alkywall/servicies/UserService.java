@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.servicies;
 
+import com.magicdogs.alkywall.dto.UserUpdateDTO;
 import com.magicdogs.alkywall.entities.RoleNameEnum;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.UserRepository;
@@ -13,16 +14,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.entities.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class UserService implements UserDetailsService {
     private UserRepository userRepository;
     private final ModelMapperConfig modelMapperConfig;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -52,5 +53,29 @@ public class UserService implements UserDetailsService {
 
         user.setSoftDelete(1);
         userRepository.save(user);
+    }
+
+    public UserDto update(Long id, String userEmail, UserUpdateDTO userUpdateDTO) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        boolean isSameUser = Objects.equals(user.getIdUser(), id);
+        if (!isSameUser) {
+            throw new ApiException(HttpStatus.CONFLICT, "El usuario loggeado no coincide con el id recibido");
+        }
+
+        if (userUpdateDTO.getFirstName() != null) {
+            user.setFirstName(userUpdateDTO.getFirstName());
+        }
+        if (userUpdateDTO.getLastName() != null) {
+            user.setLastName(userUpdateDTO.getLastName());
+        }
+        if (userUpdateDTO.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(userUpdateDTO.getPassword()));
+        }
+
+        userRepository.save(user);
+        return modelMapperConfig.userToDTO(user);
+
     }
 }

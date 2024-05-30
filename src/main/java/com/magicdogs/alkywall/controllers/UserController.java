@@ -1,12 +1,14 @@
 package com.magicdogs.alkywall.controllers;
 
 import com.magicdogs.alkywall.dto.UserDto;
+import com.magicdogs.alkywall.dto.UserUpdateDTO;
 import com.magicdogs.alkywall.servicies.JWTService;
 import com.magicdogs.alkywall.dto.UserPageDTO;
 import com.magicdogs.alkywall.servicies.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -44,5 +46,14 @@ public class UserController {
         var userEmail = jwtService.extractUserId(token);
         userService.softDeleteUser(id, userEmail);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
+
+    @Operation(summary = "Actualizar los datos de un usuario")
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDto> userUpdate(@PathVariable("id") Long id, @RequestBody @Valid UserUpdateDTO user, HttpServletRequest request){
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var userUpdated = userService.update(id, userEmail, user);
+        return ResponseEntity.ok(userUpdated);
     }
 }

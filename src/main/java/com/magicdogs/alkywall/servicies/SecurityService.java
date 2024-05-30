@@ -76,4 +76,8 @@ public class SecurityService {
         accountRepository.save(accountUSD);
         return registerRequest;
     }
+
+    public String encryptPassword(String password) {
+        return passwordEncoder.encode(password);
+    }
 }
