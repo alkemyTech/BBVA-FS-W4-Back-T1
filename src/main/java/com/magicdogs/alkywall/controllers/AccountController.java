@@ -33,7 +33,7 @@ public class AccountController {
     @GetMapping("{userId}")
     public ResponseEntity<AccountPageDTO> accountListByUser(@PathVariable("userId") Long id,
                                                             @RequestParam(defaultValue = "0") int page,
-                                                            @RequestParam(defaultValue = "1") int size) {
+                                                            @RequestParam(defaultValue = "10") int size) {
         Optional<Page<AccountDTO>> optionalAccounts = accountService.accountsByUser(id, page, size);
         String next = "", prev = "";
         if (optionalAccounts.isPresent()  && !optionalAccounts.get().isEmpty()) {

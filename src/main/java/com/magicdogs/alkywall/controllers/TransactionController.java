@@ -1,5 +1,9 @@
 package com.magicdogs.alkywall.controllers;
 
+import com.magicdogs.alkywall.dto.AccountDTO;
+import com.magicdogs.alkywall.dto.ListTransactionDTO;
+import com.magicdogs.alkywall.dto.TransactionDTO;
+import com.magicdogs.alkywall.dto.TransactionPageDTO;
 import com.magicdogs.alkywall.dto.*;
 import com.magicdogs.alkywall.entities.CurrencyType;
 import com.magicdogs.alkywall.exceptions.ApiException;
@@ -11,6 +15,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +50,7 @@ public class TransactionController {
         transactionService.sendMoney(transactionDTO, CurrencyType.USD, userEmail);
         return ResponseEntity.ok().build();
     }
+
     @Operation(summary ="Lista de transacciones de un usuario")
     @GetMapping("userId/{userId}")
     public ResponseEntity<List<ListTransactionDTO>> transactionListByUser(@PathVariable("userId") Long id,
@@ -54,10 +60,26 @@ public class TransactionController {
         List<ListTransactionDTO> transactions = transactionService.getTransactionsByUserId(id, userEmail);
         return ResponseEntity.ok().body(transactions);
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<TransactionPageDTO> transactionPageByUser(@PathVariable("userId") Long id,
+                                                                    @RequestParam(defaultValue = "0")int page,
+                                                                    @RequestParam(defaultValue = "10")int size){
+        Optional<Page<ListTransactionDTO>> transactions = transactionService.getTransactionsPageByUserId(id, page, size);
+        String next = "", prev = "";
+        if(transactions.isPresent() && !transactions.get().isEmpty()){
+            if(transactions.get().hasNext()){next = "/transactions/user/"+id+"?page="+(page+1);}
+            if(transactions.get().hasPrevious()){prev = "/transactions/user/"+id+"?page="+(page-1);}
+            return ResponseEntity.ok(new TransactionPageDTO(transactions.get().getContent(), next, prev));
+        } else {
+            throw new ApiException(HttpStatus.NOT_FOUND, "No se encontraron transacciones para el usuario con ID " + id);
+        }
+    }
+
     @Operation(summary ="Detalle de transaccion de transacciones de un usuario")
     @GetMapping("id/{id}")
     public ResponseEntity<?> transactionDetailsByID(@PathVariable("id") Long id,
-                                                                          HttpServletRequest request) {
+                                                    HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
         //List<ListTransactionDTO> transactions = transactionService.getTransactionsByUserId(id, userEmail);
@@ -92,5 +114,4 @@ public class TransactionController {
         var transaction = transactionService.updateTransaction(idTransaction, update, userEmail);
         return ResponseEntity.ok(transaction);
     }
-
 }
