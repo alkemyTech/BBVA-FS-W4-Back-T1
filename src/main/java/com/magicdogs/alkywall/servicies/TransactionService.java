@@ -119,4 +119,27 @@ public class TransactionService {
 
         return new TransactionAccountDTO(transactionDTO, accountDTO);
     }
+
+    public TransactionAccountDTO payment(TransactionDepositDTO payment, CurrencyType currency, String userEmail) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        var account = user.getAccountIn(currency);
+        if (account == null) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada para la moneda indicada");
+        }
+
+        validateBalanceAndLimit(account, payment.getAmount());
+
+        var transaction = new Transaction(payment.getAmount(), TypeTransaction.PAYMENT, "Realización de un pago", account);
+        transactionRepository.save(transaction);
+
+        account.setBalance(account.getBalance() - payment.getAmount());
+        accountRepository.save(account);
+
+        var transactionDTO = modelMapperConfig.listTransactionDTO(transaction);
+        var accountDTO = modelMapperConfig.accountToDTO(account);
+
+        return new TransactionAccountDTO(transactionDTO, accountDTO);
+    }
 }
