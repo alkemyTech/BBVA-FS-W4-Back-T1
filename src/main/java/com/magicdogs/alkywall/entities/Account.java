@@ -71,4 +71,9 @@ public class Account {
     protected void onUpdate() {
         updateDate = LocalDateTime.now();
     }
+
+    public Transaction searchTransactionById(Long id){
+        return transactions.stream().filter(t -> t.getIdTransaction().equals(id)).findFirst().orElse(null);
+
+    }
 }

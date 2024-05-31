@@ -28,7 +28,8 @@ public class SecurityConfig {
                         .requestMatchers("/accounts/{userId}").hasRole("ADMIN")
                         .requestMatchers("/fixedTerm/simulate").permitAll()
                         .requestMatchers("/users").hasRole("ADMIN")
-                        .requestMatchers("/transactions/{userId:[\\d]+}").hasRole("ADMIN")
+                        .requestMatchers("/transactions/userId/").hasRole("ADMIN")
+                        .requestMatchers("/transactions/id/").hasRole("ADMIN")
                         .requestMatchers("/transactions/**").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session

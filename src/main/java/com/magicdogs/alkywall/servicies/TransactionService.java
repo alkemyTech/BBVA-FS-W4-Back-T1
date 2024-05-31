@@ -142,4 +142,17 @@ public class TransactionService {
 
         return new TransactionAccountDTO(transactionDTO, accountDTO);
     }
+
+    public ListTransactionDTO getDetailsTreansactionById(Long id, String userEmail){
+        var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        //var transaction = transactionRepository.getByIdAndUserId(id, user.getIdUser());
+        //List<Transaction> transactions = transactionRepository.getByUserId(user.getIdUser());
+        var transaction = user.findTransactionByIdInAccount(id);
+        if(transaction == null) throw new ApiException(HttpStatus.NOT_FOUND, "Id transaccion no corresponde al usuario logeado");
+
+        var transactionDTO = modelMapperConfig.listTransactionDTO(transaction);
+
+
+        return transactionDTO;
+    }
 }
