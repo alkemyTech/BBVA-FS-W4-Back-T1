@@ -82,7 +82,7 @@ public class TransactionService {
         accountRepository.save(accountOrigin);
         accountRepository.save(accountDestination);
     }
-/*
+
     public List<ListTransactionDTO> getTransactionsByUserId(Long id, String userEmail) {
         var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         if (!Objects.equals(user.getIdUser(), id)) {
@@ -95,7 +95,7 @@ public class TransactionService {
             return transactions;
 
         }
-    }*/
+    }
 
     public Optional<Page<ListTransactionDTO>> getTransactionsPageByUserId(Long id, int page, int size){
         Optional<Page<Transaction>> transactions = transactionRepository.findByAccountUserIdUser(id, PageRequest.of(page, size));
