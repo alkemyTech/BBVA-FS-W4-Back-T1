@@ -12,11 +12,12 @@ import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.TransactionRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+
+import java.util.*;
 
 
 import java.util.ArrayList;
@@ -82,7 +83,7 @@ public class TransactionService {
         accountRepository.save(accountOrigin);
         accountRepository.save(accountDestination);
     }
-
+/*
     public List<ListTransactionDTO> getTransactionsByUserId(Long id, String userEmail) {
         var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         if (!Objects.equals(user.getIdUser(), id)) {
@@ -95,5 +96,10 @@ public class TransactionService {
             return transactions;
 
         }
+    }*/
+
+    public Optional<Page<ListTransactionDTO>> getTransactionsPageByUserId(Long id, int page, int size){
+        Optional<Page<Transaction>> transactions = transactionRepository.findByAccountUserIdUser(id, PageRequest.of(page, size));
+        return transactions.map(t -> t.map(modelMapperConfig::listTransactionDTO));
     }
 }
