@@ -47,13 +47,25 @@ public class TransactionController {
         transactionService.sendMoney(transactionDTO, CurrencyType.USD, userEmail);
         return ResponseEntity.ok().build();
     }
-
-    @GetMapping("{userId}")
-    public ResponseEntity<List<ListTransactionDTO>> transactionListByUser(@PathVariable("userId") Long id, HttpServletRequest request) {
+    @Operation(summary ="Lista de transacciones de un usuario")
+    @GetMapping("userId/{userId}")
+    public ResponseEntity<List<ListTransactionDTO>> transactionListByUser(@PathVariable("userId") Long id,
+                                                                          HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
         List<ListTransactionDTO> transactions = transactionService.getTransactionsByUserId(id, userEmail);
         return ResponseEntity.ok().body(transactions);
     }
+    @Operation(summary ="Detalle de transaccion de transacciones de un usuario")
+    @GetMapping("id/{id}")
+    public ResponseEntity<?> transactionDetailsByID(@PathVariable("id") Long id,
+                                                                          HttpServletRequest request) {
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        //List<ListTransactionDTO> transactions = transactionService.getTransactionsByUserId(id, userEmail);
+        var transsaction = transactionService.getDetailsTreansactionById(id, userEmail);
+        return ResponseEntity.ok(transsaction);
+    }
+
 
 }

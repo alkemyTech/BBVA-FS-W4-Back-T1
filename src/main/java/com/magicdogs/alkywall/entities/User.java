@@ -110,4 +110,13 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    public Transaction findTransactionByIdInAccount(Long id){
+        Transaction transactionFinded = null;
+        for(Account account: accounts){
+            transactionFinded = account.searchTransactionById(id);
+            if(transactionFinded !=  null) break;
+        }
+        return transactionFinded;
+    }
 }
