@@ -25,7 +25,7 @@ public class FixedTermController {
     private final JWTService jwtService;
 
     @PostMapping("")
-    public ResponseEntity<?> createAccount(@RequestBody @Valid FixedTermCreateDTO fixedTermCreateDTO, HttpServletRequest request) {
+    public ResponseEntity<?> createFixedTerm(@RequestBody @Valid FixedTermCreateDTO fixedTermCreateDTO, HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
         var fixedTermDeposit = fixedTermService.createFixedTermDeposit(fixedTermCreateDTO, userEmail);
@@ -34,7 +34,7 @@ public class FixedTermController {
     }
 
     @PostMapping("/simulate")
-    public ResponseEntity<?> createAccount (@RequestBody @Valid FixedTermCreateDTO fixedTermCreateDTO){
+    public ResponseEntity<?> simulateFixedTerm (@RequestBody @Valid FixedTermCreateDTO fixedTermCreateDTO){
         var fixedTermDeposit = fixedTermService.simulateFixedTerm(fixedTermCreateDTO);
         return ResponseEntity.ok().body(fixedTermDeposit);
     }

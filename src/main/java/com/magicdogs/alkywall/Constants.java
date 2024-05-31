@@ -15,6 +15,8 @@ public class Constants {
     private static int JWT_EXPIRATION_MINUTES;
     private static int FIXED_TERM_MINIMUM_DAYS;
     private static double FIXED_TERM_INTEREST_PERCENT;
+    private static double LOAN_INTEREST_PERCENT;
+
     @Autowired
     public Constants(Environment env) {
         TRANSACTION_LIMIT_ARS = Double.parseDouble(Objects.requireNonNull(env.getProperty("transaction.limit.ars")));
@@ -23,6 +25,8 @@ public class Constants {
         JWT_EXPIRATION_MINUTES = Integer.parseInt(Objects.requireNonNull(env.getProperty("security.jwt.expiration.minutes")));
         FIXED_TERM_MINIMUM_DAYS = Integer.parseInt(Objects.requireNonNull(env.getProperty("fixedTermDeposit.minimum.days")));
         FIXED_TERM_INTEREST_PERCENT = Double.parseDouble(Objects.requireNonNull(env.getProperty("fixedTermDeposit.interest.percent")));
+        LOAN_INTEREST_PERCENT = Double.parseDouble(Objects.requireNonNull(env.getProperty("loan.interest.percent")));
+
     }
 
     public static double getTransactionLimitArs() {
@@ -40,6 +44,7 @@ public class Constants {
     public static int getJwtExpirationMinutes() {
         return JWT_EXPIRATION_MINUTES;
     }
+
     public static int getFixedTermMinimunDays() {
         return FIXED_TERM_MINIMUM_DAYS;
     }
@@ -47,5 +52,10 @@ public class Constants {
     public static double getFixedTermInterestPercent() {
         return FIXED_TERM_INTEREST_PERCENT;
     }
+
+    public static double getLoanInterestPercent() {
+        return LOAN_INTEREST_PERCENT;
+    }
+
 }
 
