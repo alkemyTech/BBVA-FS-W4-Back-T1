@@ -27,6 +27,7 @@ public class SecurityConfig {
                         .requestMatchers("/api-docs/swagger-config").permitAll()                     
                         .requestMatchers("/accounts/{userId}").hasRole("ADMIN")
                         .requestMatchers("/fixedTerm/simulate").permitAll()
+                        .requestMatchers("/loan/simulate").permitAll()
                         .requestMatchers("/users").hasRole("ADMIN")
                         .requestMatchers("/transactions/{userId:[\\d]+}").hasRole("ADMIN")
                         .requestMatchers("/transactions/**").authenticated()
