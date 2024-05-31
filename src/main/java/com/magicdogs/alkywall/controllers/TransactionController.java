@@ -1,8 +1,6 @@
 package com.magicdogs.alkywall.controllers;
 
-import com.magicdogs.alkywall.dto.AccountDTO;
-import com.magicdogs.alkywall.dto.ListTransactionDTO;
-import com.magicdogs.alkywall.dto.TransactionDTO;
+import com.magicdogs.alkywall.dto.*;
 import com.magicdogs.alkywall.entities.CurrencyType;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.servicies.JWTService;
@@ -54,6 +52,15 @@ public class TransactionController {
         var userEmail = jwtService.extractUserId(token);
         List<ListTransactionDTO> transactions = transactionService.getTransactionsByUserId(id, userEmail);
         return ResponseEntity.ok().body(transactions);
+    }
+
+    @Operation(summary = "Realiza un ingreso de dinero")
+    @PostMapping("/deposit")
+    public ResponseEntity<?> deposit(@RequestBody @Valid TransactionDepositDTO deposit, HttpServletRequest request) {
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var TransactionAccountDTO = transactionService.deposit(deposit, deposit.getCurrency(), userEmail);
+        return ResponseEntity.ok(TransactionAccountDTO);
     }
 
 }

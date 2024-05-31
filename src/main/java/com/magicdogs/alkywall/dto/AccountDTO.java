@@ -18,6 +18,9 @@ public class AccountDTO {
 
     @Schema(description = "CBU de la cuenta")
     private String cbu;
+
+    @Schema(description = "Balance de la cuenta")
+    private Double balance;
   
     @Schema(description = "Límite de transacción de la cuenta")
     private Double transactionLimit;
