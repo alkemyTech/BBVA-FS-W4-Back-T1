@@ -63,4 +63,13 @@ public class TransactionController {
         return ResponseEntity.ok(TransactionAccountDTO);
     }
 
+    @Operation(summary = "Realiza un pago")
+    @PostMapping("/payment")
+    public ResponseEntity<?> payment(@RequestBody @Valid TransactionDepositDTO payment, HttpServletRequest request) {
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var TransactionAccountDTO = transactionService.payment(payment, payment.getCurrency(), userEmail);
+        return ResponseEntity.ok(TransactionAccountDTO);
+    }
+
 }
