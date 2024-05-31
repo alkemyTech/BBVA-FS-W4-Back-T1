@@ -18,6 +18,7 @@ public class TransactionDepositDTO {
     @Schema(description = "Cantidad de dinero a depositar")
     private Double amount;
 
+    @NotNull(message = "Indicar el tipo de moneda")
     @Schema(description = "Tipo de cuenta")
     private CurrencyType currency;
 }

@@ -84,4 +84,13 @@ public class TransactionController {
         return ResponseEntity.ok(TransactionAccountDTO);
     }
 
+    @Operation(summary = "Actualizar transacción")
+    @PutMapping("/{idTransaction}")
+    public ResponseEntity<?> updateTransaction(@PathVariable Long idTransaction, @RequestBody @Valid TransactionUpdateDTO update, HttpServletRequest request) {
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var transaction = transactionService.updateTransaction(idTransaction, update, userEmail);
+        return ResponseEntity.ok(transaction);
+    }
+
 }
