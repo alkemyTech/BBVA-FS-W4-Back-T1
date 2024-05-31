@@ -1,10 +1,7 @@
 package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.config.ModelMapperConfig;
-import com.magicdogs.alkywall.dto.ListTransactionDTO;
-import com.magicdogs.alkywall.dto.TransactionAccountDTO;
-import com.magicdogs.alkywall.dto.TransactionDTO;
-import com.magicdogs.alkywall.dto.TransactionDepositDTO;
+import com.magicdogs.alkywall.dto.*;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.CurrencyType;
 import com.magicdogs.alkywall.entities.Transaction;
@@ -141,5 +138,32 @@ public class TransactionService {
         var accountDTO = modelMapperConfig.accountToDTO(account);
 
         return new TransactionAccountDTO(transactionDTO, accountDTO);
+    }
+
+    public ListTransactionDTO getDetailsTreansactionById(Long id, String userEmail) {
+        var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        //var transaction = transactionRepository.getByIdAndUserId(id, user.getIdUser());
+        //List<Transaction> transactions = transactionRepository.getByUserId(user.getIdUser());
+        var transaction = user.findTransactionByIdInAccount(id);
+        if (transaction == null)
+            throw new ApiException(HttpStatus.NOT_FOUND, "Id transaccion no corresponde al usuario logeado");
+
+        var transactionDTO = modelMapperConfig.listTransactionDTO(transaction);
+
+
+        return transactionDTO;
+    }
+
+    public ListTransactionDTO updateTransaction(Long idTransaction, TransactionUpdateDTO update, String userEmail) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        var transaction = user.findTransactionByIdInAccount(idTransaction);
+        if (transaction == null)
+            throw new ApiException(HttpStatus.NOT_FOUND, "Id transaccion no corresponde al usuario logeado");
+
+        transaction.setDescription(update.getDescription());
+        transactionRepository.save(transaction);
+
+        return modelMapperConfig.listTransactionDTO(transaction);
     }
 }
