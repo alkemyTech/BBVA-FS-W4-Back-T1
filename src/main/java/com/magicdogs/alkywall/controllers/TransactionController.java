@@ -4,6 +4,7 @@ import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.dto.ListTransactionDTO;
 import com.magicdogs.alkywall.dto.TransactionDTO;
 import com.magicdogs.alkywall.dto.TransactionPageDTO;
+import com.magicdogs.alkywall.dto.*;
 import com.magicdogs.alkywall.entities.CurrencyType;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.servicies.JWTService;
@@ -49,15 +50,17 @@ public class TransactionController {
         transactionService.sendMoney(transactionDTO, CurrencyType.USD, userEmail);
         return ResponseEntity.ok().build();
     }
-/*
-    @GetMapping("{userId}")
-    public ResponseEntity<List<ListTransactionDTO>> transactionListByUser(@PathVariable("userId") Long id, HttpServletRequest request) {
+
+    @Operation(summary ="Lista de transacciones de un usuario")
+    @GetMapping("userId/{userId}")
+    public ResponseEntity<List<ListTransactionDTO>> transactionListByUser(@PathVariable("userId") Long id,
+                                                                          HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
         List<ListTransactionDTO> transactions = transactionService.getTransactionsByUserId(id, userEmail);
         return ResponseEntity.ok().body(transactions);
     }
-*/
+
     @GetMapping("/{userId}")
     public ResponseEntity<TransactionPageDTO> transactionPageByUser(@PathVariable("userId") Long id,
                                                                     @RequestParam(defaultValue = "0")int page,
@@ -71,5 +74,44 @@ public class TransactionController {
         } else {
             throw new ApiException(HttpStatus.NOT_FOUND, "No se encontraron transacciones para el usuario con ID " + id);
         }
+    }
+
+    @Operation(summary ="Detalle de transaccion de transacciones de un usuario")
+    @GetMapping("id/{id}")
+    public ResponseEntity<?> transactionDetailsByID(@PathVariable("id") Long id,
+                                                    HttpServletRequest request) {
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        //List<ListTransactionDTO> transactions = transactionService.getTransactionsByUserId(id, userEmail);
+        var transsaction = transactionService.getDetailsTreansactionById(id, userEmail);
+        return ResponseEntity.ok(transsaction);
+    }
+
+
+    @Operation(summary = "Realiza un ingreso de dinero")
+    @PostMapping("/deposit")
+    public ResponseEntity<?> deposit(@RequestBody @Valid TransactionDepositDTO deposit, HttpServletRequest request) {
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var TransactionAccountDTO = transactionService.deposit(deposit, deposit.getCurrency(), userEmail);
+        return ResponseEntity.ok(TransactionAccountDTO);
+    }
+
+    @Operation(summary = "Realiza un pago")
+    @PostMapping("/payment")
+    public ResponseEntity<?> payment(@RequestBody @Valid TransactionDepositDTO payment, HttpServletRequest request) {
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var TransactionAccountDTO = transactionService.payment(payment, payment.getCurrency(), userEmail);
+        return ResponseEntity.ok(TransactionAccountDTO);
+    }
+
+    @Operation(summary = "Actualizar transacción")
+    @PutMapping("/{idTransaction}")
+    public ResponseEntity<?> updateTransaction(@PathVariable Long idTransaction, @RequestBody @Valid TransactionUpdateDTO update, HttpServletRequest request) {
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var transaction = transactionService.updateTransaction(idTransaction, update, userEmail);
+        return ResponseEntity.ok(transaction);
     }
 }

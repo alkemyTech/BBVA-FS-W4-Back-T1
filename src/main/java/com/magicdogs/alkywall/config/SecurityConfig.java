@@ -27,10 +27,12 @@ public class SecurityConfig {
                         .requestMatchers("/api-docs/swagger-config").permitAll()
                         .requestMatchers("/accounts/balance").permitAll()
                         .requestMatchers("/fixedTerm/simulate").permitAll()
+                        .requestMatchers("/loan/simulate").permitAll()
                         .requestMatchers("/users").hasRole("ADMIN")
                         .requestMatchers("/accounts/{userId}").hasRole("ADMIN")
-                        .requestMatchers("/transactions/{userId:[\\d]+}").hasRole("ADMIN")
                         .requestMatchers("/transactions/**").authenticated()
+                        .requestMatchers("/transactions/userId/").hasRole("ADMIN")
+                        .requestMatchers("/transactions/id/").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

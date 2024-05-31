@@ -1,8 +1,7 @@
 package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.config.ModelMapperConfig;
-import com.magicdogs.alkywall.dto.ListTransactionDTO;
-import com.magicdogs.alkywall.dto.TransactionDTO;
+import com.magicdogs.alkywall.dto.*;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.CurrencyType;
 import com.magicdogs.alkywall.entities.Transaction;
@@ -101,5 +100,76 @@ public class TransactionService {
     public Optional<Page<ListTransactionDTO>> getTransactionsPageByUserId(Long id, int page, int size){
         Optional<Page<Transaction>> transactions = transactionRepository.findByAccountUserIdUser(id, PageRequest.of(page, size));
         return transactions.map(t -> t.map(modelMapperConfig::listTransactionDTO));
+    }
+
+    public TransactionAccountDTO deposit(TransactionDepositDTO deposit, CurrencyType currency, String userEmail) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        var account = user.getAccountIn(currency);
+        if (account == null) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada para la moneda indicada");
+        }
+
+        var transaction = new Transaction(deposit.getAmount(), TypeTransaction.DEPOSIT, "Depósito de dinero", account);
+        transactionRepository.save(transaction);
+
+        account.setBalance(account.getBalance() + deposit.getAmount());
+        accountRepository.save(account);
+
+        var transactionDTO = modelMapperConfig.listTransactionDTO(transaction);
+        var accountDTO = modelMapperConfig.accountToDTO(account);
+
+        return new TransactionAccountDTO(transactionDTO, accountDTO);
+    }
+
+    public TransactionAccountDTO payment(TransactionDepositDTO payment, CurrencyType currency, String userEmail) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        var account = user.getAccountIn(currency);
+        if (account == null) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada para la moneda indicada");
+        }
+
+        validateBalanceAndLimit(account, payment.getAmount());
+
+        var transaction = new Transaction(payment.getAmount(), TypeTransaction.PAYMENT, "Realización de un pago", account);
+        transactionRepository.save(transaction);
+
+        account.setBalance(account.getBalance() - payment.getAmount());
+        accountRepository.save(account);
+
+        var transactionDTO = modelMapperConfig.listTransactionDTO(transaction);
+        var accountDTO = modelMapperConfig.accountToDTO(account);
+
+        return new TransactionAccountDTO(transactionDTO, accountDTO);
+    }
+
+    public ListTransactionDTO getDetailsTreansactionById(Long id, String userEmail) {
+        var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        //var transaction = transactionRepository.getByIdAndUserId(id, user.getIdUser());
+        //List<Transaction> transactions = transactionRepository.getByUserId(user.getIdUser());
+        var transaction = user.findTransactionByIdInAccount(id);
+        if (transaction == null)
+            throw new ApiException(HttpStatus.NOT_FOUND, "Id transaccion no corresponde al usuario logeado");
+
+        var transactionDTO = modelMapperConfig.listTransactionDTO(transaction);
+
+
+        return transactionDTO;
+    }
+
+    public ListTransactionDTO updateTransaction(Long idTransaction, TransactionUpdateDTO update, String userEmail) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        var transaction = user.findTransactionByIdInAccount(idTransaction);
+        if (transaction == null)
+            throw new ApiException(HttpStatus.NOT_FOUND, "Id transaccion no corresponde al usuario logeado");
+
+        transaction.setDescription(update.getDescription());
+        transactionRepository.save(transaction);
+
+        return modelMapperConfig.listTransactionDTO(transaction);
     }
 }
