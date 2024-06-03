@@ -4,6 +4,7 @@ import com.magicdogs.alkywall.Constants;
 import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
+import com.magicdogs.alkywall.dto.AccountPageDTO;
 import com.magicdogs.alkywall.entities.*;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.AccountRepository;
@@ -12,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,10 +29,21 @@ public class AccountService {
     private final UserRepository userRepository;
     private final ModelMapperConfig modelMapperConfig;
 
-    public Optional<Page<AccountDTO>> accountsByUser(Long userId, int page, int size){
+    public AccountPageDTO accountsByUser(Long userId, int page, int size){
+        if(page < 0 || size <= 0) throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
+
         Optional<Page<Account>> accountsOptional = Optional.ofNullable(accountRepository.findByUserIdUser(userId, PageRequest.of(page, size))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado")));
-        return accountsOptional.map(accounts -> accounts.map(modelMapperConfig::accountToDTO));
+        int cant = accountsOptional.get().getTotalPages();
+        if(cant <= page )   throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "No existe el numero de pagina");
+        Optional<Page<AccountDTO>> optionalAccounts = accountsOptional.map(accounts -> accounts.map(modelMapperConfig::accountToDTO));
+        String next = "", prev = "";
+        if (!optionalAccounts.isPresent()  && optionalAccounts.get().isEmpty()) throw new ApiException(HttpStatus.NOT_FOUND, "No se encontraron cuentas para el usuario con ID " + userId);
+
+        if(optionalAccounts.get().hasNext()){next = "/accounts/"+userId+"?page="+(page+1);}
+        if(optionalAccounts.get().hasPrevious()){prev = "/accounts/"+userId+"?page="+(page-1);}
+        return new AccountPageDTO(optionalAccounts.get().getContent(), next, prev, cant);
+
     }
 
     public AccountDTO createAccount(String userEmail, CurrencyType currency) {

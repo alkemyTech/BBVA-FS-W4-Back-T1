@@ -14,4 +14,6 @@ public class AccountPageDTO {
     private List<?> accounts;
     private String nextPage;
     private String prevPage;
+    private int countPages;
+
 }
