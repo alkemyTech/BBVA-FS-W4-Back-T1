@@ -53,15 +53,25 @@ public class TransactionController {
 
     @Operation(summary ="Lista de transacciones de un usuario")
     @GetMapping("userId/{userId}")
-    public ResponseEntity<List<ListTransactionDTO>> transactionListByUser(@PathVariable("userId") Long id,
+    public ResponseEntity<?> transactionListByUser(@PathVariable("userId") Long id, @RequestParam(defaultValue = "0")int page,
+                                                                          @RequestParam(defaultValue = "10")int size,
                                                                           HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
-        List<ListTransactionDTO> transactions = transactionService.getTransactionsByUserId(id, userEmail);
-        return ResponseEntity.ok().body(transactions);
+        //List<ListTransactionDTO> transactions = transactionService.getTransactionsByUserId(id, userEmail);
+
+        Optional<Page<ListTransactionDTO>> transactions = transactionService.getTransactionsPageByUserId(id,userEmail, page, size);
+        String next = "", prev = "";
+        if(!transactions.isPresent() && transactions.get().isEmpty()){
+            throw new ApiException(HttpStatus.NOT_FOUND, "No se encontraron transacciones para el usuario con ID " + id);
+        }
+        if(transactions.get().hasNext()){next = "/transactions/userId/"+id+"?page="+(page+1);}
+        if(transactions.get().hasPrevious()){prev = "/transactions/userId/"+id+"?page="+(page-1);}
+        return ResponseEntity.ok(new TransactionPageDTO(transactions.get().getContent(), next, prev));
+
     }
 
-    @GetMapping("/{userId}")
+    /*@GetMapping("/{userId}")
     public ResponseEntity<TransactionPageDTO> transactionPageByUser(@PathVariable("userId") Long id,
                                                                     @RequestParam(defaultValue = "0")int page,
                                                                     @RequestParam(defaultValue = "10")int size){
@@ -74,7 +84,7 @@ public class TransactionController {
         } else {
             throw new ApiException(HttpStatus.NOT_FOUND, "No se encontraron transacciones para el usuario con ID " + id);
         }
-    }
+    }*/
 
     @Operation(summary ="Detalle de transaccion de transacciones de un usuario")
     @GetMapping("id/{id}")
