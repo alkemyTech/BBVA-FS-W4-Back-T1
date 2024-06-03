@@ -95,24 +95,26 @@ public class AccountService {
      * @param userEmail
      * @return DTO con el balance de las cuentas
      */
-    public List<AccountBalanceDTO> getAccountBalance(String userEmail){
-        Optional<List<Account>> accounts = accountRepository.findByUserEmail(userEmail);
-        List<AccountBalanceDTO> accountsBalanceDTO = new ArrayList<>();
-        accounts.ifPresent(accountList -> {
-            for(Account ac: accountList){
-                AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO();
-                accountBalanceDTO.setHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionBalanceToDTO).toList());
-                accountBalanceDTO.setFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
-                if(ac.getCurrency().equals(CurrencyType.ARS)){
-                    accountBalanceDTO.setAccountArs(ac.getBalance());
-                }else if(ac.getCurrency().equals(CurrencyType.USD)){
-                    accountBalanceDTO.setAccountUsd(ac.getBalance());
-                }
-                accountsBalanceDTO.add(accountBalanceDTO);
+    public AccountBalanceDTO getAccountBalance(String userEmail){
+        List<Account> accounts = accountRepository.findByUserEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuentas no encontradas"));
+        if (accounts.isEmpty()) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "El usuario no tiene cuentas");
+        }
+
+        AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO();
+
+        for(Account ac: accounts){
+            accountBalanceDTO.addHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionBalanceToDTO).toList());
+            accountBalanceDTO.setFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
+            if(ac.getCurrency().equals(CurrencyType.ARS)){
+                accountBalanceDTO.setAccountArs(modelMapperConfig.accountToDTO(ac));
+            }else if(ac.getCurrency().equals(CurrencyType.USD)){
+                accountBalanceDTO.setAccountUsd(modelMapperConfig.accountToDTO(ac));
             }
-        });
-        return accountsBalanceDTO;
+        }
+        return accountBalanceDTO;
     }
+
     public Optional<List<Account>> getAccountsByUserEmail(String email){
         return accountRepository.findByUserEmail(email);
     }

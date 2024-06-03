@@ -64,7 +64,7 @@ public class AccountController {
 
     @Operation(summary = "Obtener balance de cuentas")
     @GetMapping("balance")
-    public ResponseEntity<List<AccountBalanceDTO>> accountsBalance(HttpServletRequest request){
+    public ResponseEntity<AccountBalanceDTO> accountsBalance(HttpServletRequest request){
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
         return ResponseEntity.ok(accountService.getAccountBalance(userEmail));

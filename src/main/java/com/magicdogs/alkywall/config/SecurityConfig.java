@@ -30,7 +30,6 @@ public class SecurityConfig {
                         .requestMatchers("/accounts/balance").permitAll()
                         .requestMatchers("/accounts/{userId}").hasRole("ADMIN")
                         .requestMatchers("/users").hasRole("ADMIN")
-                        .requestMatchers("/transactions/{userId}").hasRole("ADMIN")
                         .requestMatchers("/transactions/userId/").hasRole("ADMIN")
                         .requestMatchers("/transactions/id/").hasRole("ADMIN")
                         .anyRequest().authenticated())
