@@ -41,7 +41,7 @@ public class Account {
     private LocalDateTime updateDate;
 
     @Column(name = "softDelete", nullable = false)
-    private Boolean softDelete;
+    private Integer softDelete;
 
     @Column(name="cbu", nullable=false)
     private String cbu;
@@ -52,7 +52,7 @@ public class Account {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FixedTermDeposit> fixedTermDeposits;
 
-    public Account(CurrencyType currencyType, double transactionLimit, double balance, User user, boolean softDelete, String cbu) {
+    public Account(CurrencyType currencyType, double transactionLimit, double balance, User user, int softDelete, String cbu) {
         this.currency = currencyType;
         this.transactionLimit = transactionLimit;
         this.balance = balance;
