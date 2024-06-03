@@ -97,7 +97,13 @@ public class TransactionService {
         }
     }
 
-    public Optional<Page<ListTransactionDTO>> getTransactionsPageByUserId(Long id, int page, int size){
+    public Optional<Page<ListTransactionDTO>> getTransactionsPageByUserId(Long id,  String userEmail, int page, int size){
+        if(page < 0 || size <= 0) throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
+
+        var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        if (!Objects.equals(user.getIdUser(), id)) {
+            throw new ApiException(HttpStatus.CONFLICT, "Usuario logueado distinto al usuario del id recibido");
+        }
         Optional<Page<Transaction>> transactions = transactionRepository.findByAccountUserIdUser(id, PageRequest.of(page, size));
         return transactions.map(t -> t.map(modelMapperConfig::listTransactionDTO));
     }

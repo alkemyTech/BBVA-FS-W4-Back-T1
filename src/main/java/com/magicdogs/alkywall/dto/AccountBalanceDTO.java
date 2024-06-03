@@ -25,9 +25,13 @@ public class AccountBalanceDTO {
     private List<TransactionBalanceDTO> history = new ArrayList<>();
 
     @Schema(description = "Depósitos a plazo fijo de la cuenta")
-    private List<FixedTermsBalanceDTO> fixedTerms;
+    private List<FixedTermsBalanceDTO> fixedTerms = new ArrayList<>();
 
     public void addHistory(List<TransactionBalanceDTO> transactionBalanceDTO) {
         history.addAll(transactionBalanceDTO);
+    }
+
+    public void addFixedTerms(List<FixedTermsBalanceDTO> fixedTermsBalanceDTO) {
+        fixedTerms.addAll(fixedTermsBalanceDTO);
     }
 }
