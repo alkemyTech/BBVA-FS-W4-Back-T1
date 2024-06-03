@@ -5,6 +5,7 @@ import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
 import com.magicdogs.alkywall.entities.User;
 import com.magicdogs.alkywall.repositories.UserRepository;
+import com.magicdogs.alkywall.utils.AliasGenerator;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.modelmapper.ModelMapper;
@@ -28,6 +29,7 @@ public class SecurityService {
     private final JWTService jwtService;
     private final RoleRepository roleRepository;
     private final AccountRepository accountRepository;
+    private final AliasGenerator aliasGenerator;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -69,8 +71,8 @@ public class SecurityService {
                 .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
         var newUser = new User(registerRequest.getFirstName(), registerRequest.getLastName(), registerRequest.getEmail(), passwordEncoder.encode(registerRequest.getPassword()), role, 0);
-        var accountARS = new Account(CurrencyType.ARS, Constants.getTransactionLimitArs(), 0.00, newUser, false, accountService.generateUniqueCbu());
-        var accountUSD = new Account(CurrencyType.USD, Constants.getTransactionLimitUsd(), 0.00, newUser, false, accountService.generateUniqueCbu());
+        var accountARS = new Account(CurrencyType.ARS, Constants.getTransactionLimitArs(), 0.00, newUser, false, accountService.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(registerRequest.getFirstName(), registerRequest.getLastName()));
+        var accountUSD = new Account(CurrencyType.USD, Constants.getTransactionLimitUsd(), 0.00, newUser, false, accountService.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(registerRequest.getFirstName(), registerRequest.getLastName()));
         userRepository.save(newUser);
         accountRepository.save(accountARS);
         accountRepository.save(accountUSD);

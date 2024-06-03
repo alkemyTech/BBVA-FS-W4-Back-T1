@@ -18,4 +18,5 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     Optional<Account> findByUserAndCurrency(User user, CurrencyType currency);
     Optional<List<Account>> findByUserEmail(String email);
     Optional<Account> findByIdAccountAndUser(Long id, User user);
+    Boolean existsByAlias(String alias);
 }

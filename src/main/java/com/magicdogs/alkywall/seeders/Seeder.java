@@ -5,6 +5,7 @@ import com.magicdogs.alkywall.entities.*;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.TransactionRepository;
 import com.magicdogs.alkywall.servicies.AccountService;
+import com.magicdogs.alkywall.utils.AliasGenerator;
 import lombok.AllArgsConstructor;
 import net.datafaker.Faker;
 import com.magicdogs.alkywall.repositories.RoleRepository;
@@ -29,6 +30,7 @@ public class Seeder implements CommandLineRunner {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AliasGenerator aliasGenerator;
 
     private final Faker faker = new Faker(Locale.forLanguageTag("es"));
     private final Random random = new Random();
@@ -96,7 +98,8 @@ public class Seeder implements CommandLineRunner {
                     random.nextInt(100000),
                     user,
                     false,
-                    accountService.generateUniqueCbu()
+                    accountService.generateUniqueCbu(),
+                    aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName())
             );
             accountRepository.save(accountARS);
             createTransactionsForAccount(accountARS);
@@ -109,7 +112,8 @@ public class Seeder implements CommandLineRunner {
                     random.nextInt(500),
                     user,
                     false,
-                    accountService.generateUniqueCbu()
+                    accountService.generateUniqueCbu(),
+                    aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName())
             );
             accountRepository.save(accountUSD);
             createTransactionsForAccount(accountUSD);

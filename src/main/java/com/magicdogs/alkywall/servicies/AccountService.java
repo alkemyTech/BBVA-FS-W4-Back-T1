@@ -9,14 +9,13 @@ import com.magicdogs.alkywall.entities.*;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
+import com.magicdogs.alkywall.utils.AliasGenerator;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -28,6 +27,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final ModelMapperConfig modelMapperConfig;
+    private final AliasGenerator aliasGenerator;
 
     public AccountPageDTO accountsByUser(Long userId, int page, int size){
         if(page < 0 || size <= 0) throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
@@ -55,7 +55,7 @@ public class AccountService {
             throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "La cuenta ya existe");
         }
 
-        var account = new Account(currency, 0.00, 0.00, user, false, generateUniqueCbu());
+        var account = new Account(currency, 0.00, 0.00, user, false, generateUniqueCbu(), aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName()));
 
         if (currency == CurrencyType.ARS) {
                 account.setTransactionLimit(Constants.getTransactionLimitArs());
