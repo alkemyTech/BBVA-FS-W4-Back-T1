@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.dto;
 
+import com.magicdogs.alkywall.entities.CurrencyType;
 import com.magicdogs.alkywall.entities.TypeTransaction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,12 @@ public class TransactionBalanceDTO {
 
     @Schema(description = "Descripción de la transacción")
     private String description;
+
+    @Schema(description = "Moneda de la transacción")
+    private CurrencyType accountCurrency;
+
+    @Schema(description = "Id de la cuenta con la que se hizo transacción")
+    private Long accountIdAccount;
 
     @Schema(description = "Fecha y hora de la transacción")
     private LocalDateTime transactionDate;
