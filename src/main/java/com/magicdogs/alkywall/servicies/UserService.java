@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.servicies;
 
+import com.magicdogs.alkywall.dto.UserPageDTO;
 import com.magicdogs.alkywall.dto.UserUpdateDTO;
 import com.magicdogs.alkywall.entities.RoleNameEnum;
 import com.magicdogs.alkywall.exceptions.ApiException;
@@ -30,9 +31,21 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(email).orElseThrow();
     }
 
-    public Page<UserDto> getUsers(int pagina, int tamanio){
-        Page<User> users = userRepository.findAll(PageRequest.of(pagina, tamanio));
-        return users.map(modelMapperConfig::userToDTO);
+    public UserPageDTO getUsers(int page, int size){
+        Page<User> users = userRepository.findAll(PageRequest.of(page, size));
+        var totalPages = users.getTotalPages();
+
+        if(totalPages <= page) throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "No existe el numero de pagina");
+
+        String next = "", prev = "";
+        if(users.hasNext()){
+            next = "/users?page="+(page+1);
+        }
+        if(users.hasPrevious()){
+            prev = "/users?page="+(page-1);
+        }
+        var users_page = users.map(modelMapperConfig::userToDTO);
+        return new UserPageDTO(users_page.getContent(), next, prev, totalPages);
     }
 
     /**

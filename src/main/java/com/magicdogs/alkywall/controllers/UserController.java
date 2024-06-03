@@ -28,15 +28,10 @@ public class UserController {
     @GetMapping("")
     public ResponseEntity<UserPageDTO> userList(@RequestParam(defaultValue = "0") int page,
                                                          @RequestParam(defaultValue = "10")int size){
-        Page<UserDto> usersPage = userService.getUsers(page, size);
-        String next = "", prev = "";
-        if(usersPage.hasNext()){
-            next = "/users?page="+(page+1);
-        }
-        if(usersPage.hasPrevious()){
-            prev = "/users?page="+(page-1);
-        }
-        return ResponseEntity.ok(new UserPageDTO(usersPage.getContent(), next, prev));
+
+       var usersPage = userService.getUsers(page, size);
+
+        return ResponseEntity.ok(usersPage);
     }
 
     @Operation(summary = "Eliminar usuario por ID")

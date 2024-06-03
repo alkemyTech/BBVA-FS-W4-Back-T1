@@ -14,4 +14,5 @@ public class UserPageDTO {
     private List<UserDto> users;
     private String nextPage;
     private String prevPage;
+    private Integer totalPages;
 }
