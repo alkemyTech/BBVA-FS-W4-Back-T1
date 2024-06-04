@@ -48,6 +48,7 @@ public class AccountService {
         if(optionalAccounts.get().hasPrevious()){prev = "/accounts/"+userId+"?page="+(page-1);}
         return new AccountPageDTO(optionalAccounts.get().getContent(), next, prev, cant);
 
+
     }
 
     public AccountDTO createAccount(String userEmail, AccountType accountType, CurrencyType currency) {
@@ -132,5 +133,20 @@ public class AccountService {
 
     public Optional<List<Account>> getAccountsByUserEmail(String email){
         return accountRepository.findByUserEmail(email);
+    }
+
+    /**
+     * Baja logica de una cuenta
+     * @param id
+     */
+    public void softDeleteAccount(Long id, String email){
+        var accountOptional = accountRepository.findByIdAccountAndUserEmail(id, email);
+
+        if(accountOptional.isPresent()){
+            accountOptional.get().setSoftDelete(1);
+            accountRepository.save(accountOptional.get());
+        }else{
+            throw new ApiException(HttpStatus.BAD_REQUEST, "La cuenta no corresponde a este usuario");
+        }
     }
 }
