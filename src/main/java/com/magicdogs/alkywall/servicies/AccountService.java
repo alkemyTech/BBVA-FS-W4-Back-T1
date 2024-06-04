@@ -55,7 +55,7 @@ public class AccountService {
             throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "La cuenta ya existe");
         }
 
-        var account = new Account(currency, 0.00, 0.00, user, false, generateUniqueCbu(), aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName()));
+        var account = new Account(currency, 0.00, 0.00, user, 0, generateUniqueCbu(), aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName()));
 
         if (currency == CurrencyType.ARS) {
                 account.setTransactionLimit(Constants.getTransactionLimitArs());

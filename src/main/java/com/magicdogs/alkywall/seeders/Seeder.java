@@ -97,7 +97,7 @@ public class Seeder implements CommandLineRunner {
                     Constants.getTransactionLimitArs(),
                     random.nextInt(100000),
                     user,
-                    false,
+                    0,
                     accountService.generateUniqueCbu(),
                     aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName())
             );
@@ -111,7 +111,7 @@ public class Seeder implements CommandLineRunner {
                     Constants.getTransactionLimitUsd(),
                     random.nextInt(500),
                     user,
-                    false,
+                    0,
                     accountService.generateUniqueCbu(),
                     aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName())
             );

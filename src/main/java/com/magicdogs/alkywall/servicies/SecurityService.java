@@ -71,8 +71,8 @@ public class SecurityService {
                 .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
         var newUser = new User(registerRequest.getFirstName(), registerRequest.getLastName(), registerRequest.getEmail(), passwordEncoder.encode(registerRequest.getPassword()), role, 0);
-        var accountARS = new Account(CurrencyType.ARS, Constants.getTransactionLimitArs(), 0.00, newUser, false, accountService.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(registerRequest.getFirstName(), registerRequest.getLastName()));
-        var accountUSD = new Account(CurrencyType.USD, Constants.getTransactionLimitUsd(), 0.00, newUser, false, accountService.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(registerRequest.getFirstName(), registerRequest.getLastName()));
+        var accountARS = new Account(CurrencyType.ARS, Constants.getTransactionLimitArs(), 0.00, newUser, 0, accountService.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(registerRequest.getFirstName(), registerRequest.getLastName()));
+        var accountUSD = new Account(CurrencyType.USD, Constants.getTransactionLimitUsd(), 0.00, newUser, 0, accountService.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(registerRequest.getFirstName(), registerRequest.getLastName()));
         userRepository.save(newUser);
         accountRepository.save(accountARS);
         accountRepository.save(accountUSD);
