@@ -1,12 +1,13 @@
 package com.magicdogs.alkywall.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import com.magicdogs.alkywall.enums.DocumentType;
+import com.magicdogs.alkywall.enums.UserGender;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -23,6 +24,21 @@ public class UserRegisterDTO {
     @NotBlank(message = "El apellido no puede estar en blanco")
     private String lastName;
 
+    @NotNull(message = "La fecha de nacimiento no puede ser nula")
+    @Past(message = "La fecha de nacimiento no puede ser en el futuro")
+    private LocalDate birthDate;
+
+    @NotNull(message = "El género no puede ser nulo")
+    private UserGender gender;
+
+    @NotNull(message = "El tipo de documento no puede ser nulo")
+    private DocumentType documentType;
+
+    @NotEmpty(message = "El número de documento no puede estar vacío")
+    @NotNull(message = "El número de documento no puede ser nulo")
+    @NotBlank(message = "El número de documento no puede estar en blanco")
+    private String documentNumber;
+
     @NotEmpty(message = "El correo electrónico no puede estar vacío")
     @NotNull(message = "El correo electrónico no puede ser nulo")
     @NotBlank(message = "El correo electrónico no puede estar en blanco")
@@ -33,5 +49,4 @@ public class UserRegisterDTO {
     @NotNull(message = "La contraseña no puede ser nula")
     @NotBlank(message = "La contraseña no puede estar en blanco")
     private String password;
-
 }

@@ -1,7 +1,7 @@
 package com.magicdogs.alkywall.dto;
 
-import com.magicdogs.alkywall.entities.CurrencyType;
-import com.magicdogs.alkywall.entities.TypeTransaction;
+import com.magicdogs.alkywall.enums.CurrencyType;
+import com.magicdogs.alkywall.enums.TypeTransaction;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
