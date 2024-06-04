@@ -1,5 +1,9 @@
 package com.magicdogs.alkywall.entities;
 
+import com.magicdogs.alkywall.enums.AccountType;
+import com.magicdogs.alkywall.enums.CurrencyType;
+import com.magicdogs.alkywall.enums.DocumentType;
+import com.magicdogs.alkywall.enums.UserGender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -30,6 +35,20 @@ public class User implements UserDetails {
     @Column(name = "lastName", nullable = false)
     private String lastName;
 
+    @Column(name = "birthDate", nullable = false)
+    private LocalDate birthDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", nullable = false)
+    private UserGender gender;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "documentType", nullable = false)
+    private DocumentType documentType;
+
+    @Column(name = "documentNumber", nullable = false)
+    private String documentNumber;
+
     @Column(name = "email", nullable = false)
     private String email;
 
@@ -46,12 +65,19 @@ public class User implements UserDetails {
     @Column(name = "creationDate")
     private LocalDateTime creationDate;
 
+    @Column(name = "softDelete")
+    private Integer softDelete;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Account> accounts;
 
-    public User( String firstName, String lastName, String email, String password, Role role, int softDelete) {
+    public User(String firstName, String lastName, LocalDate birthDate, UserGender gender, DocumentType documentType, String documentNumber, String email, String password, Role role, Integer softDelete) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.documentType = documentType;
+        this.documentNumber = documentNumber;
         this.email = email;
         this.password = password;
         this.role = role;
@@ -69,17 +95,14 @@ public class User implements UserDetails {
         updateDate = LocalDateTime.now();
     }
 
-    @Column(name = "softDelete")
-    private Integer softDelete;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.getName().name()));
     }
 
-    public Account getAccountIn(CurrencyType currencyType) {
+    public Account getAccountIn(AccountType accountType, CurrencyType currencyType) {
         for (Account account : accounts) {
-            if (account.getCurrency().equals(currencyType)) {
+            if (account.getAccountType().equals(accountType) && account.getCurrency().equals(currencyType)) {
                 return account;
             }
         }

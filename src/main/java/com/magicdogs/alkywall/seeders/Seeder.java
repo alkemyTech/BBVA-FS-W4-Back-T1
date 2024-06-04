@@ -1,10 +1,12 @@
 package com.magicdogs.alkywall.seeders;
 
-import com.magicdogs.alkywall.Constants;
+import com.magicdogs.alkywall.constants.Constants;
 import com.magicdogs.alkywall.entities.*;
+import com.magicdogs.alkywall.enums.*;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.TransactionRepository;
-import com.magicdogs.alkywall.servicies.AccountService;
+import com.magicdogs.alkywall.utils.AliasGenerator;
+import com.magicdogs.alkywall.utils.CbuGenerator;
 import lombok.AllArgsConstructor;
 import net.datafaker.Faker;
 import com.magicdogs.alkywall.repositories.RoleRepository;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.Locale;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -25,10 +28,11 @@ public class Seeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final AccountService accountService;
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AliasGenerator aliasGenerator;
+    private final CbuGenerator cbuGenerator;
 
     private final Faker faker = new Faker(Locale.forLanguageTag("es"));
     private final Random random = new Random();
@@ -52,6 +56,10 @@ public class Seeder implements CommandLineRunner {
                     User admin = new User(
                             faker.name().firstName(),
                             faker.name().lastName(),
+                            LocalDate.of(1990, 9, 14),
+                            UserGender.FEMALE,
+                            DocumentType.DNI,
+                            "36845984",
                             email,
                             passwordEncoder.encode(password),
                             adminRole,
@@ -70,6 +78,10 @@ public class Seeder implements CommandLineRunner {
                     User user = new User(
                             faker.name().firstName(),
                             faker.name().lastName(),
+                            LocalDate.of(1990, 9, 14),
+                            UserGender.MALE,
+                            DocumentType.CUIT,
+                            "20395556667",
                             email,
                             passwordEncoder.encode(password),
                             userRole,
@@ -91,12 +103,15 @@ public class Seeder implements CommandLineRunner {
 
         if (createArsAccount) {
             var accountARS = new Account(
+                    AccountType.CAJA_AHORRO,
                     CurrencyType.ARS,
+                    AccountBank.ALKYWALL,
+                    cbuGenerator.generateUniqueCbu(),
+                    aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName()),
                     Constants.getTransactionLimitArs(),
-                    random.nextInt(100000),
+                    random.nextDouble(100000),
                     user,
-                    false,
-                    accountService.generateUniqueCbu()
+                    0
             );
             accountRepository.save(accountARS);
             createTransactionsForAccount(accountARS);
@@ -104,12 +119,15 @@ public class Seeder implements CommandLineRunner {
 
         if (createUsdAccount) {
             var accountUSD = new Account(
+                    AccountType.CAJA_AHORRO,
                     CurrencyType.USD,
+                    AccountBank.ALKYWALL,
+                    cbuGenerator.generateUniqueCbu(),
+                    aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName()),
                     Constants.getTransactionLimitUsd(),
-                    random.nextInt(500),
+                    random.nextDouble(500),
                     user,
-                    false,
-                    accountService.generateUniqueCbu()
+                    0
             );
             accountRepository.save(accountUSD);
             createTransactionsForAccount(accountUSD);
@@ -131,6 +149,7 @@ public class Seeder implements CommandLineRunner {
             Transaction transaction = new Transaction(
                     amount.doubleValue(),
                     getRandomTransactionType(),
+                    TransactionConcept.VARIOS,
                     addDescription ? faker.lorem().sentence() : "",
                     account
             );

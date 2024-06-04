@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.entities;
 
+import com.magicdogs.alkywall.enums.RoleNameEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

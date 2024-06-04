@@ -1,6 +1,6 @@
 package com.magicdogs.alkywall.servicies;
 
-import com.magicdogs.alkywall.Constants;
+import com.magicdogs.alkywall.constants.Constants;
 import com.magicdogs.alkywall.dto.LoanDTO;
 import com.magicdogs.alkywall.dto.LoanSimulateDTO;
 import org.springframework.stereotype.Service;

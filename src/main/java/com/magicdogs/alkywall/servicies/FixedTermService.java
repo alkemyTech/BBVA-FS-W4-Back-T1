@@ -1,11 +1,11 @@
 package com.magicdogs.alkywall.servicies;
 
-import com.magicdogs.alkywall.Constants;
+import com.magicdogs.alkywall.constants.Constants;
 import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.FixedTermCreateDTO;
 import com.magicdogs.alkywall.dto.FixedTermSimulatedDTO;
 import com.magicdogs.alkywall.entities.Account;
-import com.magicdogs.alkywall.entities.CurrencyType;
+import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.entities.FixedTermDeposit;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.FixedTermDepositRepository;
@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
