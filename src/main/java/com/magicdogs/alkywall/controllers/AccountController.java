@@ -66,9 +66,11 @@ public class AccountController {
     }
 
     @Operation(summary = "Eliminar cuenta por id")
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> accountDelete(@PathVariable("id")Long id){
-        accountService.softDeleteAccount(id);
+    @DeleteMapping("/accountId/{id}")
+    public ResponseEntity<?> accountDelete(@PathVariable("id")Long id, HttpServletRequest request){
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        accountService.softDeleteAccount(id, userEmail);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
 }
