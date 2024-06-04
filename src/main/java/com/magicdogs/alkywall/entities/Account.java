@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.entities;
 
+import com.magicdogs.alkywall.enums.AccountBank;
 import com.magicdogs.alkywall.enums.AccountType;
 import com.magicdogs.alkywall.enums.CurrencyType;
 import jakarta.persistence.*;
@@ -29,6 +30,10 @@ public class Account {
     @Enumerated(EnumType.STRING)
     @Column(name = "currency", nullable = false)
     private CurrencyType currency;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="bank", nullable=false)
+    private AccountBank bank;
 
     @Column(name="cbu", nullable=false)
     private String cbu;
@@ -62,9 +67,10 @@ public class Account {
     private List<FixedTermDeposit> fixedTermDeposits;
 
 
-    public Account(AccountType accountType, CurrencyType currencyType, String cbu, String alias, Double transactionLimit, Double balance, User user, Integer softDelete) {
+    public Account(AccountType accountType, CurrencyType currencyType, AccountBank bank, String cbu, String alias, Double transactionLimit, Double balance, User user, Integer softDelete) {
         this.accountType = accountType;
         this.currency = currencyType;
+        this.bank = bank;
         this.cbu = cbu;
         this.alias = alias;
         this.transactionLimit = transactionLimit;

@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.dto;
 
+import com.magicdogs.alkywall.enums.AccountBank;
 import com.magicdogs.alkywall.enums.AccountType;
 import com.magicdogs.alkywall.enums.CurrencyType;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,6 +20,9 @@ public class AccountDTO {
   
     @Schema(description = "Tipo de moneda de la cuenta")
     private CurrencyType currency;
+
+    @Schema(description = "Banco de la cuenta")
+    private AccountBank bank;
 
     @Schema(description = "CBU de la cuenta")
     private String cbu;

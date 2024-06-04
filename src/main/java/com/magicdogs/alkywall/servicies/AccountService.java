@@ -6,6 +6,7 @@ import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.dto.AccountPageDTO;
 import com.magicdogs.alkywall.entities.*;
+import com.magicdogs.alkywall.enums.AccountBank;
 import com.magicdogs.alkywall.enums.AccountType;
 import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.exceptions.ApiException;
@@ -62,7 +63,7 @@ public class AccountService {
             throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "No es posible crear una cuenta corriente en dólares");
         }
 
-        var account = new Account(accountType, currency, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName()), 0.0, 0.0, user, 0);
+        var account = new Account(accountType, currency, AccountBank.ALKYWALL, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName()), 0.0, 0.0, user, 0);
 
         if (currency == CurrencyType.ARS) {
                 account.setTransactionLimit(Constants.getTransactionLimitArs());

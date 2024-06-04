@@ -4,6 +4,7 @@ import com.magicdogs.alkywall.constants.Constants;
 import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
 import com.magicdogs.alkywall.entities.User;
+import com.magicdogs.alkywall.enums.AccountBank;
 import com.magicdogs.alkywall.enums.AccountType;
 import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.enums.RoleNameEnum;
@@ -74,13 +75,13 @@ public class SecurityService {
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
-        var newUser = new User(registerRequest.getFirstName(), registerRequest.getLastName(), registerRequest.getEmail(), passwordEncoder.encode(registerRequest.getPassword()), role, 0);
+        var newUser = new User(registerRequest.getFirstName(), registerRequest.getLastName(), registerRequest.getBirthDate(), registerRequest.getGender(), registerRequest.getDocumentType(), registerRequest.getDocumentNumber(), registerRequest.getEmail(), passwordEncoder.encode(registerRequest.getPassword()), role, 0);
         userRepository.save(newUser);
 
-        var accountARS = new Account(AccountType.CAJA_AHORRO, CurrencyType.ARS, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(newUser.getFirstName(), newUser.getLastName()), Constants.getTransactionLimitArs(), 0.0, newUser, 0);
+        var accountARS = new Account(AccountType.CAJA_AHORRO, CurrencyType.ARS, AccountBank.ALKYWALL, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(newUser.getFirstName(), newUser.getLastName()), Constants.getTransactionLimitArs(), 0.0, newUser, 0);
         accountRepository.save(accountARS);
 
-        var accountUSD = new Account(AccountType.CAJA_AHORRO, CurrencyType.USD, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(newUser.getFirstName(), newUser.getLastName()), Constants.getTransactionLimitUsd(), 0.0, newUser, 0);
+        var accountUSD = new Account(AccountType.CAJA_AHORRO, CurrencyType.USD, AccountBank.ALKYWALL, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(newUser.getFirstName(), newUser.getLastName()), Constants.getTransactionLimitUsd(), 0.0, newUser, 0);
         accountRepository.save(accountUSD);
 
         return registerRequest;
