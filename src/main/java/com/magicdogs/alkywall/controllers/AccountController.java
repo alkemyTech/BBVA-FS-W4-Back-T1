@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -64,5 +65,10 @@ public class AccountController {
         return ResponseEntity.ok(AccountDTO);
     }
 
-
+    @Operation(summary = "Eliminar cuenta por id")
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> accountDelete(@PathVariable("id")Long id){
+        accountService.softDeleteAccount(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
 }

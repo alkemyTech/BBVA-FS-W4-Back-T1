@@ -134,4 +134,15 @@ public class AccountService {
     public Optional<List<Account>> getAccountsByUserEmail(String email){
         return accountRepository.findByUserEmail(email);
     }
+
+    /**
+     * Baja logica de una cuenta
+     * @param id
+     */
+    public void softDeleteAccount(Long id){
+        var account = accountRepository.findById(id)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada"));
+        account.setSoftDelete(1);
+        accountRepository.save(account);
+    }
 }
