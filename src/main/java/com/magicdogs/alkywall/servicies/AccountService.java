@@ -44,6 +44,7 @@ public class AccountService {
         if(optionalAccounts.get().hasPrevious()){prev = "/accounts/"+userId+"?page="+(page-1);}
         return new AccountPageDTO(optionalAccounts.get().getContent(), next, prev, cant);
 
+
     }
 
     public AccountDTO createAccount(String userEmail, CurrencyType currency) {
