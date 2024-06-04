@@ -52,6 +52,7 @@ public class SecurityController {
         cookie.setPath("/");
         cookie.setMaxAge(Constants.getJwtExpirationMinutes() * 60);
         response.addCookie(cookie);
+        response.addHeader("Authorization", "Bearer " + token);
     }
 
     @Operation(summary = "Registrar nuevo usuario")
