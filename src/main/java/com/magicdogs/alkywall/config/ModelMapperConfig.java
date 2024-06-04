@@ -1,10 +1,7 @@
 package com.magicdogs.alkywall.config;
 
 import com.magicdogs.alkywall.dto.*;
-import com.magicdogs.alkywall.entities.Account;
-import com.magicdogs.alkywall.entities.FixedTermDeposit;
-import com.magicdogs.alkywall.entities.Transaction;
-import com.magicdogs.alkywall.entities.User;
+import com.magicdogs.alkywall.entities.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,4 +33,8 @@ public class ModelMapperConfig {
     }
 
     public ListTransactionDTO listTransactionDTO(Transaction transaction){return modelMapper().map(transaction, ListTransactionDTO.class);}
+
+    public ThirdAccount ThirdAccountDTOToEntitie(ThirdAccountDTO dto){
+        return modelMapper().map(dto,ThirdAccount.class);
+    }
 }

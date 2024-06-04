@@ -70,6 +70,8 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Account> accounts;
+    /*@OneToMany(mappedBy = "thirdAccount", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ThirdAccount> thirdAccounts;*/
 
     public User(String firstName, String lastName, LocalDate birthDate, UserGender gender, DocumentType documentType, String documentNumber, String email, String password, Role role, Integer softDelete) {
         this.firstName = firstName;
