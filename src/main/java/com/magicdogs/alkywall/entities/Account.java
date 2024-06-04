@@ -46,19 +46,24 @@ public class Account {
     @Column(name="cbu", nullable=false)
     private String cbu;
 
+    @Column(name="alias", nullable=true)
+    private String alias;
+
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FixedTermDeposit> fixedTermDeposits;
 
-    public Account(CurrencyType currencyType, double transactionLimit, double balance, User user, int softDelete, String cbu) {
+
+    public Account(CurrencyType currencyType, double transactionLimit, double balance, User user, int softDelete, String cbu, String alias) {
         this.currency = currencyType;
         this.transactionLimit = transactionLimit;
         this.balance = balance;
         this.user = user;
         this.softDelete = softDelete;
         this.cbu = cbu;
+        this.alias = alias;
     }
 
     @PrePersist

@@ -19,6 +19,9 @@ public class AccountDTO {
     @Schema(description = "CBU de la cuenta")
     private String cbu;
 
+    @Schema(description = "Alias de la cuenta")
+    private String alias;
+
     @Schema(description = "Balance de la cuenta")
     private Double balance;
   
