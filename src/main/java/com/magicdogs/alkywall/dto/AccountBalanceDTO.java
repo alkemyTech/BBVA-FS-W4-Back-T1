@@ -16,7 +16,7 @@ import java.util.List;
 public class AccountBalanceDTO {
 
     @Schema(description = "Saldo de la cuenta en ARS")
-    private AccountDTO accountArs;
+    private List<AccountDTO> accountArs = new ArrayList<>();
 
     @Schema(description = "Saldo de la cuenta en USD")
     private AccountDTO accountUsd;

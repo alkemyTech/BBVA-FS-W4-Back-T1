@@ -1,15 +1,18 @@
 package com.magicdogs.alkywall.servicies;
 
-import com.magicdogs.alkywall.Constants;
+import com.magicdogs.alkywall.constants.Constants;
 import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.dto.AccountPageDTO;
 import com.magicdogs.alkywall.entities.*;
+import com.magicdogs.alkywall.enums.AccountType;
+import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import com.magicdogs.alkywall.utils.AliasGenerator;
+import com.magicdogs.alkywall.utils.CbuGenerator;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 @Service
 @AllArgsConstructor
@@ -28,6 +30,7 @@ public class AccountService {
     private final UserRepository userRepository;
     private final ModelMapperConfig modelMapperConfig;
     private final AliasGenerator aliasGenerator;
+    private final CbuGenerator cbuGenerator;
 
     public AccountPageDTO accountsByUser(Long userId, int page, int size){
         if(page < 0 || size <= 0) throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
@@ -46,16 +49,20 @@ public class AccountService {
 
     }
 
-    public AccountDTO createAccount(String userEmail, CurrencyType currency) {
+    public AccountDTO createAccount(String userEmail, AccountType accountType, CurrencyType currency) {
         var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        Optional<Account> existingAccount = accountRepository.findByUserAndCurrency(user, currency);
+        Optional<Account> existingAccount = accountRepository.findByUserAndAccountTypeAndCurrency(user, accountType, currency);
         if (existingAccount.isPresent()) {
             throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "La cuenta ya existe");
         }
 
-        var account = new Account(currency, 0.00, 0.00, user, 0, generateUniqueCbu(), aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName()));
+        if (accountType.equals(AccountType.CUENTA_CORRIENTE) && currency.equals(CurrencyType.USD)) {
+            throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "No es posible crear una cuenta corriente en dólares");
+        }
+
+        var account = new Account(accountType, currency, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName()), 0.0, 0.0, user, 0);
 
         if (currency == CurrencyType.ARS) {
                 account.setTransactionLimit(Constants.getTransactionLimitArs());
@@ -80,36 +87,18 @@ public class AccountService {
         return modelMapperConfig.accountToDTO(savedAccount);
     }
 
-    public String generateUniqueCbu() {
-        String cbu;
-        do {
-            cbu = generateCbu();
-        } while (!isCbuUnique(cbu));
-        return cbu;
-    }
-
-    private String generateCbu() {
-        StringBuilder cbu = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < 22; i++) {
-            cbu.append(random.nextInt(10));
-        }
-        return cbu.toString();
-    }
-
-    private boolean isCbuUnique(String cbu) {
-        return accountRepository.findByCbu(cbu).isEmpty();
-    }
-
     /**
      * Retorna el balance de cada cuenta con
      * su historial de transacciones y plazos fijos.
-     * Las cuentas se diferencian por su tipo de moneda
+     * Los balances se diferencian por su tipo de moneda
+     * El balance en pesos argentinos puede tener caja de ahorro y cuenta corriente.
      * @param userEmail
      * @return DTO con el balance de las cuentas
      */
     public AccountBalanceDTO getAccountBalance(String userEmail){
-        List<Account> accounts = accountRepository.findByUserEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuentas no encontradas"));
+        List<Account> accounts = accountRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuentas no encontradas"));
+
         if (accounts.isEmpty()) {
             throw new ApiException(HttpStatus.NOT_FOUND, "El usuario no tiene cuentas");
         }
@@ -119,9 +108,10 @@ public class AccountService {
         for(Account ac: accounts){
             accountBalanceDTO.addHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionBalanceToDTO).toList());
             accountBalanceDTO.addFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
+
             if(ac.getCurrency().equals(CurrencyType.ARS)){
-                accountBalanceDTO.setAccountArs(modelMapperConfig.accountToDTO(ac));
-            }else if(ac.getCurrency().equals(CurrencyType.USD)){
+                accountBalanceDTO.getAccountArs().add(modelMapperConfig.accountToDTO(ac));
+            } else if(ac.getCurrency().equals(CurrencyType.USD)) {
                 accountBalanceDTO.setAccountUsd(modelMapperConfig.accountToDTO(ac));
             }
         }

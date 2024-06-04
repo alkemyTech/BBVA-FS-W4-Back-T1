@@ -1,11 +1,15 @@
 package com.magicdogs.alkywall.servicies;
 
-import com.magicdogs.alkywall.Constants;
+import com.magicdogs.alkywall.constants.Constants;
 import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
 import com.magicdogs.alkywall.entities.User;
+import com.magicdogs.alkywall.enums.AccountType;
+import com.magicdogs.alkywall.enums.CurrencyType;
+import com.magicdogs.alkywall.enums.RoleNameEnum;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import com.magicdogs.alkywall.utils.AliasGenerator;
+import com.magicdogs.alkywall.utils.CbuGenerator;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.modelmapper.ModelMapper;
@@ -22,14 +26,14 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class SecurityService {
-    private final AccountService accountService;
-    private UserRepository userRepository;
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
+    private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final AccountRepository accountRepository;
     private final AliasGenerator aliasGenerator;
+    private final CbuGenerator cbuGenerator;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -42,6 +46,7 @@ public class SecurityService {
         var user2 = (User) authentication.getPrincipal();
         return jwtService.createToken(user2.getEmail(), 60);
     }
+
     public UserDto searchUser(UserLoginDTO us){
         UserDto userReturn;
 
@@ -51,7 +56,6 @@ public class SecurityService {
             return userReturn;
         }
         return null;
-
     }
 
     public UserRegisterDTO registerUser(UserRegisterDTO registerRequest){
@@ -62,7 +66,7 @@ public class SecurityService {
         return register(registerRequest, RoleNameEnum.ADMIN);
     }
 
-    private UserRegisterDTO register(UserRegisterDTO registerRequest, RoleNameEnum roleName) {
+    public UserRegisterDTO register(UserRegisterDTO registerRequest, RoleNameEnum roleName) {
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             throw new IllegalArgumentException("User already exists");
         }
@@ -73,10 +77,10 @@ public class SecurityService {
         var newUser = new User(registerRequest.getFirstName(), registerRequest.getLastName(), registerRequest.getEmail(), passwordEncoder.encode(registerRequest.getPassword()), role, 0);
         userRepository.save(newUser);
 
-        var accountARS = new Account(CurrencyType.ARS, Constants.getTransactionLimitArs(), 0.00, newUser, 0, accountService.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(registerRequest.getFirstName(), registerRequest.getLastName()));
+        var accountARS = new Account(AccountType.CAJA_AHORRO, CurrencyType.ARS, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(newUser.getFirstName(), newUser.getLastName()), Constants.getTransactionLimitArs(), 0.0, newUser, 0);
         accountRepository.save(accountARS);
 
-        var accountUSD = new Account(CurrencyType.USD, Constants.getTransactionLimitUsd(), 0.00, newUser, 0, accountService.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(registerRequest.getFirstName(), registerRequest.getLastName()));
+        var accountUSD = new Account(AccountType.CAJA_AHORRO, CurrencyType.USD, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(newUser.getFirstName(), newUser.getLastName()), Constants.getTransactionLimitUsd(), 0.0, newUser, 0);
         accountRepository.save(accountUSD);
 
         return registerRequest;

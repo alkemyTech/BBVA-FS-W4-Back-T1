@@ -1,5 +1,7 @@
 package com.magicdogs.alkywall.entities;
 
+import com.magicdogs.alkywall.enums.AccountType;
+import com.magicdogs.alkywall.enums.CurrencyType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,8 +23,18 @@ public class Account {
     private Long idAccount;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "accountType", nullable = false)
+    private AccountType accountType;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "currency", nullable = false)
     private CurrencyType currency;
+
+    @Column(name="cbu", nullable=false)
+    private String cbu;
+
+    @Column(name="alias", nullable=false)
+    private String alias;
 
     @Column(name = "transactionLimit", nullable = false)
     private Double transactionLimit;
@@ -43,12 +55,6 @@ public class Account {
     @Column(name = "softDelete", nullable = false)
     private Integer softDelete;
 
-    @Column(name="cbu", nullable=false)
-    private String cbu;
-
-    @Column(name="alias", nullable=true)
-    private String alias;
-
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions;
 
@@ -56,14 +62,15 @@ public class Account {
     private List<FixedTermDeposit> fixedTermDeposits;
 
 
-    public Account(CurrencyType currencyType, double transactionLimit, double balance, User user, int softDelete, String cbu, String alias) {
+    public Account(AccountType accountType, CurrencyType currencyType, String cbu, String alias, Double transactionLimit, Double balance, User user, Integer softDelete) {
+        this.accountType = accountType;
         this.currency = currencyType;
+        this.cbu = cbu;
+        this.alias = alias;
         this.transactionLimit = transactionLimit;
         this.balance = balance;
         this.user = user;
         this.softDelete = softDelete;
-        this.cbu = cbu;
-        this.alias = alias;
     }
 
     @PrePersist

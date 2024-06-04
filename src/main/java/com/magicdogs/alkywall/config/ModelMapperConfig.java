@@ -13,9 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class ModelMapperConfig {
 
     @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
+    public ModelMapper modelMapper(){return new ModelMapper();}
 
     public UserDto userToDTO(User user){return modelMapper().map(user, UserDto.class);}
 
@@ -28,14 +26,14 @@ public class ModelMapperConfig {
     public FixedTermsBalanceDTO fixedTermsBalanceToDTO(FixedTermDeposit fixedTermDeposit){
         return modelMapper().map(fixedTermDeposit, FixedTermsBalanceDTO.class);
     }
+
     public FixedTermDeposit fixedTermsCreateDTOToEntitie(FixedTermCreateDTO fixedTermCreateDTO){
         return modelMapper().map(fixedTermCreateDTO, FixedTermDeposit.class);
     }
+
     public FixedTermSimulatedDTO fixedTermsEntitieToSimulatedDTO(FixedTermDeposit FixedTermDeposit){
         return modelMapper().map(FixedTermDeposit, FixedTermSimulatedDTO.class);
     }
 
-
     public ListTransactionDTO listTransactionDTO(Transaction transaction){return modelMapper().map(transaction, ListTransactionDTO.class);}
-
 }

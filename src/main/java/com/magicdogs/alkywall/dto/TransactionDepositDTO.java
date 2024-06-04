@@ -1,6 +1,6 @@
 package com.magicdogs.alkywall.dto;
 
-import com.magicdogs.alkywall.entities.CurrencyType;
+import com.magicdogs.alkywall.enums.CurrencyType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

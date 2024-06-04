@@ -1,17 +1,15 @@
 package com.magicdogs.alkywall.controllers;
 
-import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.dto.ListTransactionDTO;
 import com.magicdogs.alkywall.dto.TransactionDTO;
 import com.magicdogs.alkywall.dto.TransactionPageDTO;
 import com.magicdogs.alkywall.dto.*;
-import com.magicdogs.alkywall.entities.CurrencyType;
+import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.servicies.JWTService;
 import com.magicdogs.alkywall.servicies.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -20,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @Tag(name = "Transacciones", description = "Endpoints para realizar transacciones")

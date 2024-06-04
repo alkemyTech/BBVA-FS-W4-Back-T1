@@ -1,11 +1,16 @@
 package com.magicdogs.alkywall.seeders;
 
-import com.magicdogs.alkywall.Constants;
+import com.magicdogs.alkywall.constants.Constants;
 import com.magicdogs.alkywall.entities.*;
+import com.magicdogs.alkywall.enums.AccountType;
+import com.magicdogs.alkywall.enums.CurrencyType;
+import com.magicdogs.alkywall.enums.RoleNameEnum;
+import com.magicdogs.alkywall.enums.TypeTransaction;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.TransactionRepository;
 import com.magicdogs.alkywall.servicies.AccountService;
 import com.magicdogs.alkywall.utils.AliasGenerator;
+import com.magicdogs.alkywall.utils.CbuGenerator;
 import lombok.AllArgsConstructor;
 import net.datafaker.Faker;
 import com.magicdogs.alkywall.repositories.RoleRepository;
@@ -31,6 +36,7 @@ public class Seeder implements CommandLineRunner {
     private final TransactionRepository transactionRepository;
     private final PasswordEncoder passwordEncoder;
     private final AliasGenerator aliasGenerator;
+    private final CbuGenerator cbuGenerator;
 
     private final Faker faker = new Faker(Locale.forLanguageTag("es"));
     private final Random random = new Random();
@@ -93,13 +99,14 @@ public class Seeder implements CommandLineRunner {
 
         if (createArsAccount) {
             var accountARS = new Account(
+                    AccountType.CAJA_AHORRO,
                     CurrencyType.ARS,
+                    cbuGenerator.generateUniqueCbu(),
+                    aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName()),
                     Constants.getTransactionLimitArs(),
-                    random.nextInt(100000),
+                    random.nextDouble(100000),
                     user,
-                    0,
-                    accountService.generateUniqueCbu(),
-                    aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName())
+                    0
             );
             accountRepository.save(accountARS);
             createTransactionsForAccount(accountARS);
@@ -107,13 +114,14 @@ public class Seeder implements CommandLineRunner {
 
         if (createUsdAccount) {
             var accountUSD = new Account(
+                    AccountType.CAJA_AHORRO,
                     CurrencyType.USD,
+                    cbuGenerator.generateUniqueCbu(),
+                    aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName()),
                     Constants.getTransactionLimitUsd(),
-                    random.nextInt(500),
+                    random.nextDouble(500),
                     user,
-                    0,
-                    accountService.generateUniqueCbu(),
-                    aliasGenerator.generateUniqueAlias(user.getFirstName(), user.getLastName())
+                    0
             );
             accountRepository.save(accountUSD);
             createTransactionsForAccount(accountUSD);

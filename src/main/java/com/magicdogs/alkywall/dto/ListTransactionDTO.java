@@ -1,6 +1,6 @@
 package com.magicdogs.alkywall.dto;
 
-import com.magicdogs.alkywall.entities.TypeTransaction;
+import com.magicdogs.alkywall.enums.TypeTransaction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

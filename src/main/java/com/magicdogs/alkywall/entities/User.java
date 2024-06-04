@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.entities;
 
+import com.magicdogs.alkywall.enums.CurrencyType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
