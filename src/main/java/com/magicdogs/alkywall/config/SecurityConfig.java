@@ -30,6 +30,7 @@ public class SecurityConfig {
                         .requestMatchers("/loan/simulate").permitAll()
                         .requestMatchers("/accounts/balance").permitAll()
                         .requestMatchers(HttpMethod.GET,"/accounts/search").authenticated()
+                        .requestMatchers("/cbu").authenticated()
                         .requestMatchers(HttpMethod.GET,"/accounts/{userId}").hasRole("ADMIN")
                         .requestMatchers("/users").hasRole("ADMIN")
                         .requestMatchers("/transactions/userId/").hasRole("ADMIN")
