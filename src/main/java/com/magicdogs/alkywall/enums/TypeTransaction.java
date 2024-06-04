@@ -1,4 +1,4 @@
-package com.magicdogs.alkywall.entities;
+package com.magicdogs.alkywall.enums;
 
 public enum TypeTransaction {
     INCOME,

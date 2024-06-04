@@ -1,4 +1,4 @@
-package com.magicdogs.alkywall;
+package com.magicdogs.alkywall.constants;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;

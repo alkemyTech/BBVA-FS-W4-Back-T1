@@ -2,7 +2,7 @@ package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.dto.UserPageDTO;
 import com.magicdogs.alkywall.dto.UserUpdateDTO;
-import com.magicdogs.alkywall.entities.RoleNameEnum;
+import com.magicdogs.alkywall.enums.RoleNameEnum;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
