@@ -24,7 +24,6 @@ public class AccountController {
 
     @Operation(summary = "Obtener lista de cuentas por ID de usuario")
     @GetMapping("/{userId}")
-
     public ResponseEntity<?> accountListByUser(@PathVariable("userId") Long id,
                                                @RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "10") int size) {
@@ -41,6 +40,7 @@ public class AccountController {
         return ResponseEntity.ok(accountDTO);
     }
 
+    @Operation(summary = "Editar límite de transacción de una cuenta")
     @PutMapping("/{idAccount}")
     public ResponseEntity<?> updateAccount(@PathVariable("idAccount") Long id, @RequestBody @Valid AccountUpdateDTO account, HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
@@ -56,4 +56,13 @@ public class AccountController {
         var userEmail = jwtService.extractUserId(token);
         return ResponseEntity.ok(accountService.getAccountBalance(userEmail));
     }
+
+    @Operation(summary = "Obtener cuenta a través de CBU o Alias")
+    @GetMapping("/search")
+    public ResponseEntity<?> searchAccount(@RequestParam String value){
+        var AccountDTO = accountService.searchAccount(value);
+        return ResponseEntity.ok(AccountDTO);
+    }
+
+
 }

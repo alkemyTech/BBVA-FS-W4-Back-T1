@@ -88,6 +88,17 @@ public class AccountService {
         return modelMapperConfig.accountToDTO(savedAccount);
     }
 
+    public AccountDTO searchAccount(String value) {
+        Optional<Account> account = accountRepository.findByCbu(value);
+        if (account.isEmpty()) {
+            account = accountRepository.findByAlias(value);
+        }
+
+        Account foundAccount = account.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "La cuenta no existe"));
+
+        return modelMapperConfig.accountToDTO(foundAccount);
+    }
+
     /**
      * Retorna el balance de cada cuenta con
      * su historial de transacciones y plazos fijos.

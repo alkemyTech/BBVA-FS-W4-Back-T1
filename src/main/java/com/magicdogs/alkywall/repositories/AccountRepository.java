@@ -16,6 +16,7 @@ import java.util.Optional;
 public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Page<Account>> findByUserIdUser(Long userId, Pageable pageable);
     Optional<Account> findByCbu(String cbu);
+    Optional<Account> findByAlias(String alias);
     Optional<Account> findByUserAndAccountTypeAndCurrency(User user, AccountType accountType, CurrencyType currency);
     Optional<List<Account>> findByUserEmail(String email);
     Optional<Account> findByIdAccountAndUser(Long id, User user);
