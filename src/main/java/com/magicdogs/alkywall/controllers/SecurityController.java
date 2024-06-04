@@ -73,7 +73,7 @@ public class SecurityController {
     @Operation(summary = "Registrar nuevo usuario administrador")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/register-admin")
-    public ResponseEntity<?> registerAdmin(@RequestBody UserRegisterDTO registerRequest) {
+    public ResponseEntity<?> registerAdmin(@RequestBody @Valid UserRegisterDTO registerRequest) {
         try {
             var newAdmin = securityService.registerAdmin(registerRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(newAdmin);
