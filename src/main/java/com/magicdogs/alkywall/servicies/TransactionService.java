@@ -31,23 +31,22 @@ public class TransactionService {
     private UserRepository userRepository;
     private final ModelMapperConfig modelMapperConfig;
 
-
-    public void sendMoney(TransactionDTO transactionDTO, CurrencyType currencyType, String userEmail) {
+    public ListTransactionDTO sendMoney(TransactionDTO transactionDTO, CurrencyType currencyType, String userEmail) {
         var accountDestination = accountRepository.findById(transactionDTO.getDestinationIdAccount())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta destino no encontrada"));
 
         var userOrigin = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        var accountOrigin = userOrigin.getAccountIn(currencyType);
-        if (accountOrigin == null) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Cuenta origen no encontrada para la moneda indicada");
-        }
+        var accountOrigin = accountRepository.findByIdAccountAndUser(transactionDTO.getOriginIdAccount(), userOrigin)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta origen no encontrada"));
 
         validateCurrencyType(accountOrigin, accountDestination, currencyType);
         validateBalanceAndLimit(accountOrigin, transactionDTO.getAmount());
 
-        processTransaction(accountOrigin, accountDestination, transactionDTO);
+        var transaction = processTransaction(accountOrigin, accountDestination, transactionDTO);
+
+        return modelMapperConfig.listTransactionDTO(transaction);
     }
 
     private void validateCurrencyType(Account accountOrigin, Account accountDestination, CurrencyType currencyType) {
@@ -56,7 +55,7 @@ public class TransactionService {
         }
     }
 
-    private void validateBalanceAndLimit(Account accountOrigin, double amount) {
+    private void validateBalanceAndLimit(Account accountOrigin, Double amount) {
         if (accountOrigin.getBalance() < amount) {
             throw new ApiException(HttpStatus.CONFLICT, "Balance insuficiente");
         }
@@ -65,17 +64,19 @@ public class TransactionService {
         }
     }
 
-    private void processTransaction(Account accountOrigin, Account accountDestination, TransactionDTO transactionDTO) {
-        var transactionIncomeDestination = new Transaction(transactionDTO.getAmount(), TypeTransaction.INCOME, transactionDTO.getDescription(), accountDestination);
-        var transactionPaymentOrigin = new Transaction(transactionDTO.getAmount(), TypeTransaction.PAYMENT, transactionDTO.getDescription(), accountOrigin);
+    private Transaction processTransaction(Account accountOrigin, Account accountDestination, TransactionDTO transactionDTO) {
+        var transactionIncomeDestination = new Transaction(transactionDTO.getAmount(), TypeTransaction.INCOME, transactionDTO.getConcept(), transactionDTO.getDescription(), accountDestination);
+        var transactionPaymentOrigin = new Transaction(transactionDTO.getAmount(), TypeTransaction.PAYMENT, transactionDTO.getConcept(), transactionDTO.getDescription(), accountOrigin);
 
         transactionRepository.save(transactionIncomeDestination);
-        transactionRepository.save(transactionPaymentOrigin);
+        var transaction = transactionRepository.save(transactionPaymentOrigin);
 
         updateAccountBalances(accountOrigin, accountDestination, transactionDTO.getAmount());
+
+        return transaction;
     }
 
-    private void updateAccountBalances(Account accountOrigin, Account accountDestination, double amount) {
+    private void updateAccountBalances(Account accountOrigin, Account accountDestination, Double amount) {
         accountOrigin.setBalance(accountOrigin.getBalance() - amount);
         accountDestination.setBalance(accountDestination.getBalance() + amount);
 
@@ -93,7 +94,6 @@ public class TransactionService {
                 transactions.addAll(account.getTransactions().stream().map(modelMapperConfig::listTransactionDTO).toList());
             }
             return transactions;
-
         }
     }
 
@@ -108,16 +108,16 @@ public class TransactionService {
         return transactions.map(t -> t.map(modelMapperConfig::listTransactionDTO));
     }
 
-    public TransactionAccountDTO deposit(TransactionDepositDTO deposit, CurrencyType currency, String userEmail) {
+    public TransactionAccountDTO deposit(TransactionDepositDTO deposit, String userEmail) {
         var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        var account = user.getAccountIn(currency);
+        var account = user.getAccountIn(deposit.getAccountType(), deposit.getCurrency());
         if (account == null) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada para la moneda indicada");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada");
         }
 
-        var transaction = new Transaction(deposit.getAmount(), TypeTransaction.DEPOSIT, "Depósito de dinero", account);
+        var transaction = new Transaction(deposit.getAmount(), TypeTransaction.DEPOSIT, deposit.getConcept(), deposit.getDescription(), account);
         transactionRepository.save(transaction);
 
         account.setBalance(account.getBalance() + deposit.getAmount());
@@ -129,18 +129,18 @@ public class TransactionService {
         return new TransactionAccountDTO(transactionDTO, accountDTO);
     }
 
-    public TransactionAccountDTO payment(TransactionDepositDTO payment, CurrencyType currency, String userEmail) {
+    public TransactionAccountDTO payment(TransactionDepositDTO payment, String userEmail) {
         var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        var account = user.getAccountIn(currency);
+        var account = user.getAccountIn(payment.getAccountType(), payment.getCurrency());
         if (account == null) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada para la moneda indicada");
+            throw new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada");
         }
 
         validateBalanceAndLimit(account, payment.getAmount());
 
-        var transaction = new Transaction(payment.getAmount(), TypeTransaction.PAYMENT, "Realización de un pago", account);
+        var transaction = new Transaction(payment.getAmount(), TypeTransaction.PAYMENT, payment.getConcept(), payment.getDescription(), account);
         transactionRepository.save(transaction);
 
         account.setBalance(account.getBalance() - payment.getAmount());
@@ -155,11 +155,11 @@ public class TransactionService {
     public ListTransactionDTO getDetailsTreansactionById(Long id, String userEmail) {
         var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         var transaction = user.findTransactionByIdInAccount(id);
-        if (transaction == null)
+        if (transaction == null) {
             throw new ApiException(HttpStatus.NOT_FOUND, "Id transaccion no corresponde al usuario logeado");
+        }
 
         var transactionDTO = modelMapperConfig.listTransactionDTO(transaction);
-
 
         return transactionDTO;
     }
@@ -167,9 +167,12 @@ public class TransactionService {
     public ListTransactionDTO updateTransaction(Long idTransaction, TransactionUpdateDTO update, String userEmail) {
         var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
         var transaction = user.findTransactionByIdInAccount(idTransaction);
-        if (transaction == null)
+
+        if (transaction == null) {
             throw new ApiException(HttpStatus.NOT_FOUND, "Id transaccion no corresponde al usuario logeado");
+        }
 
         transaction.setDescription(update.getDescription());
         transactionRepository.save(transaction);

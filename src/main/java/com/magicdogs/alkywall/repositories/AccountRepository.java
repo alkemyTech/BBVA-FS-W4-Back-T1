@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AccountRepository extends JpaRepository<Account, Integer> {
+public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Page<Account>> findByUserIdUser(Long userId, Pageable pageable);
     Optional<Account> findByCbu(String cbu);
     Optional<Account> findByUserAndAccountTypeAndCurrency(User user, AccountType accountType, CurrencyType currency);

@@ -149,6 +149,7 @@ public class Seeder implements CommandLineRunner {
             Transaction transaction = new Transaction(
                     amount.doubleValue(),
                     getRandomTransactionType(),
+                    TransactionConcept.VARIOS,
                     addDescription ? faker.lorem().sentence() : "",
                     account
             );

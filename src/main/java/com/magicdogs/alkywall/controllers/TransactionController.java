@@ -34,9 +34,8 @@ public class TransactionController {
     public ResponseEntity<?> sendArs(@RequestBody @Valid TransactionDTO transactionDTO, HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
-        transactionService.sendMoney(transactionDTO, CurrencyType.ARS, userEmail);
-        return ResponseEntity.ok().build();
-
+        var ListTransactionDTO =  transactionService.sendMoney(transactionDTO, CurrencyType.ARS, userEmail);
+        return ResponseEntity.ok(ListTransactionDTO);
     }
 
     @Operation(summary = "Realiza una transacción de envío en USD")
@@ -44,8 +43,8 @@ public class TransactionController {
     public ResponseEntity<?> sendUsd(@RequestBody @Valid TransactionDTO transactionDTO, HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
-        transactionService.sendMoney(transactionDTO, CurrencyType.USD, userEmail);
-        return ResponseEntity.ok().build();
+        var ListTransactionDTO = transactionService.sendMoney(transactionDTO, CurrencyType.USD, userEmail);
+        return ResponseEntity.ok(ListTransactionDTO);
     }
 
     @Operation(summary ="Lista de transacciones de un usuario")
@@ -100,7 +99,7 @@ public class TransactionController {
     public ResponseEntity<?> deposit(@RequestBody @Valid TransactionDepositDTO deposit, HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
-        var TransactionAccountDTO = transactionService.deposit(deposit, deposit.getCurrency(), userEmail);
+        var TransactionAccountDTO = transactionService.deposit(deposit, userEmail);
         return ResponseEntity.ok(TransactionAccountDTO);
     }
 
@@ -109,7 +108,7 @@ public class TransactionController {
     public ResponseEntity<?> payment(@RequestBody @Valid TransactionDepositDTO payment, HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
-        var TransactionAccountDTO = transactionService.payment(payment, payment.getCurrency(), userEmail);
+        var TransactionAccountDTO = transactionService.payment(payment, userEmail);
         return ResponseEntity.ok(TransactionAccountDTO);
     }
 
@@ -118,7 +117,7 @@ public class TransactionController {
     public ResponseEntity<?> updateTransaction(@PathVariable Long idTransaction, @RequestBody @Valid TransactionUpdateDTO update, HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
-        var transaction = transactionService.updateTransaction(idTransaction, update, userEmail);
-        return ResponseEntity.ok(transaction);
+        var TransactionUpdateDTO = transactionService.updateTransaction(idTransaction, update, userEmail);
+        return ResponseEntity.ok(TransactionUpdateDTO);
     }
 }

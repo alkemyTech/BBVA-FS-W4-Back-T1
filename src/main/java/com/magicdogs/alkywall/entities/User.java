@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.entities;
 
+import com.magicdogs.alkywall.enums.AccountType;
 import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.enums.DocumentType;
 import com.magicdogs.alkywall.enums.UserGender;
@@ -99,9 +100,9 @@ public class User implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.getName().name()));
     }
 
-    public Account getAccountIn(CurrencyType currencyType) {
+    public Account getAccountIn(AccountType accountType, CurrencyType currencyType) {
         for (Account account : accounts) {
-            if (account.getCurrency().equals(currencyType)) {
+            if (account.getAccountType().equals(accountType) && account.getCurrency().equals(currencyType)) {
                 return account;
             }
         }
