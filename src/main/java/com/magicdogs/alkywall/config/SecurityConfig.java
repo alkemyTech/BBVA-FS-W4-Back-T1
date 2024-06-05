@@ -3,6 +3,7 @@ package com.magicdogs.alkywall.config;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,7 +23,18 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api-docs").permitAll()
+                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/api-docs/swagger-config").permitAll()
+                        .requestMatchers("/fixedTerm/simulate").permitAll()
+                        .requestMatchers("/loan/simulate").permitAll()
+                        .requestMatchers("/accounts/balance").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/accounts/search").authenticated()
+                        .requestMatchers("/cbu").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/accounts/{userId}").hasRole("ADMIN")
+                        .requestMatchers("/users").hasRole("ADMIN")
+                        .requestMatchers("/transactions/userId/").hasRole("ADMIN")
+                        .requestMatchers("/transactions/id/").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

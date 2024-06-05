@@ -1,30 +1,51 @@
 package com.magicdogs.alkywall.servicies;
 
+import com.magicdogs.alkywall.dto.UserPageDTO;
+import com.magicdogs.alkywall.dto.UserUpdateDTO;
+import com.magicdogs.alkywall.enums.RoleNameEnum;
+import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;import com.magicdogs.alkywall.config.ModelMapperConfig;
+import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.entities.User;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import java.util.Objects;
 
-@Component
+@Service
 @AllArgsConstructor
 public class UserService implements UserDetailsService {
     private UserRepository userRepository;
     private final ModelMapperConfig modelMapperConfig;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepository.findByEmail(email).orElseThrow();
     }
 
-    public List<UserDto> getUsers(){
-        List<User> users = userRepository.findAll();
-        return users.stream().map(modelMapperConfig::userToDTO).toList();
+    public UserPageDTO getUsers(int page, int size){
+        Page<User> users = userRepository.findAll(PageRequest.of(page, size));
+        var totalPages = users.getTotalPages();
+
+        if(totalPages <= page) throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "No existe el numero de pagina");
+
+        String next = "", prev = "";
+        if(users.hasNext()){
+            next = "/users?page="+(page+1);
+        }
+        if(users.hasPrevious()){
+            prev = "/users?page="+(page-1);
+        }
+        var users_page = users.map(modelMapperConfig::userToDTO);
+        return new UserPageDTO(users_page.getContent(), next, prev, totalPages);
     }
 
     /**
@@ -32,9 +53,53 @@ public class UserService implements UserDetailsService {
      * (1: baja, 0: activo)
      * @param id
      */
-    public void softDeleteUser(Long id){
-        Optional<User> user = userRepository.findById(id);
-        user.ifPresent(value -> value.setSoftDelete(1));
-        userRepository.save(user.get());
+    public void softDeleteUser(Long id, String userEmail) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        boolean isAdmin = user.getRole().getName() == RoleNameEnum.ADMIN;
+        boolean isSameUser = Objects.equals(user.getIdUser(), id);
+
+        if (!isAdmin && !isSameUser) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "No se puede eliminar el usuario porque no tiene permiso de administrador");
+        }
+
+        user.setSoftDelete(1);
+        userRepository.save(user);
+    }
+
+    public UserDto update(Long id, String userEmail, UserUpdateDTO userUpdateDTO) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        boolean isSameUser = Objects.equals(user.getIdUser(), id);
+        if (!isSameUser) {
+            throw new ApiException(HttpStatus.CONFLICT, "El usuario loggeado no coincide con el id recibido");
+        }
+
+        if (userUpdateDTO.getFirstName() != null) {
+            user.setFirstName(userUpdateDTO.getFirstName());
+        }
+        if (userUpdateDTO.getLastName() != null) {
+            user.setLastName(userUpdateDTO.getLastName());
+        }
+        if (userUpdateDTO.getPassword() != null) {
+            if (userUpdateDTO.getPassword().isBlank() || userUpdateDTO.getPassword().isEmpty()) {
+                throw new ApiException(HttpStatus.BAD_REQUEST, "La contraseña no puede ser vacia");
+            }
+            user.setPassword(passwordEncoder.encode(userUpdateDTO.getPassword()));
+        }
+
+        userRepository.save(user);
+        return modelMapperConfig.userToDTO(user);
+
+    }
+
+
+    public UserDto userDetails(Long id, String email){
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        if(!user.getIdUser().equals(id))  throw new ApiException(HttpStatus.BAD_REQUEST, "No coincide el id con el loggeado");
+        UserDto userDto = modelMapperConfig.userToDTO(user);
+        return userDto;
     }
 }

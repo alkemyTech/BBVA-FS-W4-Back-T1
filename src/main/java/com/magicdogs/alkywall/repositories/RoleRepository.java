@@ -1,7 +1,7 @@
 package com.magicdogs.alkywall.repositories;
 
 import com.magicdogs.alkywall.entities.Role;
-import com.magicdogs.alkywall.entities.RoleNameEnum;
+import com.magicdogs.alkywall.enums.RoleNameEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

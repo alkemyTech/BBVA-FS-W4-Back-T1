@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,5 +39,21 @@ public class FixedTermDeposit {
     @PrePersist
     protected void onCreate() {
         creationDate = LocalDateTime.now();
+    }
+
+
+    public double interestTotalWin(){
+        return (this.interesPerDay()) * Duration.between(this.creationDate, this.closingDate).toDays();
+    }
+    public double interestPartialWin(){
+        return (this.interesPerDay()) * Duration.between(this.creationDate, LocalDateTime.now()).toDays();
+    }
+
+    public double interesPerDay(){
+        return (this.amount*interest/100);
+    }
+
+    public double getAmountTotalToReceive(){
+        return this.amount + interestTotalWin();
     }
 }
