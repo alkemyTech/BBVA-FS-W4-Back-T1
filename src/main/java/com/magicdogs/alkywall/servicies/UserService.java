@@ -31,19 +31,23 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(email).orElseThrow();
     }
 
-    public UserPageDTO getUsers(int page, int size){
-        Page<User> users = userRepository.findAll(PageRequest.of(page, size));
+    public UserPageDTO getUsers(Integer softDelete, Integer page, Integer size){
+        Page<User> users = userRepository.findAllBySoftDelete(softDelete, PageRequest.of(page, size));
         var totalPages = users.getTotalPages();
 
-        if(totalPages <= page) throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "No existe el numero de pagina");
+        if (totalPages <= page) {
+            throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "No existe el numero de pagina");
+        }
 
         String next = "", prev = "";
-        if(users.hasNext()){
+        if (users.hasNext()){
             next = "/users?page="+(page+1);
         }
-        if(users.hasPrevious()){
+
+        if (users.hasPrevious()){
             prev = "/users?page="+(page-1);
         }
+
         var users_page = users.map(modelMapperConfig::userToDTO);
         return new UserPageDTO(users_page.getContent(), next, prev, totalPages);
     }
@@ -54,18 +58,21 @@ public class UserService implements UserDetailsService {
      * @param id
      */
     public void softDeleteUser(Long id, String userEmail) {
-        var user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        var userLogged = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario autenticado no encontrado"));
 
-        boolean isAdmin = user.getRole().getName() == RoleNameEnum.ADMIN;
-        boolean isSameUser = Objects.equals(user.getIdUser(), id);
+        var userToDelete = userRepository.findById(id)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario a eliminar no encontrado"));
+
+        boolean isAdmin = userLogged.getRole().getName() == RoleNameEnum.ADMIN;
+        boolean isSameUser = Objects.equals(userLogged, userToDelete);
 
         if (!isAdmin && !isSameUser) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "No se puede eliminar el usuario porque no tiene permiso de administrador");
         }
 
-        user.setSoftDelete(1);
-        userRepository.save(user);
+        userToDelete.setSoftDelete(1);
+        userRepository.save(userToDelete);
     }
 
     public UserDto update(Long id, String userEmail, UserUpdateDTO userUpdateDTO) {
@@ -80,26 +87,30 @@ public class UserService implements UserDetailsService {
         if (userUpdateDTO.getFirstName() != null) {
             user.setFirstName(userUpdateDTO.getFirstName());
         }
+
         if (userUpdateDTO.getLastName() != null) {
             user.setLastName(userUpdateDTO.getLastName());
         }
+
         if (userUpdateDTO.getPassword() != null) {
             if (userUpdateDTO.getPassword().isBlank() || userUpdateDTO.getPassword().isEmpty()) {
-                throw new ApiException(HttpStatus.BAD_REQUEST, "La contraseña no puede ser vacia");
+                throw new ApiException(HttpStatus.BAD_REQUEST, "La contraseña no puede estar vacia");
             }
             user.setPassword(passwordEncoder.encode(userUpdateDTO.getPassword()));
         }
 
         userRepository.save(user);
         return modelMapperConfig.userToDTO(user);
-
     }
 
-
     public UserDto userDetails(Long id, String email){
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-        if(!user.getIdUser().equals(id))  throw new ApiException(HttpStatus.BAD_REQUEST, "No coincide el id con el loggeado");
-        UserDto userDto = modelMapperConfig.userToDTO(user);
-        return userDto;
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        if(!user.getIdUser().equals(id)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "No coincide el id con el usuario autenticado");
+        }
+
+        return modelMapperConfig.userToDTO(user);
     }
 }

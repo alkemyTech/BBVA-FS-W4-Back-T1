@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/cbu").authenticated()
                         .requestMatchers(HttpMethod.GET,"/accounts/{userId}").hasRole("ADMIN")
                         .requestMatchers("/users").hasRole("ADMIN")
+                        .requestMatchers("/users/inactive").hasRole("ADMIN")
                         .requestMatchers("/transactions/userId/").hasRole("ADMIN")
                         .requestMatchers("/transactions/id/").hasRole("ADMIN")
                         .anyRequest().authenticated())
