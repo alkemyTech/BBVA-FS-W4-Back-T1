@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,11 +25,17 @@ public class UserController {
 
     @Operation(summary = "Obtener lista de usuarios")
     @GetMapping("")
-    public ResponseEntity<UserPageDTO> userList(@RequestParam(defaultValue = "0") int page,
-                                                         @RequestParam(defaultValue = "10")int size){
+    public ResponseEntity<UserPageDTO> userList(@RequestParam(defaultValue = "0") Integer page,
+                                                @RequestParam(defaultValue = "10") Integer size){
+       var usersPage = userService.getUsers(0, page, size);
+       return ResponseEntity.ok(usersPage);
+    }
 
-       var usersPage = userService.getUsers(page, size);
-
+    @Operation(summary = "Obtener lista de usuarios inactivos")
+    @GetMapping("/inactive")
+    public ResponseEntity<UserPageDTO> userListInactive(@RequestParam(defaultValue = "0") Integer page,
+                                                        @RequestParam(defaultValue = "10") Integer size){
+        var usersPage = userService.getUsers(1, page, size);
         return ResponseEntity.ok(usersPage);
     }
 
@@ -57,8 +62,6 @@ public class UserController {
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
         var userDto = userService.userDetails(id, userEmail);
-
         return ResponseEntity.ok().body(userDto);
     }
-
 }
