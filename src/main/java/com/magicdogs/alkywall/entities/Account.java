@@ -80,7 +80,7 @@ public class Account {
     }
 
     @PrePersist
-    protected void onCreate() {
+    public void onCreate() {
         creationDate = LocalDateTime.now();
         updateDate = LocalDateTime.now();
     }
