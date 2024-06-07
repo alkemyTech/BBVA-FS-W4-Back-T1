@@ -87,13 +87,13 @@ public class User implements UserDetails {
     }
 
     @PrePersist
-    protected void onCreate() {
+    public void onCreate() {
         creationDate = LocalDateTime.now();
         updateDate = LocalDateTime.now();
     }
 
     @PreUpdate
-    protected void onUpdate() {
+    public void onUpdate() {
         updateDate = LocalDateTime.now();
     }
 
