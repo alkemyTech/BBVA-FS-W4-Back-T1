@@ -26,9 +26,18 @@ public class AccountController {
     @Operation(summary = "Obtener lista de cuentas por ID de usuario")
     @GetMapping("/{userId}")
     public ResponseEntity<?> accountListByUser(@PathVariable("userId") Long id,
-                                               @RequestParam(defaultValue = "0") int page,
-                                               @RequestParam(defaultValue = "10") int size) {
-        var accountPageDTO = accountService.accountsByUser(id, page, size);
+                                               @RequestParam(defaultValue = "0") Integer page,
+                                               @RequestParam(defaultValue = "10") Integer size) {
+        var accountPageDTO = accountService.accountsByUser(id, 0, page, size);
+        return ResponseEntity.ok(accountPageDTO);
+    }
+
+    @Operation(summary = "Obtener lista de cuentas por ID de usuario")
+    @GetMapping("/{userId}/inactive")
+    public ResponseEntity<?> accountInactiveListByUser(@PathVariable("userId") Long id,
+                                                       @RequestParam(defaultValue = "0") Integer page,
+                                                       @RequestParam(defaultValue = "10") Integer size) {
+        var accountPageDTO = accountService.accountsByUser(id, 1, page, size);
         return ResponseEntity.ok(accountPageDTO);
     }
 
@@ -67,7 +76,7 @@ public class AccountController {
 
     @Operation(summary = "Eliminar cuenta por id")
     @DeleteMapping("/accountId/{id}")
-    public ResponseEntity<?> accountDelete(@PathVariable("id")Long id, HttpServletRequest request){
+    public ResponseEntity<?> accountDelete(@PathVariable("id") Long id, HttpServletRequest request){
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
         accountService.softDeleteAccount(id, userEmail);

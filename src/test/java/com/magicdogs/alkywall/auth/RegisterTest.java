@@ -6,6 +6,7 @@ import com.magicdogs.alkywall.dto.UserLoginDTO;
 import com.magicdogs.alkywall.dto.UserRegisterDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.Role;
+
 import com.magicdogs.alkywall.entities.User;
 import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.enums.DocumentType;
@@ -284,3 +285,4 @@ public class RegisterTest {
         //"El apellido no puede estar en blanco"
     }
 }
+

@@ -33,22 +33,36 @@ public class AccountService {
     private final AliasGenerator aliasGenerator;
     private final CbuGenerator cbuGenerator;
 
-    public AccountPageDTO accountsByUser(Long userId, int page, int size){
-        if(page < 0 || size <= 0) throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
+    public AccountPageDTO accountsByUser(Long userId, Integer softDelete, Integer page, Integer size){
+        if (page < 0 || size <= 0) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
+        }
 
-        Optional<Page<Account>> accountsOptional = Optional.ofNullable(accountRepository.findByUserIdUser(userId, PageRequest.of(page, size))
+        Optional<Page<Account>> accountsOptional = Optional.ofNullable(accountRepository.findByUserIdUserAndSoftDelete(userId, softDelete, PageRequest.of(page, size))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado")));
+
         int cant = accountsOptional.get().getTotalPages();
-        if(cant <= page )   throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "No existe el numero de pagina");
+
+        if (cant <= page ) {
+            throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "No existe el numero de pagina");
+        }
+
         Optional<Page<AccountDTO>> optionalAccounts = accountsOptional.map(accounts -> accounts.map(modelMapperConfig::accountToDTO));
         String next = "", prev = "";
-        if (!optionalAccounts.isPresent()  && optionalAccounts.get().isEmpty()) throw new ApiException(HttpStatus.NOT_FOUND, "No se encontraron cuentas para el usuario con ID " + userId);
 
-        if(optionalAccounts.get().hasNext()){next = "/accounts/"+userId+"?page="+(page+1);}
-        if(optionalAccounts.get().hasPrevious()){prev = "/accounts/"+userId+"?page="+(page-1);}
+        if (!optionalAccounts.isPresent()  && optionalAccounts.get().isEmpty()) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "No se encontraron cuentas para el usuario con ID " + userId);
+        }
+
+        if (optionalAccounts.get().hasNext())
+            {next = "/accounts/"+userId+"?page="+(page+1);
+        }
+
+        if (optionalAccounts.get().hasPrevious()) {
+            prev = "/accounts/"+userId+"?page="+(page-1);
+        }
+
         return new AccountPageDTO(optionalAccounts.get().getContent(), next, prev, cant);
-
-
     }
 
     public AccountDTO createAccount(String userEmail, AccountType accountType, CurrencyType currency) {
@@ -142,10 +156,10 @@ public class AccountService {
     public void softDeleteAccount(Long id, String email){
         var accountOptional = accountRepository.findByIdAccountAndUserEmail(id, email);
 
-        if(accountOptional.isPresent()){
+        if (accountOptional.isPresent()) {
             accountOptional.get().setSoftDelete(1);
             accountRepository.save(accountOptional.get());
-        }else{
+        } else {
             throw new ApiException(HttpStatus.BAD_REQUEST, "La cuenta no corresponde a este usuario");
         }
     }
