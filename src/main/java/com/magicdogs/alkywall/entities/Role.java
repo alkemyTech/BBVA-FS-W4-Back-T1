@@ -42,4 +42,5 @@ public class Role {
     protected void onUpdate() {
         updateDate = LocalDateTime.now();
     }
+
 }
