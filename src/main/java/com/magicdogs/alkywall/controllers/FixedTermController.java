@@ -9,12 +9,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/fixedTerm")
@@ -26,7 +28,11 @@ public class FixedTermController {
 
     @PostMapping("")
     public ResponseEntity<?> createFixedTerm(@RequestBody @Valid FixedTermCreateDTO fixedTermCreateDTO, HttpServletRequest request) {
+
         var token = jwtService.getJwtFromCookies(request);
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized: No token provided");
+        }
         var userEmail = jwtService.extractUserId(token);
         var fixedTermDeposit = fixedTermService.createFixedTermDeposit(fixedTermCreateDTO, userEmail);
         return ResponseEntity.ok(fixedTermDeposit);
@@ -38,5 +44,6 @@ public class FixedTermController {
         var fixedTermDeposit = fixedTermService.simulateFixedTerm(fixedTermCreateDTO);
         return ResponseEntity.ok().body(fixedTermDeposit);
     }
+
 
 }
