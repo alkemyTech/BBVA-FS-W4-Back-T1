@@ -43,9 +43,15 @@ public class FixedTermDeposit {
 
 
     public double interestTotalWin(){
+        if (this.creationDate == null || this.closingDate == null) {
+            throw new IllegalStateException("Las fechas de creación y cierre no pueden ser nulas");
+        }
         return (this.interesPerDay()) * Duration.between(this.creationDate, this.closingDate).toDays();
     }
     public double interestPartialWin(){
+        if (this.creationDate == null || this.closingDate == null) {
+            throw new IllegalStateException("Las fechas de creación y cierre no pueden ser nulas");
+        }
         return (this.interesPerDay()) * Duration.between(this.creationDate, LocalDateTime.now()).toDays();
     }
 

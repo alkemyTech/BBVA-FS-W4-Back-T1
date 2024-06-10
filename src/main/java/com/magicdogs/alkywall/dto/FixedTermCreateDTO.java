@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.dto;
 
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ public class FixedTermCreateDTO {
         private Double amount;
 
         @NotNull(message = "La fecha no puede ser nula")
+        @Future(message = "La fecha debe ser en el futuro")
         private LocalDate closingDate;
         // LE PONGO LA HORA ACTUAL
         // AÑO, MES, DIA
