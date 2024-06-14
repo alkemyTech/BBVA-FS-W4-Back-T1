@@ -31,22 +31,22 @@ public class TransactionService {
     private UserRepository userRepository;
     private final ModelMapperConfig modelMapperConfig;
 
-    public ListTransactionDTO sendMoney(TransactionDTO transactionDTO, CurrencyType currencyType, String userEmail) {
-        var accountDestination = accountRepository.findById(transactionDTO.getDestinationIdAccount())
+    public TransactionDTO sendMoney(TransactionSendMoneyDTO transactionSendMoneyDTO, CurrencyType currencyType, String userEmail) {
+        var accountDestination = accountRepository.findById(transactionSendMoneyDTO.getDestinationIdAccount())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta destino no encontrada"));
 
         var userOrigin = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        var accountOrigin = accountRepository.findByIdAccountAndUser(transactionDTO.getOriginIdAccount(), userOrigin)
+        var accountOrigin = accountRepository.findByIdAccountAndUser(transactionSendMoneyDTO.getOriginIdAccount(), userOrigin)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta origen no encontrada"));
 
         validateCurrencyType(accountOrigin, accountDestination, currencyType);
-        validateBalanceAndLimit(accountOrigin, transactionDTO.getAmount());
+        validateBalanceAndLimit(accountOrigin, transactionSendMoneyDTO.getAmount());
 
-        var transaction = processTransaction(accountOrigin, accountDestination, transactionDTO);
+        var transaction = processTransaction(accountOrigin, accountDestination, transactionSendMoneyDTO);
 
-        return modelMapperConfig.listTransactionDTO(transaction);
+        return modelMapperConfig.transactionToDTO(transaction);
     }
 
     private void validateCurrencyType(Account accountOrigin, Account accountDestination, CurrencyType currencyType) {
@@ -64,14 +64,14 @@ public class TransactionService {
         }
     }
 
-    private Transaction processTransaction(Account accountOrigin, Account accountDestination, TransactionDTO transactionDTO) {
-        var transactionIncomeDestination = new Transaction(transactionDTO.getAmount(), TypeTransaction.INCOME, transactionDTO.getConcept(), transactionDTO.getDescription(), accountDestination);
-        var transactionPaymentOrigin = new Transaction(transactionDTO.getAmount(), TypeTransaction.PAYMENT, transactionDTO.getConcept(), transactionDTO.getDescription(), accountOrigin);
+    private Transaction processTransaction(Account accountOrigin, Account accountDestination, TransactionSendMoneyDTO transactionSendMoneyDTO) {
+        var transactionIncomeDestination = new Transaction(transactionSendMoneyDTO.getAmount(), TypeTransaction.INCOME, transactionSendMoneyDTO.getConcept(), transactionSendMoneyDTO.getDescription(), accountDestination);
+        var transactionPaymentOrigin = new Transaction(transactionSendMoneyDTO.getAmount(), TypeTransaction.PAYMENT, transactionSendMoneyDTO.getConcept(), transactionSendMoneyDTO.getDescription(), accountOrigin);
 
         transactionRepository.save(transactionIncomeDestination);
         var transaction = transactionRepository.save(transactionPaymentOrigin);
 
-        updateAccountBalances(accountOrigin, accountDestination, transactionDTO.getAmount());
+        updateAccountBalances(accountOrigin, accountDestination, transactionSendMoneyDTO.getAmount());
 
         return transaction;
     }
@@ -84,20 +84,20 @@ public class TransactionService {
         accountRepository.save(accountDestination);
     }
 
-    public List<ListTransactionDTO> getTransactionsByUserId(Long id, String userEmail) {
+    public List<TransactionDTO> getTransactionsByUserId(Long id, String userEmail) {
         var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         if (!Objects.equals(user.getIdUser(), id)) {
             throw new ApiException(HttpStatus.CONFLICT, "Usuario logueado distinto al usuario del id recibido");
         } else {
-            List<ListTransactionDTO> transactions = new ArrayList<>();
+            List<TransactionDTO> transactions = new ArrayList<>();
             for (Account account : user.getAccounts()) {
-                transactions.addAll(account.getTransactions().stream().map(modelMapperConfig::listTransactionDTO).toList());
+                transactions.addAll(account.getTransactions().stream().map(modelMapperConfig::transactionToDTO).toList());
             }
             return transactions;
         }
     }
 
-    public Optional<Page<ListTransactionDTO>> getTransactionsPageByUserId(Long id,  String userEmail, int page, int size){
+    public Optional<Page<TransactionDTO>> getTransactionsPageByUserId(Long id, String userEmail, int page, int size){
         if(page < 0 || size <= 0) throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
 
         var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
@@ -105,7 +105,20 @@ public class TransactionService {
             throw new ApiException(HttpStatus.CONFLICT, "Usuario logueado distinto al usuario del id recibido");
         }
         Optional<Page<Transaction>> transactions = transactionRepository.findByAccountUserIdUser(id, PageRequest.of(page, size));
-        return transactions.map(t -> t.map(modelMapperConfig::listTransactionDTO));
+        return transactions.map(t -> t.map(modelMapperConfig::transactionToDTO));
+    }
+
+    public Optional<Page<TransactionDTO>> getTransactionsPageByUserAccountId(Long id, String userEmail, int page, int size){
+        if(page < 0 || size <= 0) throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
+
+        var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        var account = accountRepository.findByIdAccountAndUser(id, user)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada para el usuario"));
+
+
+        Optional<Page<Transaction>> transactions = transactionRepository.findByAccountIdAccount(id, PageRequest.of(page, size));
+        return transactions.map(t -> t.map(modelMapperConfig::transactionToDTO));
     }
 
     public TransactionAccountDTO deposit(TransactionDepositDTO deposit, String userEmail) {
@@ -123,7 +136,7 @@ public class TransactionService {
         account.setBalance(account.getBalance() + deposit.getAmount());
         accountRepository.save(account);
 
-        var transactionDTO = modelMapperConfig.listTransactionDTO(transaction);
+        var transactionDTO = modelMapperConfig.transactionToDTO(transaction);
         var accountDTO = modelMapperConfig.accountToDTO(account);
 
         return new TransactionAccountDTO(transactionDTO, accountDTO);
@@ -146,25 +159,25 @@ public class TransactionService {
         account.setBalance(account.getBalance() - payment.getAmount());
         accountRepository.save(account);
 
-        var transactionDTO = modelMapperConfig.listTransactionDTO(transaction);
+        var transactionDTO = modelMapperConfig.transactionToDTO(transaction);
         var accountDTO = modelMapperConfig.accountToDTO(account);
 
         return new TransactionAccountDTO(transactionDTO, accountDTO);
     }
 
-    public ListTransactionDTO getDetailsTreansactionById(Long id, String userEmail) {
+    public TransactionDTO getDetailsTreansactionById(Long id, String userEmail) {
         var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         var transaction = user.findTransactionByIdInAccount(id);
         if (transaction == null) {
             throw new ApiException(HttpStatus.NOT_FOUND, "Id transaccion no corresponde al usuario logeado");
         }
 
-        var transactionDTO = modelMapperConfig.listTransactionDTO(transaction);
+        var transactionDTO = modelMapperConfig.transactionToDTO(transaction);
 
         return transactionDTO;
     }
 
-    public ListTransactionDTO updateTransaction(Long idTransaction, TransactionUpdateDTO update, String userEmail) {
+    public TransactionDTO updateTransaction(Long idTransaction, TransactionUpdateDTO update, String userEmail) {
         var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
@@ -177,6 +190,6 @@ public class TransactionService {
         transaction.setDescription(update.getDescription());
         transactionRepository.save(transaction);
 
-        return modelMapperConfig.listTransactionDTO(transaction);
+        return modelMapperConfig.transactionToDTO(transaction);
     }
 }

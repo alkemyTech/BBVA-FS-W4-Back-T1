@@ -133,7 +133,7 @@ public class AccountService {
         AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO();
 
         for(Account ac: accounts){
-            accountBalanceDTO.addHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionBalanceToDTO).toList());
+            accountBalanceDTO.addHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionToDTO).toList());
             accountBalanceDTO.addFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
 
             if(ac.getCurrency().equals(CurrencyType.ARS)){
