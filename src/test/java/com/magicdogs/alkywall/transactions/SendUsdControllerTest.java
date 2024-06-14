@@ -2,8 +2,8 @@ package com.magicdogs.alkywall.transactions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.magicdogs.alkywall.controllers.TransactionController;
-import com.magicdogs.alkywall.dto.ListTransactionDTO;
 import com.magicdogs.alkywall.dto.TransactionDTO;
+import com.magicdogs.alkywall.dto.TransactionSendMoneyDTO;
 import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.enums.TransactionConcept;
 import com.magicdogs.alkywall.enums.TypeTransaction;
@@ -58,25 +58,25 @@ public class SendUsdControllerTest {
     @Test
     public void testSendMoney() throws Exception {
         // Mock de los datos de entrada
-        TransactionDTO transactionDTO = new TransactionDTO();
-        transactionDTO.setOriginIdAccount(1L);
-        transactionDTO.setDestinationIdAccount(2L);
-        transactionDTO.setConcept(TransactionConcept.VARIOS);
-        transactionDTO.setAmount(100.00);
+        TransactionSendMoneyDTO transactionSendMoneyDTO = new TransactionSendMoneyDTO();
+        transactionSendMoneyDTO.setOriginIdAccount(1L);
+        transactionSendMoneyDTO.setDestinationIdAccount(2L);
+        transactionSendMoneyDTO.setConcept(TransactionConcept.VARIOS);
+        transactionSendMoneyDTO.setAmount(100.00);
 
         when(jwtService.extractUserId(any(String.class))).thenReturn("user@example.com");
         when(jwtService.getJwtFromCookies(any())).thenReturn("jwt-token");
 
-        ListTransactionDTO listTransactionDTO = new ListTransactionDTO();
-        listTransactionDTO.setAccountIdAccount(transactionDTO.getOriginIdAccount());
-        listTransactionDTO.setType(TypeTransaction.PAYMENT);
-        listTransactionDTO.setConcept(transactionDTO.getConcept());
-        listTransactionDTO.setAmount(transactionDTO.getAmount());
-        when(transactionService.sendMoney(any(TransactionDTO.class), any(CurrencyType.class), any(String.class))).thenReturn(listTransactionDTO);
+        TransactionDTO transactionDTO = new TransactionDTO();
+        transactionDTO.setAccountIdAccount(transactionSendMoneyDTO.getOriginIdAccount());
+        transactionDTO.setType(TypeTransaction.PAYMENT);
+        transactionDTO.setConcept(transactionSendMoneyDTO.getConcept());
+        transactionDTO.setAmount(transactionSendMoneyDTO.getAmount());
+        when(transactionService.sendMoney(any(TransactionSendMoneyDTO.class), any(CurrencyType.class), any(String.class))).thenReturn(transactionDTO);
 
         mockMvc.perform(post("/transactions/sendUsd")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(transactionDTO)))
+                        .content(objectMapper.writeValueAsString(transactionSendMoneyDTO)))
                 .andExpect(status().isOk());
     }
 
@@ -85,8 +85,8 @@ public class SendUsdControllerTest {
     @Test
     public void testInvalidTransactionDTO() throws Exception {
         // Crear un TransactionDTO con campos nulos o valores no válidos
-        TransactionDTO transactionDTO = new TransactionDTO();
-        transactionDTO.setOriginIdAccount(null); // establecer un campo requerido como nulo
+        TransactionSendMoneyDTO transactionSendMoneyDTO = new TransactionSendMoneyDTO();
+        transactionSendMoneyDTO.setOriginIdAccount(null); // establecer un campo requerido como nulo
 
         // Simular la extracción del token y el usuario del token
         when(jwtService.getJwtFromCookies(any())).thenReturn("jwt-token");
@@ -95,30 +95,30 @@ public class SendUsdControllerTest {
         // Realizar la solicitud al controlador
         mockMvc.perform(post("/transactions/sendUsd")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(transactionDTO)))
+                        .content(objectMapper.writeValueAsString(transactionSendMoneyDTO)))
                 // Verificar que la respuesta sea un BadRequest (código 400)
                 .andExpect(status().isBadRequest());
 
         // Agregar más pruebas para los demás campos
-        transactionDTO.setOriginIdAccount(1L); // establecer un valor válido
-        transactionDTO.setDestinationIdAccount(null); // establecer un campo requerido como nulo
+        transactionSendMoneyDTO.setOriginIdAccount(1L); // establecer un valor válido
+        transactionSendMoneyDTO.setDestinationIdAccount(null); // establecer un campo requerido como nulo
         mockMvc.perform(post("/transactions/sendUsd")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(transactionDTO)))
+                        .content(objectMapper.writeValueAsString(transactionSendMoneyDTO)))
                 .andExpect(status().isBadRequest());
 
-        transactionDTO.setDestinationIdAccount(2L); // establecer un valor válido
-        transactionDTO.setAmount(-100.00); // establecer un valor negativo
+        transactionSendMoneyDTO.setDestinationIdAccount(2L); // establecer un valor válido
+        transactionSendMoneyDTO.setAmount(-100.00); // establecer un valor negativo
         mockMvc.perform(post("/transactions/sendUsd")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(transactionDTO)))
+                        .content(objectMapper.writeValueAsString(transactionSendMoneyDTO)))
                 .andExpect(status().isBadRequest());
 
-        transactionDTO.setAmount(100.00); // establecer un valor positivo
-        transactionDTO.setConcept(null); // establecer un campo requerido como nulo
+        transactionSendMoneyDTO.setAmount(100.00); // establecer un valor positivo
+        transactionSendMoneyDTO.setConcept(null); // establecer un campo requerido como nulo
         mockMvc.perform(post("/transactions/sendUsd")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(transactionDTO)))
+                        .content(objectMapper.writeValueAsString(transactionSendMoneyDTO)))
                 .andExpect(status().isBadRequest());
 
     }

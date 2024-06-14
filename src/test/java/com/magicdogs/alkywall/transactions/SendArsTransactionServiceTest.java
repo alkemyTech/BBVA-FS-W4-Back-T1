@@ -6,8 +6,8 @@ import static org.mockito.Mockito.*;
 import java.util.Optional;
 
 import com.magicdogs.alkywall.config.ModelMapperConfig;
-import com.magicdogs.alkywall.dto.ListTransactionDTO;
 import com.magicdogs.alkywall.dto.TransactionDTO;
+import com.magicdogs.alkywall.dto.TransactionSendMoneyDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.Transaction;
 import com.magicdogs.alkywall.entities.User;
@@ -52,11 +52,11 @@ public class SendArsTransactionServiceTest {
     @Test
     public void testSendArsSuccessfully() {
         // Mock de los datos de entrada
-        TransactionDTO transactionDTO = new TransactionDTO();
-        transactionDTO.setOriginIdAccount(1L);
-        transactionDTO.setDestinationIdAccount(2L);
-        transactionDTO.setConcept(TransactionConcept.VARIOS);
-        transactionDTO.setAmount(100.00);
+        TransactionSendMoneyDTO transactionSendMoneyDTO = new TransactionSendMoneyDTO();
+        transactionSendMoneyDTO.setOriginIdAccount(1L);
+        transactionSendMoneyDTO.setDestinationIdAccount(2L);
+        transactionSendMoneyDTO.setConcept(TransactionConcept.VARIOS);
+        transactionSendMoneyDTO.setAmount(100.00);
 
         CurrencyType currencyType = CurrencyType.ARS;
         String userEmail = "test@example.com";
@@ -78,10 +78,10 @@ public class SendArsTransactionServiceTest {
         when(accountRepository.findById(2L)).thenReturn(Optional.of(accountDestination));
         when(accountRepository.findByIdAccountAndUser(1L, userOrigin)).thenReturn(Optional.of(accountOrigin));
         when(transactionRepository.save(any(Transaction.class))).thenReturn(new Transaction());
-        when(modelMapperConfig.listTransactionDTO(transaction)).thenReturn(new ListTransactionDTO());
+        when(modelMapperConfig.transactionToDTO(transaction)).thenReturn(new TransactionDTO());
 
         // Ejecutar el método y verificar el resultado
-        ListTransactionDTO result = transactionService.sendMoney(transactionDTO, currencyType, userEmail);
+        TransactionDTO result = transactionService.sendMoney(transactionSendMoneyDTO, currencyType, userEmail);
 
         assertNotNull(result);
 
@@ -89,7 +89,7 @@ public class SendArsTransactionServiceTest {
         verify(userRepository).findByEmail(userEmail);
         verify(accountRepository).findById(2L);
         verify(accountRepository).findByIdAccountAndUser(1L, userOrigin);
-        verify(modelMapperConfig).listTransactionDTO(transaction);
+        verify(modelMapperConfig).transactionToDTO(transaction);
         verify(transactionRepository, times(2)).save(any(Transaction.class));
     }
 
@@ -97,8 +97,8 @@ public class SendArsTransactionServiceTest {
     @Test
     public void testSendMoney_AccountDestinationNotFound() {
         // Mock de los datos de entrada
-        TransactionDTO transactionDTO = new TransactionDTO();
-        transactionDTO.setDestinationIdAccount(2L);
+        TransactionSendMoneyDTO transactionSendMoneyDTO = new TransactionSendMoneyDTO();
+        transactionSendMoneyDTO.setDestinationIdAccount(2L);
         CurrencyType currencyType = CurrencyType.ARS;
         String userEmail = "test@example.com";
 
@@ -107,7 +107,7 @@ public class SendArsTransactionServiceTest {
 
         // Verificar que se lance ApiException con el mensaje adecuado
         ApiException exception = assertThrows(ApiException.class, () -> {
-            transactionService.sendMoney(transactionDTO, currencyType, userEmail);
+            transactionService.sendMoney(transactionSendMoneyDTO, currencyType, userEmail);
         });
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
         assertEquals("Cuenta destino no encontrada", exception.getMessage());
@@ -117,9 +117,9 @@ public class SendArsTransactionServiceTest {
     @Test
     public void testSendMoney_UserNotFound() {
         // Mock de los datos de entrada
-        TransactionDTO transactionDTO = new TransactionDTO();
-        transactionDTO.setOriginIdAccount(1L);
-        transactionDTO.setDestinationIdAccount(2L);
+        TransactionSendMoneyDTO transactionSendMoneyDTO = new TransactionSendMoneyDTO();
+        transactionSendMoneyDTO.setOriginIdAccount(1L);
+        transactionSendMoneyDTO.setDestinationIdAccount(2L);
         CurrencyType currencyType = CurrencyType.ARS;
         String userEmail = "test@example.com";
 
@@ -134,7 +134,7 @@ public class SendArsTransactionServiceTest {
 
         // Verificar que se lance ApiException con el mensaje adecuado
         ApiException exception = assertThrows(ApiException.class, () -> {
-            transactionService.sendMoney(transactionDTO, currencyType, userEmail);
+            transactionService.sendMoney(transactionSendMoneyDTO, currencyType, userEmail);
         });
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
         assertEquals("Usuario no encontrado", exception.getMessage());
@@ -144,9 +144,9 @@ public class SendArsTransactionServiceTest {
     @Test
     public void testSendMoney_AccountOriginNotFound() {
         // Mock de los datos de entrada
-        TransactionDTO transactionDTO = new TransactionDTO();
-        transactionDTO.setOriginIdAccount(1L);
-        transactionDTO.setDestinationIdAccount(2L);
+        TransactionSendMoneyDTO transactionSendMoneyDTO = new TransactionSendMoneyDTO();
+        transactionSendMoneyDTO.setOriginIdAccount(1L);
+        transactionSendMoneyDTO.setDestinationIdAccount(2L);
         CurrencyType currencyType = CurrencyType.ARS;
         String userEmail = "test@example.com";
 
@@ -165,7 +165,7 @@ public class SendArsTransactionServiceTest {
 
         // Verificar que se lance ApiException con el mensaje adecuado
         ApiException exception = assertThrows(ApiException.class, () -> {
-            transactionService.sendMoney(transactionDTO, currencyType, userEmail);
+            transactionService.sendMoney(transactionSendMoneyDTO, currencyType, userEmail);
         });
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
         assertEquals("Cuenta origen no encontrada", exception.getMessage());
@@ -175,9 +175,9 @@ public class SendArsTransactionServiceTest {
     @Test
     public void testSendMoney_InvalidCurrencyType() {
         // Mock de los datos de entrada
-        TransactionDTO transactionDTO = new TransactionDTO();
-        transactionDTO.setOriginIdAccount(1L);
-        transactionDTO.setDestinationIdAccount(2L);
+        TransactionSendMoneyDTO transactionSendMoneyDTO = new TransactionSendMoneyDTO();
+        transactionSendMoneyDTO.setOriginIdAccount(1L);
+        transactionSendMoneyDTO.setDestinationIdAccount(2L);
         CurrencyType originCurrencyType = CurrencyType.ARS;
         CurrencyType destinationCurrencyType = CurrencyType.USD; // Tipo de moneda diferente
         String userEmail = "test@example.com";
@@ -195,7 +195,7 @@ public class SendArsTransactionServiceTest {
 
         // Verificar que se lance ApiException con el mensaje adecuado
         ApiException exception = assertThrows(ApiException.class, () -> {
-            transactionService.sendMoney(transactionDTO, originCurrencyType, userEmail);
+            transactionService.sendMoney(transactionSendMoneyDTO, originCurrencyType, userEmail);
         });
         assertEquals(HttpStatus.CONFLICT, exception.getStatus());
         assertEquals("Tipos de monedas distintos", exception.getMessage());
@@ -205,10 +205,10 @@ public class SendArsTransactionServiceTest {
     @Test
     public void testSendMoney_InsufficientBalance() {
         // Mock de los datos de entrada
-        TransactionDTO transactionDTO = new TransactionDTO();
-        transactionDTO.setOriginIdAccount(1L);
-        transactionDTO.setDestinationIdAccount(2L);
-        transactionDTO.setAmount(500.0); // Monto mayor que el balance de la cuenta de origen
+        TransactionSendMoneyDTO transactionSendMoneyDTO = new TransactionSendMoneyDTO();
+        transactionSendMoneyDTO.setOriginIdAccount(1L);
+        transactionSendMoneyDTO.setDestinationIdAccount(2L);
+        transactionSendMoneyDTO.setAmount(500.0); // Monto mayor que el balance de la cuenta de origen
         CurrencyType currencyType = CurrencyType.ARS;
         String userEmail = "test@example.com";
 
@@ -229,7 +229,7 @@ public class SendArsTransactionServiceTest {
 
         // Verificar que se lance ApiException con el mensaje adecuado
         ApiException exception = assertThrows(ApiException.class, () -> {
-            transactionService.sendMoney(transactionDTO, currencyType, userEmail);
+            transactionService.sendMoney(transactionSendMoneyDTO, currencyType, userEmail);
         });
         assertEquals(HttpStatus.CONFLICT, exception.getStatus());
         assertEquals("Balance insuficiente", exception.getMessage());
@@ -239,10 +239,10 @@ public class SendArsTransactionServiceTest {
     @Test
     public void testSendMoney_InsufficientTransactionLimit() {
         // Mock de los datos de entrada
-        TransactionDTO transactionDTO = new TransactionDTO();
-        transactionDTO.setOriginIdAccount(1L);
-        transactionDTO.setDestinationIdAccount(2L);
-        transactionDTO.setAmount(500.0); // Monto mayor que el límite de transacción de la cuenta de origen
+        TransactionSendMoneyDTO transactionSendMoneyDTO = new TransactionSendMoneyDTO();
+        transactionSendMoneyDTO.setOriginIdAccount(1L);
+        transactionSendMoneyDTO.setDestinationIdAccount(2L);
+        transactionSendMoneyDTO.setAmount(500.0); // Monto mayor que el límite de transacción de la cuenta de origen
         CurrencyType currencyType = CurrencyType.ARS;
         String userEmail = "test@example.com";
 
@@ -263,7 +263,7 @@ public class SendArsTransactionServiceTest {
 
         // Verificar que se lance ApiException con el mensaje adecuado
         ApiException exception = assertThrows(ApiException.class, () -> {
-            transactionService.sendMoney(transactionDTO, currencyType, userEmail);
+            transactionService.sendMoney(transactionSendMoneyDTO, currencyType, userEmail);
         });
         assertEquals(HttpStatus.CONFLICT, exception.getStatus());
         assertEquals("Limite insuficiente", exception.getMessage());
@@ -273,10 +273,10 @@ public class SendArsTransactionServiceTest {
     @Test
     public void testSendMoney_ValidateBalanceUpdates() {
         // Mock de los datos de entrada
-        TransactionDTO transactionDTO = new TransactionDTO();
-        transactionDTO.setOriginIdAccount(1L);
-        transactionDTO.setDestinationIdAccount(2L);
-        transactionDTO.setAmount(100.0);
+        TransactionSendMoneyDTO transactionSendMoneyDTO = new TransactionSendMoneyDTO();
+        transactionSendMoneyDTO.setOriginIdAccount(1L);
+        transactionSendMoneyDTO.setDestinationIdAccount(2L);
+        transactionSendMoneyDTO.setAmount(100.0);
         CurrencyType currencyType = CurrencyType.ARS;
         String userEmail = "test@example.com";
 
@@ -301,10 +301,10 @@ public class SendArsTransactionServiceTest {
         when(transactionRepository.save(any(Transaction.class)))
                 .thenReturn(transactionIncomeDestination)
                 .thenReturn(transactionPaymentOrigin);
-        when(modelMapperConfig.listTransactionDTO(transactionPaymentOrigin)).thenReturn(new ListTransactionDTO());
+        when(modelMapperConfig.transactionToDTO(transactionPaymentOrigin)).thenReturn(new TransactionDTO());
 
         // Ejecutar el método y verificar el resultado
-        transactionService.sendMoney(transactionDTO, currencyType, userEmail);
+        transactionService.sendMoney(transactionSendMoneyDTO, currencyType, userEmail);
 
         // Verificar que los balances se actualizaron correctamente
         assertEquals(500.0, accountOrigin.getBalance());

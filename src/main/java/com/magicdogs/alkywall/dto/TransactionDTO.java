@@ -1,35 +1,41 @@
 package com.magicdogs.alkywall.dto;
 
+import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.enums.TransactionConcept;
+import com.magicdogs.alkywall.enums.TypeTransaction;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Schema(description = "DTO para una transacción")
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransactionDTO {
-    @NotNull(message = "El id de la cuenta no puede ser nulo")
-    @Schema(description = "Id de la cuenta destino")
-    private Long destinationIdAccount;
 
-    @NotNull(message = "El monto no puede ser nulo")
-    @Positive(message = "El monto debe ser mayor a cero")
-    @Schema(description = "Cantidad de dinero a enviar")
+    @Schema(description = "ID de la transacción")
+    private Long idTransaction;
+
+    @Schema(description = "Monto de la transacción")
     private Double amount;
 
-    @NotNull(message = "El id de la cuenta no puede ser nulo")
-    @Schema(description = "Id de la cuenta origen")
-    private Long originIdAccount;
+    @Schema(description = "Tipo de transacción")
+    private TypeTransaction type;
 
-    @NotNull(message = "El concepto no puede ser nulo")
-    @Schema(description = "Concepto de la transacción")
+    @Schema(description = "Concepto de transacción")
     private TransactionConcept concept;
 
-    @Schema(description = "Descripcion de la transaccion")
+    @Schema(description = "Descripción de la transacción")
     private String description;
+
+    @Schema(description = "Moneda de la transacción")
+    private CurrencyType accountCurrency;
+
+    @Schema(description = "Id de la cuenta con la que se hizo transacción")
+    private Long accountIdAccount;
+
+    @Schema(description = "Fecha y hora de la transacción")
+    private LocalDateTime transactionDate;
 }

@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TransactionAccountDTO {
 
-    private ListTransactionDTO transaction;
+    private TransactionDTO transaction;
     private AccountDTO account;
 }

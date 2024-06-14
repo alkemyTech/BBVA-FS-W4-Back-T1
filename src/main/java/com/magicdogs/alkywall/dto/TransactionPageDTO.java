@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class TransactionPageDTO {
 
-    private List<?> transactios;
+    private List<TransactionDTO> transactios;
     private String nextPage;
     private String prevPage;
 }
