@@ -28,7 +28,7 @@ public class ModelMapperConfig {
         return modelMapper().map(fixedTermCreateDTO, FixedTermDeposit.class);
     }
 
-    public FixedTermSimulatedDTO fixedTermsEntitieToSimulatedDTO(FixedTermDeposit FixedTermDeposit){
+    public FixedTermSimulatedDTO fixedTermsToSimulatedDTO(FixedTermDeposit FixedTermDeposit){
         return modelMapper().map(FixedTermDeposit, FixedTermSimulatedDTO.class);
     }
 
