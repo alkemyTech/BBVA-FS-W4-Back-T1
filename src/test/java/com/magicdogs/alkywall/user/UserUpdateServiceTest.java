@@ -4,6 +4,8 @@ import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserUpdateDTO;
 import com.magicdogs.alkywall.entities.User;
+import com.magicdogs.alkywall.enums.DocumentType;
+import com.magicdogs.alkywall.enums.UserGender;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import com.magicdogs.alkywall.servicies.UserService;
@@ -16,6 +18,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +51,7 @@ public class UserUpdateServiceTest {
         user.setIdUser(1L);
         user.setEmail("user@email.com");
 
-        userDto = new UserDto("nombre", "apellido", 0, "user@email.com");
+        userDto = new UserDto("nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@email.com");
         userUpdateDTO = new UserUpdateDTO("nombre", "apellido", "password");
     }
 

@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.magicdogs.alkywall.dto.UserDto;
+import com.magicdogs.alkywall.enums.DocumentType;
+import com.magicdogs.alkywall.enums.UserGender;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +25,7 @@ import com.magicdogs.alkywall.servicies.JWTService;
 import com.magicdogs.alkywall.servicies.SecurityService;
 import org.springframework.security.core.AuthenticationException;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 public class LoginServiceTest {
@@ -112,16 +115,23 @@ public class LoginServiceTest {
         userEntity.setEmail("user@example.com");
         userEntity.setFirstName("User");
         userEntity.setLastName("Example");
+        userEntity.setBirthDate(LocalDate.of(1990, 1, 1));
+        userEntity.setGender(UserGender.MALE);
+        userEntity.setDocumentType(DocumentType.DNI);
+        userEntity.setDocumentNumber("33456789");
         userEntity.setSoftDelete(0);
 
-        UserDto userDto = new UserDto();
-        userDto.setEmail("user@example.com");
-        userDto.setFirstName("User");
-        userDto.setLastName("Example");
-        userDto.setSoftDelete(0);
+        UserDto userDTO = new UserDto();
+        userDTO.setEmail("user@example.com");
+        userDTO.setFirstName("User");
+        userDTO.setLastName("Example");
+        userDTO.setBirthDate(LocalDate.of(1990, 1, 1));
+        userDTO.setGender(UserGender.MALE);
+        userDTO.setDocumentType(DocumentType.DNI);
+        userDTO.setDocumentNumber("33456789");
 
         when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.of(userEntity));
-        when(modelMapper.map(userEntity, UserDto.class)).thenReturn(userDto);
+        when(modelMapper.map(userEntity, UserDto.class)).thenReturn(userDTO);
 
         // Act
         UserDto userReturn = securityService.searchUser(userLoginDTO);
@@ -131,7 +141,10 @@ public class LoginServiceTest {
         assertEquals("user@example.com", userReturn.getEmail());
         assertEquals("User", userReturn.getFirstName());
         assertEquals("Example", userReturn.getLastName());
-        assertEquals(0, userReturn.getSoftDelete());
+        assertEquals(LocalDate.of(1990, 1, 1), userReturn.getBirthDate());
+        assertEquals(UserGender.MALE, userReturn.getGender());
+        assertEquals(DocumentType.DNI, userReturn.getDocumentType());
+        assertEquals("33456789", userReturn.getDocumentNumber());
 
         verify(userRepository).findByEmail("user@example.com");
     }
@@ -144,9 +157,9 @@ public class LoginServiceTest {
 
         when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.empty());
 
-        UserDto userDto = securityService.searchUser(userLoginDTO);
+        UserDto userDTO = securityService.searchUser(userLoginDTO);
 
-        assertNull(userDto);
+        assertNull(userDTO);
 
         verify(userRepository).findByEmail("nonexistent@example.com");
     }

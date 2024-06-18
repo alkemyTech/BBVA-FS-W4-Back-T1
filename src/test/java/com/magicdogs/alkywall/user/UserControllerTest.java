@@ -3,6 +3,8 @@ package com.magicdogs.alkywall.user;
 import com.magicdogs.alkywall.controllers.UserController;
 import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserPageDTO;
+import com.magicdogs.alkywall.enums.DocumentType;
+import com.magicdogs.alkywall.enums.UserGender;
 import com.magicdogs.alkywall.servicies.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -41,8 +44,8 @@ public class UserControllerTest {
     public void testUsersListSuccess() throws Exception {
         UserPageDTO mockUserPage = new UserPageDTO();
         mockUserPage.setUsers(List.of(
-                new UserDto("John", "Doe", 0, "john.doe@example.com"),
-                new UserDto("Jane", "Smith", 0, "jane.smith@example.com")
+                new UserDto("John", "Doe", LocalDate.of(1990, 1, 1), UserGender.MALE, DocumentType.DNI, "33456789", "john.doe@example.com"),
+                new UserDto("Jane", "Smith", LocalDate.of(1992, 2, 2), UserGender.FEMALE, DocumentType.DNI, "35987654", "jane.smith@example.com")
         ));
         mockUserPage.setNextPage("/users?page=1");
         mockUserPage.setPrevPage("");

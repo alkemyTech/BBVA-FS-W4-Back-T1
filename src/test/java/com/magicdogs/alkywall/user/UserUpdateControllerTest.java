@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.magicdogs.alkywall.controllers.UserController;
 import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserUpdateDTO;
+import com.magicdogs.alkywall.enums.DocumentType;
+import com.magicdogs.alkywall.enums.UserGender;
 import com.magicdogs.alkywall.servicies.JWTService;
 import com.magicdogs.alkywall.servicies.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +23,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -59,7 +63,7 @@ public class UserUpdateControllerTest {
         token = "mockedToken";
         email = "mockedUser@example.com";
 
-        UserDto userDto = new UserDto("nombre", "apellido", 0, "user@email.com");
+        UserDto userDto = new UserDto("nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@email.com");
         when(jwtService.getJwtFromCookies(any(HttpServletRequest.class))).thenReturn(token);
         when(jwtService.extractUserId(token)).thenReturn(email);
         when(userService.update(anyLong(), anyString(), any(UserUpdateDTO.class))).thenReturn(userDto);
