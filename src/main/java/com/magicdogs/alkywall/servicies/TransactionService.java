@@ -117,7 +117,7 @@ public class TransactionService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada para el usuario"));
 
 
-        Optional<Page<Transaction>> transactions = transactionRepository.findByAccountIdAccount(id, PageRequest.of(page, size));
+        Optional<Page<Transaction>> transactions = transactionRepository.findByAccountIdAccountOrderByTransactionDateDesc(id, PageRequest.of(page, size));
         return transactions.map(t -> t.map(modelMapperConfig::transactionToDTO));
     }
 
