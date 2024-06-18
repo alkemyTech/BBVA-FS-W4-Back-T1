@@ -22,13 +22,13 @@ public class AccountBalanceDTO {
     private AccountDTO accountUsd;
 
     @Schema(description = "Historial de transacciones de la cuenta")
-    private List<TransactionBalanceDTO> history = new ArrayList<>();
+    private List<TransactionDTO> history = new ArrayList<>();
 
     @Schema(description = "Depósitos a plazo fijo de la cuenta")
     private List<FixedTermsBalanceDTO> fixedTerms = new ArrayList<>();
 
-    public void addHistory(List<TransactionBalanceDTO> transactionBalanceDTO) {
-        history.addAll(transactionBalanceDTO);
+    public void addHistory(List<TransactionDTO> transactionDTO) {
+        history.addAll(transactionDTO);
     }
 
     public void addFixedTerms(List<FixedTermsBalanceDTO> fixedTermsBalanceDTO) {

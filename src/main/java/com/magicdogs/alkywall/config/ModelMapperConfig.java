@@ -16,9 +16,9 @@ public class ModelMapperConfig {
 
     public AccountDTO accountToDTO(Account account){return modelMapper().map(account, AccountDTO.class);}
 
-    public TransactionBalanceDTO transactionBalanceToDTO(Transaction transaction){
-        return modelMapper().map(transaction, TransactionBalanceDTO.class);
-    }
+//    public TransactionBalanceDTO transactionBalanceToDTO(Transaction transaction){
+//        return modelMapper().map(transaction, TransactionBalanceDTO.class);
+//    }
 
     public FixedTermsBalanceDTO fixedTermsBalanceToDTO(FixedTermDeposit fixedTermDeposit){
         return modelMapper().map(fixedTermDeposit, FixedTermsBalanceDTO.class);
@@ -32,7 +32,7 @@ public class ModelMapperConfig {
         return modelMapper().map(FixedTermDeposit, FixedTermSimulatedDTO.class);
     }
 
-    public ListTransactionDTO listTransactionDTO(Transaction transaction){return modelMapper().map(transaction, ListTransactionDTO.class);}
+    public TransactionDTO transactionToDTO(Transaction transaction){return modelMapper().map(transaction, TransactionDTO.class);}
 
     public ThirdAccount ThirdAccountDTOToEntitie(ThirdAccountDTO dto){
         return modelMapper().map(dto,ThirdAccount.class);

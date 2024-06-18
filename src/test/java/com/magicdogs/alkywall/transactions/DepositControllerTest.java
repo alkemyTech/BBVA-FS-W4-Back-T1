@@ -60,7 +60,7 @@ public class DepositControllerTest {
     @DisplayName("Depósito exitoso")
     @Test
     public void testDepositSuccess() throws Exception {
-        ListTransactionDTO transactionDTO = new ListTransactionDTO();
+        TransactionDTO transactionDTO = new TransactionDTO();
         transactionDTO.setIdTransaction(1L);
         transactionDTO.setAmount(100.0);
         transactionDTO.setType(TypeTransaction.DEPOSIT);

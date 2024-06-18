@@ -4,7 +4,7 @@ import com.magicdogs.alkywall.controllers.AccountController;
 import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.dto.FixedTermsBalanceDTO;
-import com.magicdogs.alkywall.dto.TransactionBalanceDTO;
+import com.magicdogs.alkywall.dto.TransactionDTO;
 import com.magicdogs.alkywall.servicies.AccountService;
 import com.magicdogs.alkywall.servicies.JWTService;
 import com.magicdogs.alkywall.servicies.UserService;
@@ -53,7 +53,7 @@ public class AccountBalanceControllerTest {
 
         AccountDTO accountUsd = new AccountDTO();
         List<AccountDTO> accountArs = new ArrayList<>();
-        List<TransactionBalanceDTO> history = new ArrayList<>();
+        List<TransactionDTO> history = new ArrayList<>();
         List<FixedTermsBalanceDTO> fixedTerms = new ArrayList<>();
 
         AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO(accountArs, accountUsd, history, fixedTerms);

@@ -95,14 +95,14 @@ public class DepositServiceTest {
         account.setBalance(account.getBalance() + 100.0);
         when(accountRepository.save(any(Account.class))).thenReturn(account);
 
-        ListTransactionDTO listTransactionDTO = new ListTransactionDTO();
-        listTransactionDTO.setIdTransaction(1L);
-        listTransactionDTO.setAmount(100.0);
-        listTransactionDTO.setType(TypeTransaction.DEPOSIT);
-        listTransactionDTO.setConcept(TransactionConcept.VARIOS);
-        listTransactionDTO.setDescription("test deposit description");
-        listTransactionDTO.setAccountIdAccount(1L);
-        when(modelMapperConfig.listTransactionDTO(any(Transaction.class))).thenReturn(listTransactionDTO);
+        TransactionDTO transactionDTO = new TransactionDTO();
+        transactionDTO.setIdTransaction(1L);
+        transactionDTO.setAmount(100.0);
+        transactionDTO.setType(TypeTransaction.DEPOSIT);
+        transactionDTO.setConcept(TransactionConcept.VARIOS);
+        transactionDTO.setDescription("test deposit description");
+        transactionDTO.setAccountIdAccount(1L);
+        when(modelMapperConfig.transactionToDTO(any(Transaction.class))).thenReturn(transactionDTO);
 
         AccountDTO accountDTO = new AccountDTO();
         accountDTO.setIdAccount(1L);

@@ -8,7 +8,7 @@ import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.dto.FixedTermsBalanceDTO;
-import com.magicdogs.alkywall.dto.TransactionBalanceDTO;
+import com.magicdogs.alkywall.dto.TransactionDTO;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.exceptions.ApiException;
@@ -80,9 +80,9 @@ public class AccountBalanceServiceTest {
         //findByUserEmail traera la lista mockeada anteriormente
         when(accountRepository.findByUserEmail(email)).thenReturn(Optional.of(accounts));
 
-        //Mock de TransactionBalanceDTO
-        TransactionBalanceDTO transactionDTO = new TransactionBalanceDTO();
-        when(modelMapperConfig.transactionBalanceToDTO(any())).thenReturn(transactionDTO);
+        //Mock de TransactionDTO
+        TransactionDTO transactionDTO = new TransactionDTO();
+        when(modelMapperConfig.transactionToDTO(any())).thenReturn(transactionDTO);
 
         //Mock de FixedTermsBalanceDTO
         FixedTermsBalanceDTO fixedTermDTO = new FixedTermsBalanceDTO();
