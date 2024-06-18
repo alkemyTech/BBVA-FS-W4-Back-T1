@@ -5,6 +5,7 @@ import com.magicdogs.alkywall.dto.FixedTermCreateDTO;
 import com.magicdogs.alkywall.servicies.AccountService;
 import com.magicdogs.alkywall.servicies.FixedTermService;
 import com.magicdogs.alkywall.servicies.JWTService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -45,5 +46,15 @@ public class FixedTermController {
         return ResponseEntity.ok().body(fixedTermDeposit);
     }
 
+    @Operation(summary = "Obtener todos los plazos fijos del usuario loggeado ordenados por fecha")
+    @GetMapping("")
+    public ResponseEntity<?> createAccount(@RequestParam(defaultValue = "0")int page,
+                                           @RequestParam(defaultValue = "10")int size,
+                                           HttpServletRequest request) {
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var fixedTermsPage = fixedTermService.getFixedTerms(userEmail, page, size);
+        return ResponseEntity.ok(fixedTermsPage);
+    }
 
 }

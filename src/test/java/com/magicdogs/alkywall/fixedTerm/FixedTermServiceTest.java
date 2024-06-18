@@ -87,7 +87,7 @@ public class FixedTermServiceTest {
         when(accountService.getAccountsByUserEmail(anyString())).thenReturn(Optional.of(List.of(validAccount)));
         when(modelMapperConfig.fixedTermsCreateDTOToEntitie(any(FixedTermCreateDTO.class))).thenReturn(validFixedTermDeposit);
         when(fixedTermDepositRepository.save(any(FixedTermDeposit.class))).thenReturn(validFixedTermDeposit);
-        when(modelMapperConfig.fixedTermsEntitieToSimulatedDTO(any(FixedTermDeposit.class))).thenReturn(validFixedTermSimulatedDTO);
+        when(modelMapperConfig.fixedTermsToSimulatedDTO(any(FixedTermDeposit.class))).thenReturn(validFixedTermSimulatedDTO);
 
         FixedTermSimulatedDTO result = fixedTermService.createFixedTermDeposit(validFixedTermCreateDTO, "test@example.com");
 

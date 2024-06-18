@@ -2,20 +2,23 @@ package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.constants.Constants;
 import com.magicdogs.alkywall.config.ModelMapperConfig;
-import com.magicdogs.alkywall.dto.FixedTermCreateDTO;
-import com.magicdogs.alkywall.dto.FixedTermSimulatedDTO;
+import com.magicdogs.alkywall.dto.*;
 import com.magicdogs.alkywall.entities.Account;
+import com.magicdogs.alkywall.enums.AccountType;
 import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.entities.FixedTermDeposit;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.FixedTermDepositRepository;
+import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,13 +28,14 @@ public class FixedTermService {
     private final ModelMapperConfig modelMapperConfig;
     private final FixedTermDepositRepository fixedTermDepositRepository;
     private final AccountService accountService;
+    private final UserRepository userRepository;
 
     public FixedTermSimulatedDTO createFixedTermDeposit (FixedTermCreateDTO fixedTermCreateDTO, String email){
         List<Account> accounts = accountService.getAccountsByUserEmail(email)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         Account cuentaEncontrada = accounts.stream()
-                .filter(t -> Objects.equals(t.getCurrency(), CurrencyType.ARS))
+                .filter(t -> Objects.equals(t.getCurrency(), CurrencyType.ARS) && Objects.equals(t.getAccountType(), AccountType.CAJA_AHORRO))
                 .findFirst()
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada por usuario"));
 
@@ -59,7 +63,7 @@ public class FixedTermService {
         cuentaEncontrada.setBalance(cuentaEncontrada.getBalance() - fixedTermDeposit.getAmount());
         fixedTermDeposit = fixedTermDepositRepository.save(fixedTermDeposit);
 
-        FixedTermSimulatedDTO fixedTermSimulatedDTO = modelMapperConfig.fixedTermsEntitieToSimulatedDTO(fixedTermDeposit);
+        FixedTermSimulatedDTO fixedTermSimulatedDTO = modelMapperConfig.fixedTermsToSimulatedDTO(fixedTermDeposit);
         fixedTermSimulatedDTO.setInterestTotal(fixedTermDeposit.interestTotalWin());
         fixedTermSimulatedDTO.setInterestTodayWin(fixedTermDeposit.interestPartialWin());
         fixedTermSimulatedDTO.setAmountTotalToReceive(fixedTermDeposit.getAmountTotalToReceive());
@@ -76,11 +80,44 @@ public class FixedTermService {
         fixedTermDeposit.setCreationDate(LocalDateTime.now());
         fixedTermDeposit.setClosingDate(LocalDateTime.of(fixedTermCreateDTO.getClosingDate(), LocalTime.now()));
         fixedTermDeposit.setInterest(Constants.getFixedTermInterestPercent());
-        FixedTermSimulatedDTO fixedTermSimulatedDTO = modelMapperConfig.fixedTermsEntitieToSimulatedDTO(fixedTermDeposit);
+        FixedTermSimulatedDTO fixedTermSimulatedDTO = modelMapperConfig.fixedTermsToSimulatedDTO(fixedTermDeposit);
         fixedTermSimulatedDTO.setInterestTotal(fixedTermDeposit.interestTotalWin());
         fixedTermSimulatedDTO.setInterestTodayWin(fixedTermDeposit.interestPartialWin());
         fixedTermSimulatedDTO.setAmountTotalToReceive(fixedTermDeposit.getAmountTotalToReceive());
         return fixedTermSimulatedDTO;
     }
 
+    public Object getFixedTerms(String userEmail, int page, int size) {
+        if(page < 0 || size <= 0) throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
+
+        var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        var fixedTerms = fixedTermDepositRepository.findByAccount_UserIdUserOrderByClosingDateDesc(user.getIdUser(), PageRequest.of(page, size)).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        List<FixedTermSimulatedDTO> fixedTermsDTOs = new ArrayList<>();
+
+        for (FixedTermDeposit fixedTermDeposit : fixedTerms.getContent()) {
+            FixedTermSimulatedDTO fixedTermSimulatedDTO = modelMapperConfig.fixedTermsToSimulatedDTO(fixedTermDeposit);
+            fixedTermSimulatedDTO.setInterestTotal(fixedTermDeposit.interestTotalWin());
+            fixedTermSimulatedDTO.setInterestTodayWin(fixedTermDeposit.interestPartialWin());
+            fixedTermSimulatedDTO.setAmountTotalToReceive(fixedTermDeposit.getAmountTotalToReceive());
+            fixedTermsDTOs.add(fixedTermSimulatedDTO);
+        }
+
+        int cant = fixedTerms.getTotalPages();
+
+        if (cant <= page ) {
+            throw new ApiException(HttpStatus.NOT_ACCEPTABLE, "No existe el numero de pagina");
+        }
+
+        String next = "", prev = "";
+        if (fixedTerms.hasNext())
+        {next = "/fixedTerm?page="+(page+1);
+        }
+
+        if (fixedTerms.hasPrevious()) {
+            prev = "/fixedTerm?page="+(page-1);
+        }
+
+        return new FixedTermPageDTO(fixedTermsDTOs, next, prev, cant);    }
 }
