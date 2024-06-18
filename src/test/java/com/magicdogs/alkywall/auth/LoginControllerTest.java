@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.magicdogs.alkywall.controllers.SecurityController;
+import com.magicdogs.alkywall.enums.DocumentType;
+import com.magicdogs.alkywall.enums.UserGender;
 import com.magicdogs.alkywall.servicies.JWTService;
 import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
@@ -25,6 +27,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.time.LocalDate;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -57,11 +61,7 @@ public class LoginControllerTest {
     @DisplayName("Inicio de sesion exitoso")
     @Test
     public void testLoginSuccess() throws Exception {
-        UserDto userReturn = new UserDto();
-        userReturn.setFirstName("User");
-        userReturn.setLastName("Example");
-        userReturn.setEmail("user@example.com");
-        userReturn.setSoftDelete(0);
+        UserDto userReturn = new UserDto("nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@example.com");
 
         when(securityService.login(any(UserLoginDTO.class))).thenReturn("jwt-token");
         when(securityService.searchUser(any(UserLoginDTO.class))).thenReturn(userReturn);

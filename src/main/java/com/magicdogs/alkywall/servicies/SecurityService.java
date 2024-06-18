@@ -59,15 +59,15 @@ public class SecurityService {
         return null;
     }
 
-    public UserRegisterDTO registerUser(UserRegisterDTO registerRequest){
+    public UserDto registerUser(UserRegisterDTO registerRequest){
         return register(registerRequest, RoleNameEnum.USER);
     }
 
-    public UserRegisterDTO registerAdmin(UserRegisterDTO registerRequest) {
+    public UserDto registerAdmin(UserRegisterDTO registerRequest) {
         return register(registerRequest, RoleNameEnum.ADMIN);
     }
 
-    public UserRegisterDTO register(UserRegisterDTO registerRequest, RoleNameEnum roleName) {
+    public UserDto register(UserRegisterDTO registerRequest, RoleNameEnum roleName) {
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Ya existe un usuario registrado con ese Email");
         }
@@ -84,7 +84,7 @@ public class SecurityService {
         var accountUSD = new Account(AccountType.CAJA_AHORRO, CurrencyType.USD, AccountBank.ALKYWALL, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(newUser.getFirstName(), newUser.getLastName()), Constants.getTransactionLimitUsd(), 0.0, newUser, 0);
         accountRepository.save(accountUSD);
 
-        return registerRequest;
+        return modelMapper.map(registerRequest, UserDto.class);
     }
 
     public String encryptPassword(String password) {

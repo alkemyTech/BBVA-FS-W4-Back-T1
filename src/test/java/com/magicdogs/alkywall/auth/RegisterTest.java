@@ -2,48 +2,34 @@ package com.magicdogs.alkywall.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.magicdogs.alkywall.controllers.SecurityController;
-import com.magicdogs.alkywall.dto.UserLoginDTO;
+import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserRegisterDTO;
-import com.magicdogs.alkywall.entities.Account;
-import com.magicdogs.alkywall.entities.Role;
-
-import com.magicdogs.alkywall.entities.User;
-import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.enums.DocumentType;
-import com.magicdogs.alkywall.enums.RoleNameEnum;
 import com.magicdogs.alkywall.enums.UserGender;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.RoleRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
-import com.magicdogs.alkywall.servicies.AccountService;
 import com.magicdogs.alkywall.servicies.SecurityService;
-import com.magicdogs.alkywall.utils.AliasGenerator;
-import com.magicdogs.alkywall.utils.CbuGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.hamcrest.Matchers.*;
 import java.time.LocalDate;
-import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -54,8 +40,11 @@ public class RegisterTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Mock
+    @MockBean
     private SecurityService securityService;
+
+    @Mock
+    private ModelMapper modelMapper;
 
     @InjectMocks
     @Autowired
@@ -85,9 +74,10 @@ public class RegisterTest {
                 UserGender.MALE,                // gender
                 DocumentType.DNI,               // documentType
                 "123456789",                    // documentNumber
-                "juan.perez13@example.com",       // email
+                "juan.perez14@example.com",       // email
                 "SecurePassword123"             // password
         );
+
         usuarioVacio = new UserRegisterDTO();
 
         invalidUser = new UserRegisterDTO(
@@ -100,15 +90,23 @@ public class RegisterTest {
                 "juan.perez@example.com",       // email
                 ""                              // password (inválido)
         );
-        //invalidUser2 = new UserRegisterDTO("tom", "peresoso", "peresoso.com", "1234");
         MockitoAnnotations.openMocks(this);
-
     }
-    // por los datos de prueba va a saltar error, pero funciona
+
     @Test
     void whenValidInput_thenReturns201() throws Exception {
 
-        when(securityService.registerUser(any(UserRegisterDTO.class))).thenReturn(validUser);
+        var validUserDTO = new UserDto(
+                "Juan",                         // firstName
+                "Pérez",                        // lastName
+                LocalDate.of(1990, 1, 1),       // birthDate
+                UserGender.MALE,                // gender
+                DocumentType.DNI,               // documentType
+                "123456789",                    // documentNumber
+                "juan.perez14@example.com"       // email
+        );
+
+        when(securityService.registerUser(any(UserRegisterDTO.class))).thenReturn(validUserDTO);
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -124,10 +122,11 @@ public class RegisterTest {
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest());
     }
+
     @Test
     void nameEmpty() throws Exception {
         invalidUser = new UserRegisterDTO(
-                "",                             // firstName (inválido)
+                " ",                             // firstName (inválido)
                 "Pérez",                        // lastName
                 LocalDate.of(1990, 1, 1),       // birthDate
                 UserGender.MALE,                // gender
@@ -136,13 +135,14 @@ public class RegisterTest {
                 "juan.perez@example.com",       // email
                 "SecurePassword123"             // password
         );
+
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").value("El nombre no puede estar en blanco"));
-        //"El nombre no puede estar vacío"
+                .andExpect(jsonPath("$").value("El nombre no puede estar vacío"));
     }
+
     @Test
     void nameNotNull() throws Exception {
         invalidUser =  new UserRegisterDTO(
@@ -155,23 +155,18 @@ public class RegisterTest {
                 "juan.perez@example.com",       // email
                 "SecurePassword123"             // password
         );
+
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").value(
-                        anyOf(
-                                is("El nombre no puede ser nulo"),
-                                is("El nombre no puede estar en blanco"),
-                                is("El nombre no puede estar vacío")
-                        )
-                ));
-        //"El nombre no puede ser nulo"
+                .andExpect(jsonPath("$").value("El nombre no puede estar vacío"));
     }
 
     @Test
     void whenEmailAlreadyExists_thenReturns400() throws Exception {
-        when(securityService.registerUser(any(UserRegisterDTO.class))).thenThrow(new IllegalArgumentException("User already exists"));
+        when(securityService.registerUser(any(UserRegisterDTO.class))).thenThrow(new IllegalArgumentException("Ya existe un usuario registrado con ese Email"));
+
         validUser =  new UserRegisterDTO(
                 "jana",                             // firstName (inválido)
                 "Pérez",                        // lastName
@@ -182,6 +177,7 @@ public class RegisterTest {
                 "user2@example.com",       // email
                 "SecurePassword123"             // password
         );
+
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUser)))
@@ -205,14 +201,14 @@ public class RegisterTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").value("El apellido no puede estar en blanco"));
-        //"El apellido no puede estar en blanco"
+                .andExpect(jsonPath("$").value("El apellido no puede estar vacío"));
     }
+
     @Test
     void invalidUserEmptyLastName () throws Exception {
         invalidUser =  new UserRegisterDTO(
                 "juan",                         // firstName
-                "",                        // lastName
+                " ",                        // lastName
                 LocalDate.of(1990, 1, 1),       // birthDate
                 UserGender.MALE,                // gender
                 DocumentType.CUIT,          // documentType
@@ -220,13 +216,14 @@ public class RegisterTest {
                 "juan.perez@example.com",       // email
                 "SecurePassword123"             // password
         );
+
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").value("El apellido no puede estar en blanco"));
-        //"El apellido no puede estar en blanco"
+                .andExpect(jsonPath("$").value("El apellido no puede estar vacío"));
     }
+
     @Test
     void invalidUserNullBirthDate() throws Exception {
         invalidUser =  new UserRegisterDTO(
@@ -239,13 +236,14 @@ public class RegisterTest {
                 "juan.perez@example.com",       // email
                 "SecurePassword123"             // password
         );
+
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").value("La fecha de nacimiento no puede ser nula"));
-        //"El apellido no puede estar en blanco"
     }
+
     @Test
     void invalidUserFutureBirthDate() throws Exception {
         invalidUser =  new UserRegisterDTO(
@@ -258,13 +256,14 @@ public class RegisterTest {
                 "juan.perez@example.com",       // email
                 "SecurePassword123"             // password
         );
+
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").value("La fecha de nacimiento no puede ser en el futuro"));
-        //"El apellido no puede estar en blanco"
     }
+
     @Test
     void invalidUserInvalidMail() throws Exception {
         invalidUser =  new UserRegisterDTO(
@@ -277,12 +276,12 @@ public class RegisterTest {
                 "juan.perezexample.com",       // email
                 "SecurePassword123"             // password
         );
+
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").value("El correo electrónico debe ser válido"));
-        //"El apellido no puede estar en blanco"
     }
 }
 
