@@ -60,7 +60,12 @@ public class TransactionService {
             throw new ApiException(HttpStatus.CONFLICT, "Balance insuficiente");
         }
         if (accountOrigin.getTransactionLimit() < amount) {
-            throw new ApiException(HttpStatus.CONFLICT, "Limite insuficiente");
+            if (accountOrigin.getCurrency() == CurrencyType.ARS) {
+                throw new ApiException(HttpStatus.CONFLICT, "Limite insuficiente. Tu limite es $ " + accountOrigin.getTransactionLimit());
+            }
+            if (accountOrigin.getCurrency() == CurrencyType.USD) {
+                throw new ApiException(HttpStatus.CONFLICT, "Limite insuficiente. Tu limite es US$ " + accountOrigin.getTransactionLimit());
+            }
         }
     }
 
