@@ -2,6 +2,7 @@ package com.magicdogs.alkywall.dto;
 
 import com.magicdogs.alkywall.enums.UserGender;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ public class UserUpdateDTO {
     private String lastName;
 
     @Schema(description = "Fecha de nacimiento del usuario")
+    @Past(message = "La fecha de nacimiento no puede ser en el futuro")
     private LocalDate birthDate;
 
     @Schema(description = "Género del usuario")
