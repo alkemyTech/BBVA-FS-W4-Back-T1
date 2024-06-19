@@ -92,6 +92,18 @@ public class UserService implements UserDetailsService {
             user.setLastName(userUpdateDTO.getLastName());
         }
 
+        if (userUpdateDTO.getBirthDate() != null) {
+            user.setBirthDate(userUpdateDTO.getBirthDate());
+        }
+
+        if (userUpdateDTO.getGender() != null) {
+            user.setGender(userUpdateDTO.getGender());
+        }
+
+        if (userUpdateDTO.getDocumentNumber() != null) {
+            user.setDocumentNumber(userUpdateDTO.getDocumentNumber());
+        }
+
         if (userUpdateDTO.getPassword() != null) {
             if (userUpdateDTO.getPassword().isBlank() || userUpdateDTO.getPassword().isEmpty()) {
                 throw new ApiException(HttpStatus.BAD_REQUEST, "La contraseña no puede estar vacia");

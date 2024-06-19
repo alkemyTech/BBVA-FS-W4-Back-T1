@@ -14,6 +14,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDTO {
+    @Schema(description = "Id del usuario")
+    private Long idUser;
 
     @Schema(description = "Nombre del usuario")
     private String firstName;
