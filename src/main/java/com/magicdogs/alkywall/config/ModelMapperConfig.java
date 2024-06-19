@@ -12,7 +12,7 @@ public class ModelMapperConfig {
     @Bean
     public ModelMapper modelMapper(){return new ModelMapper();}
 
-    public UserDto userToDTO(User user){return modelMapper().map(user, UserDto.class);}
+    public UserDTO userToDTO(User user){return modelMapper().map(user, UserDTO.class);}
 
     public AccountDTO accountToDTO(Account account){return modelMapper().map(account, AccountDTO.class);}
 

@@ -1,6 +1,6 @@
 package com.magicdogs.alkywall.controllers;
 
-import com.magicdogs.alkywall.dto.UserDto;
+import com.magicdogs.alkywall.dto.UserDTO;
 import com.magicdogs.alkywall.dto.UserUpdateDTO;
 import com.magicdogs.alkywall.servicies.JWTService;
 import com.magicdogs.alkywall.dto.UserPageDTO;
@@ -50,7 +50,7 @@ public class UserController {
 
     @Operation(summary = "Actualizar los datos de un usuario")
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> userUpdate(@PathVariable("id") Long id, @RequestBody @Valid UserUpdateDTO user, HttpServletRequest request){
+    public ResponseEntity<UserDTO> userUpdate(@PathVariable("id") Long id, @RequestBody @Valid UserUpdateDTO user, HttpServletRequest request){
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
         var userUpdated = userService.update(id, userEmail, user);
@@ -58,7 +58,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> userDetails(@PathVariable Long id, HttpServletRequest request){
+    public ResponseEntity<UserDTO> userDetails(@PathVariable Long id, HttpServletRequest request){
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
         var userDto = userService.userDetails(id, userEmail);

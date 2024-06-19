@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
+public class UserDTO {
 
     @Schema(description = "Nombre del usuario")
     private String firstName;

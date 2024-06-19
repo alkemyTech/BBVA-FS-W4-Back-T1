@@ -2,7 +2,7 @@ package com.magicdogs.alkywall.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.magicdogs.alkywall.controllers.SecurityController;
-import com.magicdogs.alkywall.dto.UserDto;
+import com.magicdogs.alkywall.dto.UserDTO;
 import com.magicdogs.alkywall.dto.UserRegisterDTO;
 import com.magicdogs.alkywall.enums.DocumentType;
 import com.magicdogs.alkywall.enums.UserGender;
@@ -98,7 +98,7 @@ public class RegisterTest {
     @Test
     void whenValidInput_thenReturns201() throws Exception {
 
-        var validUserDTO = new UserDto(
+        var validUserDTO = new UserDTO(
                 "Juan",                         // firstName
                 "Pérez",                        // lastName
                 LocalDate.of(1990, 1, 1),       // birthDate

@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UserPageDTO {
 
-    private List<UserDto> users;
+    private List<UserDTO> users;
     private String nextPage;
     private String prevPage;
     private Integer totalPages;

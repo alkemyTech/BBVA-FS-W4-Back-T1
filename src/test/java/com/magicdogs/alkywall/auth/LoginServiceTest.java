@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.magicdogs.alkywall.dto.UserDto;
+import com.magicdogs.alkywall.dto.UserDTO;
 import com.magicdogs.alkywall.enums.DocumentType;
 import com.magicdogs.alkywall.enums.UserGender;
 import com.magicdogs.alkywall.repositories.UserRepository;
@@ -121,7 +121,7 @@ public class LoginServiceTest {
         userEntity.setDocumentNumber("33456789");
         userEntity.setSoftDelete(0);
 
-        UserDto userDTO = new UserDto();
+        UserDTO userDTO = new UserDTO();
         userDTO.setEmail("user@example.com");
         userDTO.setFirstName("User");
         userDTO.setLastName("Example");
@@ -131,10 +131,10 @@ public class LoginServiceTest {
         userDTO.setDocumentNumber("33456789");
 
         when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.of(userEntity));
-        when(modelMapper.map(userEntity, UserDto.class)).thenReturn(userDTO);
+        when(modelMapper.map(userEntity, UserDTO.class)).thenReturn(userDTO);
 
         // Act
-        UserDto userReturn = securityService.searchUser(userLoginDTO);
+        UserDTO userReturn = securityService.searchUser(userLoginDTO);
 
         // Assert
         assertNotNull(userReturn);
@@ -157,7 +157,7 @@ public class LoginServiceTest {
 
         when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.empty());
 
-        UserDto userDTO = securityService.searchUser(userLoginDTO);
+        UserDTO userDTO = securityService.searchUser(userLoginDTO);
 
         assertNull(userDTO);
 

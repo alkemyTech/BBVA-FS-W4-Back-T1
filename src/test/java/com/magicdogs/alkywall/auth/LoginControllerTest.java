@@ -10,7 +10,7 @@ import com.magicdogs.alkywall.controllers.SecurityController;
 import com.magicdogs.alkywall.enums.DocumentType;
 import com.magicdogs.alkywall.enums.UserGender;
 import com.magicdogs.alkywall.servicies.JWTService;
-import com.magicdogs.alkywall.dto.UserDto;
+import com.magicdogs.alkywall.dto.UserDTO;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
 import com.magicdogs.alkywall.servicies.SecurityService;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +61,7 @@ public class LoginControllerTest {
     @DisplayName("Inicio de sesion exitoso")
     @Test
     public void testLoginSuccess() throws Exception {
-        UserDto userReturn = new UserDto("nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@example.com");
+        UserDTO userReturn = new UserDTO("nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@example.com");
 
         when(securityService.login(any(UserLoginDTO.class))).thenReturn("jwt-token");
         when(securityService.searchUser(any(UserLoginDTO.class))).thenReturn(userReturn);
