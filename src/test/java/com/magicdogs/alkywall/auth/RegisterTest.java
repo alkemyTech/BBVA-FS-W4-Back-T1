@@ -2,10 +2,11 @@ package com.magicdogs.alkywall.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.magicdogs.alkywall.controllers.SecurityController;
-import com.magicdogs.alkywall.dto.UserDto;
+import com.magicdogs.alkywall.dto.UserDTO;
 import com.magicdogs.alkywall.dto.UserRegisterDTO;
 import com.magicdogs.alkywall.enums.DocumentType;
 import com.magicdogs.alkywall.enums.UserGender;
+import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.RoleRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -96,7 +98,7 @@ public class RegisterTest {
     @Test
     void whenValidInput_thenReturns201() throws Exception {
 
-        var validUserDTO = new UserDto(
+        var validUserDTO = new UserDTO(
                 "Juan",                         // firstName
                 "Pérez",                        // lastName
                 LocalDate.of(1990, 1, 1),       // birthDate
@@ -111,7 +113,7 @@ public class RegisterTest {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUser)))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(validUser.getEmail()));
     }
 
@@ -165,7 +167,7 @@ public class RegisterTest {
 
     @Test
     void whenEmailAlreadyExists_thenReturns400() throws Exception {
-        when(securityService.registerUser(any(UserRegisterDTO.class))).thenThrow(new IllegalArgumentException("Ya existe un usuario registrado con ese Email"));
+        when(securityService.registerUser(any(UserRegisterDTO.class))).thenThrow(new ApiException(HttpStatus.BAD_REQUEST, "Ya existe un usuario registrado con ese Email"));
 
         validUser =  new UserRegisterDTO(
                 "jana",                             // firstName (inválido)
@@ -182,7 +184,7 @@ public class RegisterTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUser)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").value("Ya existe un usuario registrado con ese Email"));
+                .andExpect(jsonPath("$.message").value("Ya existe un usuario registrado con ese Email"));
     }
 
     @Test

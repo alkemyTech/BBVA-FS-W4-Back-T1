@@ -1,17 +1,19 @@
 package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.constants.Constants;
-import com.magicdogs.alkywall.dto.UserDto;
+import com.magicdogs.alkywall.dto.UserDTO;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
 import com.magicdogs.alkywall.entities.User;
 import com.magicdogs.alkywall.enums.AccountBank;
 import com.magicdogs.alkywall.enums.AccountType;
 import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.enums.RoleNameEnum;
+import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import com.magicdogs.alkywall.utils.AliasGenerator;
 import com.magicdogs.alkywall.utils.CbuGenerator;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -48,32 +50,32 @@ public class SecurityService {
         return jwtService.createToken(user2.getEmail(), 60);
     }
 
-    public UserDto searchUser(UserLoginDTO us){
-        UserDto userReturn;
+    public UserDTO searchUser(UserLoginDTO us){
+        UserDTO userReturn;
 
         Optional<User> userEntity = userRepository.findByEmail(us.getEmail());
         if(userEntity != null){
-            userReturn = modelMapper.map(userEntity.orElse(null), UserDto.class);
+            userReturn = modelMapper.map(userEntity.orElse(null), UserDTO.class);
             return userReturn;
         }
         return null;
     }
 
-    public UserDto registerUser(UserRegisterDTO registerRequest){
+    public UserDTO registerUser(UserRegisterDTO registerRequest){
         return register(registerRequest, RoleNameEnum.USER);
     }
 
-    public UserDto registerAdmin(UserRegisterDTO registerRequest) {
+    public UserDTO registerAdmin(UserRegisterDTO registerRequest) {
         return register(registerRequest, RoleNameEnum.ADMIN);
     }
 
-    public UserDto register(UserRegisterDTO registerRequest, RoleNameEnum roleName) {
+    public UserDTO register(UserRegisterDTO registerRequest, RoleNameEnum roleName) {
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Ya existe un usuario registrado con ese Email");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Ya existe un usuario registrado con ese Email");
         }
 
         Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new IllegalArgumentException("No se ha encontrado el rol indicado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "No se ha encontrado el rol indicado"));
 
         var newUser = new User(registerRequest.getFirstName(), registerRequest.getLastName(), registerRequest.getBirthDate(), registerRequest.getGender(), registerRequest.getDocumentType(), registerRequest.getDocumentNumber(), registerRequest.getEmail(), passwordEncoder.encode(registerRequest.getPassword()), role, 0);
         userRepository.save(newUser);
@@ -84,7 +86,7 @@ public class SecurityService {
         var accountUSD = new Account(AccountType.CAJA_AHORRO, CurrencyType.USD, AccountBank.ALKYWALL, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(newUser.getFirstName(), newUser.getLastName()), Constants.getTransactionLimitUsd(), 0.0, newUser, 0);
         accountRepository.save(accountUSD);
 
-        return modelMapper.map(registerRequest, UserDto.class);
+        return modelMapper.map(registerRequest, UserDTO.class);
     }
 
     public String encryptPassword(String password) {

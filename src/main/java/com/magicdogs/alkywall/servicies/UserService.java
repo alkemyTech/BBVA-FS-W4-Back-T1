@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import com.magicdogs.alkywall.config.ModelMapperConfig;
-import com.magicdogs.alkywall.dto.UserDto;
+import com.magicdogs.alkywall.dto.UserDTO;
 import com.magicdogs.alkywall.entities.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -75,7 +75,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(userToDelete);
     }
 
-    public UserDto update(Long id, String userEmail, UserUpdateDTO userUpdateDTO) {
+    public UserDTO update(Long id, String userEmail, UserUpdateDTO userUpdateDTO) {
         var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
@@ -103,7 +103,7 @@ public class UserService implements UserDetailsService {
         return modelMapperConfig.userToDTO(user);
     }
 
-    public UserDto userDetails(Long id, String email){
+    public UserDTO userDetails(Long id, String email){
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 

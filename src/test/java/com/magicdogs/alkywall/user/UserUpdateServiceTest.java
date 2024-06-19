@@ -1,7 +1,7 @@
 package com.magicdogs.alkywall.user;
 
 import com.magicdogs.alkywall.config.ModelMapperConfig;
-import com.magicdogs.alkywall.dto.UserDto;
+import com.magicdogs.alkywall.dto.UserDTO;
 import com.magicdogs.alkywall.dto.UserUpdateDTO;
 import com.magicdogs.alkywall.entities.User;
 import com.magicdogs.alkywall.enums.DocumentType;
@@ -42,7 +42,7 @@ public class UserUpdateServiceTest {
 
     private User user;
     private UserUpdateDTO userUpdateDTO;
-    private UserDto userDto;
+    private UserDTO userDto;
 
     @BeforeEach
     void setUp() {
@@ -51,7 +51,7 @@ public class UserUpdateServiceTest {
         user.setIdUser(1L);
         user.setEmail("user@email.com");
 
-        userDto = new UserDto("nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@email.com");
+        userDto = new UserDTO("nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@email.com");
         userUpdateDTO = new UserUpdateDTO("nombre", "apellido", "password");
     }
 
@@ -62,7 +62,7 @@ public class UserUpdateServiceTest {
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
         when(modelMapperConfig.userToDTO(user)).thenReturn(userDto);
 
-        UserDto result = userService.update(1L, "user@email.com", userUpdateDTO);
+        UserDTO result = userService.update(1L, "user@email.com", userUpdateDTO);
 
         assertEquals("nombre", result.getFirstName());
         assertEquals("apellido", result.getLastName());

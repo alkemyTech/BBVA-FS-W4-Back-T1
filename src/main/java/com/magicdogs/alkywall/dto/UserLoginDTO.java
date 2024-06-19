@@ -16,16 +16,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @NoArgsConstructor
 public class UserLoginDTO {
 
-    @NotEmpty(message = "El correo electrónico no puede estar vacío")
-    @NotNull(message = "El correo electrónico no puede ser nulo")
-    @NotBlank(message = "El correo electrónico no puede estar en blanco")
+    @NotBlank(message = "El correo electrónico no puede estar vacío")
     @Email(message = "El correo electrónico debe ser válido")
     @Schema(description = "Correo electrónico del usuario")
     private String email;
 
-    @NotEmpty(message = "La contraseña no puede estar vacía")
-    @NotNull(message = "La contraseña no puede ser nula")
-    @NotBlank(message = "La contraseña no puede estar en blanco")
+    @NotBlank(message = "La contraseña no puede estar vacía")
     @Schema(description = "Contraseña del usuario")
     private String password;
 

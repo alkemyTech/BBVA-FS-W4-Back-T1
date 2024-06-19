@@ -8,6 +8,7 @@ import com.magicdogs.alkywall.entities.User;
 import com.magicdogs.alkywall.enums.DocumentType;
 import com.magicdogs.alkywall.enums.RoleNameEnum;
 import com.magicdogs.alkywall.enums.UserGender;
+import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.RoleRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
@@ -81,7 +82,7 @@ public class RegisterServiceTest {
 
         when(userRepository.findByEmail(registerDTO.getEmail())).thenReturn(Optional.of(new User()));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             securityService.registerUser(registerDTO);
         });
 
@@ -98,7 +99,7 @@ public class RegisterServiceTest {
         lenient().when(userRepository.findByEmail(registerDTO.getEmail())).thenReturn(Optional.empty());
         lenient().when(roleRepository.findByName(RoleNameEnum.USER)).thenReturn(Optional.empty());
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        ApiException exception = assertThrows(ApiException.class, () -> {
             securityService.registerUser(registerDTO);
         });
 

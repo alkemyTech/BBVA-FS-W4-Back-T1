@@ -1,7 +1,7 @@
 package com.magicdogs.alkywall.user;
 
 import com.magicdogs.alkywall.controllers.UserController;
-import com.magicdogs.alkywall.dto.UserDto;
+import com.magicdogs.alkywall.dto.UserDTO;
 import com.magicdogs.alkywall.dto.UserPageDTO;
 import com.magicdogs.alkywall.enums.DocumentType;
 import com.magicdogs.alkywall.enums.UserGender;
@@ -44,8 +44,8 @@ public class UserControllerTest {
     public void testUsersListSuccess() throws Exception {
         UserPageDTO mockUserPage = new UserPageDTO();
         mockUserPage.setUsers(List.of(
-                new UserDto("John", "Doe", LocalDate.of(1990, 1, 1), UserGender.MALE, DocumentType.DNI, "33456789", "john.doe@example.com"),
-                new UserDto("Jane", "Smith", LocalDate.of(1992, 2, 2), UserGender.FEMALE, DocumentType.DNI, "35987654", "jane.smith@example.com")
+                new UserDTO("John", "Doe", LocalDate.of(1990, 1, 1), UserGender.MALE, DocumentType.DNI, "33456789", "john.doe@example.com"),
+                new UserDTO("Jane", "Smith", LocalDate.of(1992, 2, 2), UserGender.FEMALE, DocumentType.DNI, "35987654", "jane.smith@example.com")
         ));
         mockUserPage.setNextPage("/users?page=1");
         mockUserPage.setPrevPage("");
