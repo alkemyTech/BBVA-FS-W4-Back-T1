@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransactionUpdateDTO {
-    @NotNull(message = "La descripción no puede ser nula")
-    @NotBlank(message = "La descripción no puede estar en blanco")
-    @NotEmpty(message = "La dscripción no puede estar vacía")
+    @NotBlank(message = "La descripción no puede estar vacía")
     @Schema(description = "Descripción de la transacción")
     private String description;
 }

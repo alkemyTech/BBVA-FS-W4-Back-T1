@@ -12,14 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ThirdAccountDTO {
 
-    @NotEmpty(message = "El nickname no puede estar vacío")
-    @NotNull(message = "El nickname no puede ser nulo")
-    @NotBlank(message = "El nickname no puede estar en blanco")
+    @NotBlank(message = "El nickname no puede estar vacío")
     private String nickname;
 
-    @NotEmpty(message = "El cbu no puede estar vacío")
-    @NotNull(message = "El cbu no puede ser nulo")
-    @NotBlank(message = "El cbu no puede estar en blanco")
+    @NotBlank(message = "El cbu no puede estar vacío")
     private String cbu;
 
 }

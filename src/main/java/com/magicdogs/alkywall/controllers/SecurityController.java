@@ -3,6 +3,7 @@ package com.magicdogs.alkywall.controllers;
 import com.magicdogs.alkywall.constants.Constants;
 import com.magicdogs.alkywall.dto.UserDto;
 import com.magicdogs.alkywall.dto.UserLoginDTO;
+import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.servicies.SecurityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -58,28 +59,18 @@ public class SecurityController {
     @Operation(summary = "Registrar nuevo usuario")
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid UserRegisterDTO registerRequest, HttpServletResponse response) {
-        try {
-            var newUser = securityService.registerUser(registerRequest);
-
-            var userLoginDTO = new UserLoginDTO(registerRequest.getEmail(), registerRequest.getPassword());
-            var token = securityService.login(userLoginDTO);
-            addJwtToCookie(response, token);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        var newUser = securityService.registerUser(registerRequest);
+        var userLoginDTO = new UserLoginDTO(registerRequest.getEmail(), registerRequest.getPassword());
+        var token = securityService.login(userLoginDTO);
+        addJwtToCookie(response, token);
+        return ResponseEntity.ok(newUser);
     }
 
     @Operation(summary = "Registrar nuevo usuario administrador")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/register-admin")
     public ResponseEntity<?> registerAdmin(@RequestBody @Valid UserRegisterDTO registerRequest) {
-        try {
-            var newAdmin = securityService.registerAdmin(registerRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body(newAdmin);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        var newAdmin = securityService.registerAdmin(registerRequest);
+        return ResponseEntity.ok(newAdmin);
     }
 }

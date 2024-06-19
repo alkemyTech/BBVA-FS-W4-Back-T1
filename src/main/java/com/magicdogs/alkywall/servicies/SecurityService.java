@@ -8,10 +8,12 @@ import com.magicdogs.alkywall.enums.AccountBank;
 import com.magicdogs.alkywall.enums.AccountType;
 import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.enums.RoleNameEnum;
+import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import com.magicdogs.alkywall.utils.AliasGenerator;
 import com.magicdogs.alkywall.utils.CbuGenerator;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -69,11 +71,11 @@ public class SecurityService {
 
     public UserDto register(UserRegisterDTO registerRequest, RoleNameEnum roleName) {
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Ya existe un usuario registrado con ese Email");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Ya existe un usuario registrado con ese Email");
         }
 
         Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new IllegalArgumentException("No se ha encontrado el rol indicado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "No se ha encontrado el rol indicado"));
 
         var newUser = new User(registerRequest.getFirstName(), registerRequest.getLastName(), registerRequest.getBirthDate(), registerRequest.getGender(), registerRequest.getDocumentType(), registerRequest.getDocumentNumber(), registerRequest.getEmail(), passwordEncoder.encode(registerRequest.getPassword()), role, 0);
         userRepository.save(newUser);
