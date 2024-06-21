@@ -14,4 +14,6 @@ public class TransactionPageDTO {
     private List<TransactionDTO> transactios;
     private String nextPage;
     private String prevPage;
+    private int countPages;
+    private Double maxAmmout;
 }

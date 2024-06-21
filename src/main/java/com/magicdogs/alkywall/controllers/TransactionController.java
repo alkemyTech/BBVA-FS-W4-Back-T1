@@ -5,6 +5,8 @@ import com.magicdogs.alkywall.dto.TransactionSendMoneyDTO;
 import com.magicdogs.alkywall.dto.TransactionPageDTO;
 import com.magicdogs.alkywall.dto.*;
 import com.magicdogs.alkywall.enums.CurrencyType;
+import com.magicdogs.alkywall.enums.TransactionConcept;
+import com.magicdogs.alkywall.enums.TypeTransaction;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.servicies.JWTService;
 import com.magicdogs.alkywall.servicies.TransactionService;
@@ -63,7 +65,9 @@ public class TransactionController {
         }
         if(transactions.get().hasNext()){next = "/transactions/userId/"+id+"?page="+(page+1);}
         if(transactions.get().hasPrevious()){prev = "/transactions/userId/"+id+"?page="+(page-1);}
-        return ResponseEntity.ok(new TransactionPageDTO(transactions.get().getContent(), next, prev));
+        int count = transactions.get().getTotalPages();
+        Double max = TransactionService.findMaxAmount2(transactions.get().toList());
+        return ResponseEntity.ok(new TransactionPageDTO(transactions.get().getContent(), next, prev,count, max));
     }
 
     /*@GetMapping("/{userId}")
@@ -122,7 +126,8 @@ public class TransactionController {
 
     @Operation(summary ="Lista de transacciones de la cuenta de un usuario")
     @GetMapping("userAccountId/{userAccountId}")
-    public ResponseEntity<?> transactionListByUserAccount(@PathVariable("userAccountId") Long id, @RequestParam(defaultValue = "0")int page,
+    public ResponseEntity<?> transactionListByUserAccount(@PathVariable("userAccountId") Long id,
+                                                          @RequestParam(defaultValue = "0")int page,
                                                    @RequestParam(defaultValue = "10")int size,
                                                    HttpServletRequest request) {
         var token = jwtService.getJwtFromCookies(request);
@@ -136,6 +141,38 @@ public class TransactionController {
         }
         if(transactions.get().hasNext()){next = "/transactions/userAccountId/"+id+"?page="+(page+1);}
         if(transactions.get().hasPrevious()){prev = "/transactions/userAccountId/"+id+"?page="+(page-1);}
-        return ResponseEntity.ok(new TransactionPageDTO(transactions.get().getContent(), next, prev));
+        int count = transactions.get().getTotalPages();
+        Double max = TransactionService.findMaxAmount2(transactions.get().toList());
+        return ResponseEntity.ok(new TransactionPageDTO(transactions.get().getContent(), next, prev,count, max));
     }
+
+    @Operation(summary = "Lista de transacciones de la cuenta de un usuario con filtros.")
+    @GetMapping("userAccountId/{userAccountId}/filters")
+    public ResponseEntity<?> transactionListByUserAccountWithFilters(
+            @PathVariable("userAccountId") Long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Double minAmount,
+            @RequestParam(required = false) Double maxAmount,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String concept,
+            HttpServletRequest request) {
+
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+
+        /*Optional<Page<TransactionDTO>> transactions = transactionService.getTransactionsPageByUserAccountIdWithFilters(
+                id, userEmail, page, size, minAmount, maxAmount, type, concept);
+
+
+
+        String next = transactions.get().hasNext() ? "/transactions/userAccountId/" + id + "?page=" + (page + 1) : "";
+        String prev = transactions.get().hasPrevious() ? "/transactions/userAccountId/" + id + "?page=" + (page - 1) : "";
+        int count = transactions.get().getTotalPages();*/
+
+        return transactionService.getTransactionsPageByUserAccountIdWithFilters(
+                id, userEmail, page, size, minAmount, maxAmount, type, concept);
+    }
+
+
 }
