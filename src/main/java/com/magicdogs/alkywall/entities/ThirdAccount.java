@@ -15,17 +15,20 @@ public class ThirdAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idThirdAccount")
-    private Long ThirdAccount;
-    @Column(name = "cbu", nullable = false)
-    private  String CBU;
+    private Long idThirdAccount;
 
-    @Column(name = "nickname", nullable = false)
+    @Column(name = "nickname")
     private String nickname;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="idDestinationAccount", nullable = false)
+    private Account destinationAccount;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="idDestinationUser", nullable = false)
+    private User destinationUser;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idUser")
     private User user;
-
-
-
 }

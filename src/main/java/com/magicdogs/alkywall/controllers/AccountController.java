@@ -70,8 +70,8 @@ public class AccountController {
     @Operation(summary = "Obtener cuenta a través de CBU o Alias")
     @GetMapping("/search")
     public ResponseEntity<?> searchAccount(@RequestParam String value){
-        var AccountDTO = accountService.searchAccount(value);
-        return ResponseEntity.ok(AccountDTO);
+        var AccountThirdDTO = accountService.searchAccount(value);
+        return ResponseEntity.ok(AccountThirdDTO);
     }
 
     @Operation(summary = "Eliminar cuenta por id")

@@ -12,44 +12,37 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ThirdAccountDTO {
-
-    @Schema(description = "ID del contacto")
-    private Long idThirdAccount;
-
-    @Schema(description = "Apodo del contacto")
-    private String nickname;
-
+public class AccountThirdDTO {
     @Schema(description = "ID de la cuenta")
-    private Long destinationAccountIdAccount;
+    private Long idAccount;
 
     @Schema(description = "Tipo de cuenta")
-    private AccountType destinationAccountAccountType;
+    private AccountType accountType;
 
     @Schema(description = "Tipo de moneda de la cuenta")
-    private CurrencyType destinationAccountCurrency;
+    private CurrencyType currency;
 
     @Schema(description = "Banco de la cuenta")
-    private AccountBank destinationAccountBank;
+    private AccountBank bank;
 
     @Schema(description = "CBU de la cuenta")
-    private String destinationAccountCbu;
+    private String cbu;
 
     @Schema(description = "Alias de la cuenta")
-    private String destinationAccountAlias;
+    private String alias;
 
     @Schema(description = "ID del usuario")
-    private Long destinationUserIdUser;
+    private Long userIdUser;
 
     @Schema(description = "Nombre del usuario")
-    private String destinationUserFirstName;
+    private String userFirstName;
 
     @Schema(description = "Apellido del usuario")
-    private String destinationUserLastName;
+    private String userLastName;
 
     @Schema(description = "Tipo de documento del usuario")
-    private DocumentType destinationUserDocumentType;
+    private DocumentType userDocumentType;
 
     @Schema(description = "Número de documento del usuario")
-    private String destinationUserDocumentNumber;
+    private String userDocumentNumber;
 }

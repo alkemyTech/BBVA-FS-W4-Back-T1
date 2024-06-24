@@ -56,15 +56,26 @@ public class TransactionService {
     }
 
     private void validateBalanceAndLimit(Account accountOrigin, Double amount) {
+
+        if (accountOrigin.getBalance() < amount && accountOrigin.getTransactionLimit() < amount) {
+            if (accountOrigin.getCurrency() == CurrencyType.ARS) {
+                throw new ApiException(HttpStatus.CONFLICT, "Balance y límite insuficiente. Tu límite es $ " + accountOrigin.getTransactionLimit());
+            }
+            if (accountOrigin.getCurrency() == CurrencyType.USD) {
+                throw new ApiException(HttpStatus.CONFLICT, "Balance y límite insuficiente. Tu límite es US$ " + accountOrigin.getTransactionLimit());
+            }
+        }
+
         if (accountOrigin.getBalance() < amount) {
             throw new ApiException(HttpStatus.CONFLICT, "Balance insuficiente");
         }
+
         if (accountOrigin.getTransactionLimit() < amount) {
             if (accountOrigin.getCurrency() == CurrencyType.ARS) {
-                throw new ApiException(HttpStatus.CONFLICT, "Limite insuficiente. Tu limite es $ " + accountOrigin.getTransactionLimit());
+                throw new ApiException(HttpStatus.CONFLICT, "Límite insuficiente. Tu límite es $ " + accountOrigin.getTransactionLimit());
             }
             if (accountOrigin.getCurrency() == CurrencyType.USD) {
-                throw new ApiException(HttpStatus.CONFLICT, "Limite insuficiente. Tu limite es US$ " + accountOrigin.getTransactionLimit());
+                throw new ApiException(HttpStatus.CONFLICT, "Límite insuficiente. Tu límite es US$ " + accountOrigin.getTransactionLimit());
             }
         }
     }

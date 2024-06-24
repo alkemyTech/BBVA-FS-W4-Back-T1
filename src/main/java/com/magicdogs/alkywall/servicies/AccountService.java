@@ -5,6 +5,7 @@ import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.AccountBalanceDTO;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.dto.AccountPageDTO;
+import com.magicdogs.alkywall.dto.AccountThirdDTO;
 import com.magicdogs.alkywall.entities.*;
 import com.magicdogs.alkywall.enums.AccountBank;
 import com.magicdogs.alkywall.enums.AccountType;
@@ -103,7 +104,7 @@ public class AccountService {
         return modelMapperConfig.accountToDTO(savedAccount);
     }
 
-    public AccountDTO searchAccount(String value) {
+    public AccountThirdDTO searchAccount(String value) {
         Optional<Account> account = accountRepository.findByCbu(value);
         if (account.isEmpty()) {
             account = accountRepository.findByAlias(value);
@@ -111,7 +112,7 @@ public class AccountService {
 
         Account foundAccount = account.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "La cuenta no existe"));
 
-        return modelMapperConfig.accountToDTO(foundAccount);
+        return modelMapperConfig.accountThirdToDTO(foundAccount);
     }
 
     /**
