@@ -5,6 +5,7 @@ import com.magicdogs.alkywall.dto.*;
 import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.enums.CurrencyType;
 import com.magicdogs.alkywall.entities.Transaction;
+import com.magicdogs.alkywall.enums.TransactionConcept;
 import com.magicdogs.alkywall.enums.TypeTransaction;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.AccountRepository;
@@ -14,6 +15,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -102,8 +104,9 @@ public class TransactionService {
         }
     }
 
-    public Optional<Page<TransactionDTO>> getTransactionsPageByUserId(Long id, String userEmail, int page, int size){
-        if(page < 0 || size <= 0) throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
+    public Optional<Page<TransactionDTO>> getTransactionsPageByUserId(Long id, String userEmail, int page, int size) {
+        if (page < 0 || size <= 0)
+            throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
 
         var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         if (!Objects.equals(user.getIdUser(), id)) {
@@ -113,8 +116,9 @@ public class TransactionService {
         return transactions.map(t -> t.map(modelMapperConfig::transactionToDTO));
     }
 
-    public Optional<Page<TransactionDTO>> getTransactionsPageByUserAccountId(Long id, String userEmail, int page, int size){
-        if(page < 0 || size <= 0) throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
+    public Optional<Page<TransactionDTO>> getTransactionsPageByUserAccountId(Long id, String userEmail, int page, int size) {
+        if (page < 0 || size <= 0)
+            throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
 
         var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
@@ -123,6 +127,8 @@ public class TransactionService {
 
 
         Optional<Page<Transaction>> transactions = transactionRepository.findByAccountIdAccountOrderByTransactionDateDesc(id, PageRequest.of(page, size));
+
+
         return transactions.map(t -> t.map(modelMapperConfig::transactionToDTO));
     }
 
@@ -197,4 +203,95 @@ public class TransactionService {
 
         return modelMapperConfig.transactionToDTO(transaction);
     }
+    public ResponseEntity<?> getTransactionsPageByUserAccountIdWithFilters(
+            Long id,
+            String userEmail,
+            int page,
+            int size,
+            Double minAmount,
+            Double maxAmount,
+            String type,
+            String concept) {
+
+        if(page < 0 || size <= 0) throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
+
+        var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        var account = accountRepository.findByIdAccountAndUser(id, user)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada para el usuario"));
+
+
+        Optional<List<Transaction>> transactions = transactionRepository.findByAccountIdAccountOrderByTransactionDateDesc(id);
+        if(transactions.isEmpty()){
+            throw new ApiException(HttpStatus.NOT_FOUND, "No se encontraron transacciones para el usuario con ID " + id);
+        }
+        List<Transaction> transactionsFiltered = transactions.get();
+        if(minAmount != null){
+            transactionsFiltered = transactionsFiltered.stream().filter(t -> t.getAmount() >= minAmount).toList();
+
+        }
+        if(maxAmount != null){
+            transactionsFiltered = transactionsFiltered.stream().filter(t -> t.getAmount() <= maxAmount).toList();
+        }
+        if(type != null){
+            transactionsFiltered = transactionsFiltered.stream().filter(t -> t.getType().name().equalsIgnoreCase(type)).toList();
+        }
+        if(concept != null){
+            transactionsFiltered = transactionsFiltered.stream().filter(t -> t.getConcept().name().equalsIgnoreCase(concept)).toList();
+        }
+
+        int countPages = (int) Math.ceil((double) transactionsFiltered.size() / size);
+
+        // Asegurar que el índice de la página no esté fuera de rango
+        if (page >= countPages) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "El número de página está fuera del rango.");
+        }
+
+        Double amountMax = findMaxAmount(transactions.get());
+        // Calcular el índice de inicio y fin para la sublista
+        int fromIndex = page * size;
+        int toIndex = Math.min(fromIndex + size, transactionsFiltered.size());
+        List<Transaction> transactionsPage = transactionsFiltered.subList(fromIndex, toIndex);
+
+        StringBuilder prev = new StringBuilder();
+        StringBuilder next = new StringBuilder();
+
+        String queryParams = buildQueryParams(minAmount, maxAmount, type, concept, size);
+
+        if(page > 0 && countPages > 1){
+            prev.append("/transactions/userAccountId/").append(id).append("/filters?page=").append(page - 1).append(queryParams);
+        }
+        if(countPages > 1 && page < countPages - 1){
+            next.append("/transactions/userAccountId/").append(id).append("/filters?page=").append(page + 1).append(queryParams);
+        }
+
+        List<TransactionDTO> transactionDTOS = transactionsPage.stream().map(modelMapperConfig::transactionToDTO).toList();
+        return ResponseEntity.ok(new TransactionPageDTO(transactionDTOS, next.toString(), prev.toString(), countPages, amountMax));
+    }
+    public static double findMaxAmount(List<Transaction> transactionsFiltered) {
+        return transactionsFiltered.stream()
+                .max(Comparator.comparingDouble(Transaction::getAmount))
+                .orElseThrow(() -> new IllegalArgumentException("La lista está vacía"))
+                .getAmount();
+    }
+    public static double findMaxAmount2(List<TransactionDTO> transactionsFiltered) {
+        return transactionsFiltered.stream()
+                .max(Comparator.comparingDouble(TransactionDTO::getAmount))
+                .orElseThrow(() -> new IllegalArgumentException("La lista está vacía"))
+                .getAmount();
+    }
+
+
+    private String buildQueryParams(Double minAmount, Double maxAmount, String type, String concept, int size) {
+        StringBuilder queryParams = new StringBuilder();
+
+        if(minAmount != null) queryParams.append("&minAmount=").append(minAmount);
+        if(maxAmount != null) queryParams.append("&maxAmount=").append(maxAmount);
+        if(type != null) queryParams.append("&type=").append(type);
+        if(concept != null) queryParams.append("&concept=").append(concept);
+        queryParams.append("&size=").append(size);
+
+        return queryParams.toString();
+    }
+
 }

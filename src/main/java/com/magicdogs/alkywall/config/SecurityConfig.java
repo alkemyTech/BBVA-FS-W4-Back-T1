@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/users/inactive").hasRole("ADMIN")
                         .requestMatchers("/transactions/userId/").hasRole("ADMIN")
                         .requestMatchers("/transactions/id/").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/transactions/userAccountId/**").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
