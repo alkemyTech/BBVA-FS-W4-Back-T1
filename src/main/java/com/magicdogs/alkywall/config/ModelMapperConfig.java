@@ -34,7 +34,13 @@ public class ModelMapperConfig {
 
     public TransactionDTO transactionToDTO(Transaction transaction){return modelMapper().map(transaction, TransactionDTO.class);}
 
-    public ThirdAccount ThirdAccountDTOToEntitie(ThirdAccountDTO dto){
+    public ThirdAccount ThirdAccountDTOToEntity(ThirdAccountCreateDTO dto){
         return modelMapper().map(dto,ThirdAccount.class);
     }
+
+    public ThirdAccountDTO ThirdAccountToDTO(ThirdAccount thirdAccount){
+        return modelMapper().map(thirdAccount, ThirdAccountDTO.class);
+    }
+
+    public AccountThirdDTO accountThirdToDTO(Account account){return modelMapper().map(account, AccountThirdDTO.class);}
 }

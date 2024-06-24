@@ -99,6 +99,7 @@ public class RegisterTest {
     void whenValidInput_thenReturns201() throws Exception {
 
         var validUserDTO = new UserDTO(
+                1L,
                 "Juan",                         // firstName
                 "Pérez",                        // lastName
                 LocalDate.of(1990, 1, 1),       // birthDate

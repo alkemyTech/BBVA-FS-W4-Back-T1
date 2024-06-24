@@ -1,6 +1,8 @@
 package com.magicdogs.alkywall.servicies;
 
 import com.magicdogs.alkywall.config.ModelMapperConfig;
+import com.magicdogs.alkywall.dto.AccountDTO;
+import com.magicdogs.alkywall.dto.ThirdAccountCreateDTO;
 import com.magicdogs.alkywall.dto.ThirdAccountDTO;
 import com.magicdogs.alkywall.entities.ThirdAccount;
 import com.magicdogs.alkywall.exceptions.ApiException;
@@ -8,10 +10,13 @@ import com.magicdogs.alkywall.repositories.AccountRepository;
 import com.magicdogs.alkywall.repositories.ThirdAccountRepository;
 import com.magicdogs.alkywall.repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -21,45 +26,58 @@ public class ThirdAccountService {
     private final ModelMapperConfig modelMapperConfig;
     private UserRepository userRepository;
 
-    public String creatThirdAccount (ThirdAccountDTO thirdAccountDTO, String userEmail){
-        var userOrigin = userRepository.findByEmail(userEmail)
+    public String createThirdAccount(ThirdAccountCreateDTO thirdAccountCreateDTO, String userEmail){
+        var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-        var account = accountRepository.findByCbu(thirdAccountDTO.getCbu())
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "CBU no encontrado"));
-        if(userOrigin == null && account == null) throw new ApiException(HttpStatus.NOT_FOUND, "CBU o usuario no encontrado");
-        var oldThirdAccount = thirdAccountRepository.findByCBUAndUser(thirdAccountDTO.getCbu(), userOrigin);
-        if(!oldThirdAccount.get().isEmpty()){ throw new ApiException(HttpStatus.NOT_FOUND, "El CBU ya fue guardado"); }
-                //.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "El CBU ya fue guardado"));
 
-        var newThirdAccount = modelMapperConfig.ThirdAccountDTOToEntitie(thirdAccountDTO);
-        newThirdAccount.setUser(userOrigin);
+        var destinationAccount = accountRepository.findById(thirdAccountCreateDTO.getIdDestinationAccount())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "CBU no encontrado"));
+
+        var destinationUser = userRepository.findById(destinationAccount.getUser().getIdUser())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario destino no encontrado"));
+
+        if(user == null && destinationAccount == null) throw new ApiException(HttpStatus.NOT_FOUND, "CBU o usuario no encontrado");
+
+        var oldThirdAccount = thirdAccountRepository.findByDestinationAccountAndUser(destinationAccount, user);
+
+        if(oldThirdAccount.isPresent()){ throw new ApiException(HttpStatus.NOT_FOUND, "El CBU ya se encuentra en su agenda"); }
+
+        var newThirdAccount = modelMapperConfig.ThirdAccountDTOToEntity(thirdAccountCreateDTO);
+
+        newThirdAccount.setNickname(thirdAccountCreateDTO.getNickname());
+        newThirdAccount.setDestinationAccount(destinationAccount);
+        newThirdAccount.setDestinationUser(destinationUser);
+        newThirdAccount.setUser(user);
+
         thirdAccountRepository.save(newThirdAccount);
 
-        return "Se pudo agregar correctamente";
+        return "Se agregó correctamente";
     }
 
-    public String deleteThirdAccount (String cbu, String userEmail){
+    public String deleteThirdAccount (Long id, String userEmail){
 
-        var userOrigin = userRepository.findByEmail(userEmail)
+        var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        var thirdAccount = thirdAccountRepository.findByCBUAndUser(cbu, userOrigin).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "CBU no encontrado"));
-        ThirdAccount thirdAccount2 = null;
-        for(ThirdAccount t: thirdAccount){
-            if(t.getUser().getIdUser().equals(userOrigin.getIdUser())){
-                thirdAccount2 = t;
-            }
-        }
-        /*Optional<ThirdAccount> thirdAccount2 = thirdAccount.stream()
-                .filter(t -> t.getUser().getIdUser().equals(userOrigin.getIdUser()))
-                .findFirst();*/
+        var DestinationAccount = accountRepository.findById(id)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "CBU no encontrado"));
 
-        if (thirdAccount2 == null) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "El CBU no lo tiene el usuario logeado");
-        }
+        var thirdAccount = thirdAccountRepository.findByDestinationAccountAndUser(DestinationAccount, user)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "CBU no encontrado en la agenda"));
 
-        thirdAccountRepository.delete(thirdAccount2);
+        thirdAccountRepository.delete(thirdAccount);
 
-        return "Se pudo eliminar correctamente";
+        return "Se eliminó correctamente";
+    }
+
+    public List<ThirdAccountDTO> getThirdAccount(String email) {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        List<ThirdAccount> thirdAccountList = thirdAccountRepository.findByUser(user);
+
+        return thirdAccountList.stream()
+                .map(modelMapperConfig::ThirdAccountToDTO)
+                .collect(Collectors.toList());
     }
 }

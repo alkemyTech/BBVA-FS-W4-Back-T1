@@ -51,8 +51,8 @@ public class UserUpdateServiceTest {
         user.setIdUser(1L);
         user.setEmail("user@email.com");
 
-        userDto = new UserDTO("nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@email.com");
-        userUpdateDTO = new UserUpdateDTO("nombre", "apellido", "password");
+        userDto = new UserDTO(1L, "nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@email.com");
+        userUpdateDTO = new UserUpdateDTO("nombre", "apellido", LocalDate.of(1990, 1, 1), UserGender.MALE, "35987654", "password");
     }
 
     @Test

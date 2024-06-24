@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.controllers;
 
+import com.magicdogs.alkywall.dto.ThirdAccountCreateDTO;
 import com.magicdogs.alkywall.dto.ThirdAccountDTO;
 import com.magicdogs.alkywall.servicies.JWTService;
 import com.magicdogs.alkywall.servicies.ThirdAccountService;
@@ -14,6 +15,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/cbu")
 @AllArgsConstructor
@@ -23,25 +27,30 @@ public class ThirdAccountController {
     private JWTService jwtService;
     private final ThirdAccountService thirdAccountService;
 
-    @Operation(summary = "Agrego el cbu de la agenda")
-    @PostMapping("")
-    public ResponseEntity<?> addCBU(@RequestBody @Valid ThirdAccountDTO thirdAccountDTO, HttpServletRequest request){
+    @Operation(summary = "Obtengo lista de contactos")
+    @GetMapping("")
+    public ResponseEntity<?> getThirdAccounts(HttpServletRequest request){
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
-        var mensaje = thirdAccountService.creatThirdAccount(thirdAccountDTO, userEmail);
+        List<ThirdAccountDTO> thirdAccountDTO = thirdAccountService.getThirdAccount(userEmail);
+        return ResponseEntity.ok(thirdAccountDTO);
+    }
 
+    @Operation(summary = "Agrego el cbu de la agenda")
+    @PostMapping("")
+    public ResponseEntity<?> addCBU(@RequestBody @Valid ThirdAccountCreateDTO thirdAccountCreateDTO, HttpServletRequest request){
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var mensaje = thirdAccountService.createThirdAccount(thirdAccountCreateDTO, userEmail);
         return ResponseEntity.ok().body(mensaje);
     }
 
     @Operation(summary = "Elimino el cbu de la agenda")
     @DeleteMapping("/{cbu}")
-    public ResponseEntity<?> deleteCBU(@PathVariable("cbu") @NotBlank @NotNull @NotEmpty String cbu, HttpServletRequest request){
+    public ResponseEntity<?> deleteCBU(@PathVariable("cbu") Long id, HttpServletRequest request){
         var token = jwtService.getJwtFromCookies(request);
         var userEmail = jwtService.extractUserId(token);
-        var mensaje = thirdAccountService.deleteThirdAccount(cbu, userEmail);
-
+        var mensaje = thirdAccountService.deleteThirdAccount(id, userEmail);
         return ResponseEntity.ok().body(mensaje);
-
-
     }
 }
