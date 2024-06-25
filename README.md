@@ -27,36 +27,11 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
     cd BBVA-FS-W4-Back-T1
     ```
 
-## Usage
+# Usage
 
-### API Endpoints
+## API Endpoints
 
-#### Transactions
-- **Send Money in ARS**
-    - `POST /transactions/sendArs`
-
-  **Request Body:**
-  ```json
-    {
-    "destinationIdAccount":2,
-    "amount":100,
-    "description": "Envio de dinero en pesos"
-    }
-  ```
-
-- **Send Money in USD**
-    - `POST /transactions/sendUsd`
-
-  **Request Body:**
-  ```json
-    {
-    "destinationIdAccount":1,
-    "amount":50,
-    "description": "Envio de dinero en dolares"
-    }
-  ```
-
-#### Authentication
+### Authentication
 - **Register a User**
     - `POST /auth/register`
 
@@ -94,7 +69,7 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
     }
   ```
 
-#### Users (Requires ADMIN Role)
+### Users (Requires ADMIN Role)
 - **Get All Users**
   - `GET /users`
 
@@ -183,7 +158,7 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
   - *404 Not Found:*
     - User not found.
     
-## Accounts
+### Accounts
 
 - **Get Accounts by User ID**
   - `GET /accounts/{userId}`
@@ -411,7 +386,7 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
     - If there is an error in processing the request.
 
 
-## FixedTerm
+### FixedTerm
 
 - **Create a Fixed Term**
   - `POST /fixedTerm`
@@ -519,7 +494,7 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
   - *500 Internal Server Error:*
     - If there is an error in processing the request.
 
-## Transaction
+### Transaction
 - **Send money Ars**
   - `POST /transactions/sendArs`
   
