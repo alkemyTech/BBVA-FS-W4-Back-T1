@@ -102,23 +102,342 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
 - **Get User by ID**
     - `GET /users/{id}`
 
-#### Accounts
+## Accounts
+
 - **Get Accounts by User ID**
-    - `GET /accounts/{userId}`
+  - `GET /accounts/{userId}`
+
+  **Request Parameters:**
+  - `page` (default: 0)
+  - `size` (default: 10)
+
+  **Response:**
+    ```json
+    {
+      "accounts": [
+        {
+          "idAccount": 1,
+          "accountType": "CAJA_AHORRO",
+          "currency": "ARS",
+          "bank": "BANCO_NACION",
+          "cbu": "1234567890123456789012",
+          "alias": "mi.cuenta",
+          "transactionLimit": 10000.00,
+          "balance": 5000.00
+        }
+      ],
+      "nextPage": "/accounts/{userId}?page=1",
+      "prevPage": null,
+      "countPages": 10
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `page` or `size` parameters are invalid.
+  - *404 Not Found:*
+    - If the user with the specified `userId` does not exist.
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+- **Get Inactive Accounts by User ID**
+  - `GET /accounts/{userId}/inactive`
+
+  **Request Parameters:**
+  - `page` (default: 0)
+  - `size` (default: 10)
+
+  **Response:**
+    ```json
+    {
+      "accounts": [
+        {
+          "idAccount": 2,
+          "accountType": "CAJA_AHORRO",
+          "currency": "ARS",
+          "bank": "BANCO_PROVINCIA",
+          "cbu": "9876543210987654321098",
+          "alias": "otra.cuenta",
+          "transactionLimit": 5000.00,
+          "balance": 0.00
+        }
+      ],
+      "nextPage": "/accounts/{userId}/inactive?page=1",
+      "prevPage": null,
+      "countPages": 5
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `page` or `size` parameters are invalid.
+  - *404 Not Found:*
+    - If the user with the specified `userId` does not exist.
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
 
 
 - **Create a New Account**
-    - `POST /accounts`
+  - `POST /accounts`
 
   **Request Body:**
-  ```json
+    ```json
     {
-    "currency": "ARS"
+      "accountType": "CAJA_AHORRO",
+      "currency": "ARS"
     }
-  ```
+    ```
 
-- **Get Account Balances**
-    - `GET /accounts/balance`
+  **Response:**
+    ```json
+    {
+      "idAccount": 3,
+      "accountType": "CAJA_AHORRO",
+      "currency": "ARS",
+      "bank": "BANCO_NACION",
+      "cbu": "2345678901234567890123",
+      "alias": "nueva.cuenta",
+      "transactionLimit": 10000.00,
+      "balance": 0.00
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the request body is missing required fields or contains invalid data.
+    - If the `accountType` or `currency` is not supported.
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+- **Update Account Transaction Limit**
+  - `PUT /accounts/{idAccount}`
+
+  **Request Body:**
+    ```json
+    {
+      "transactionLimit": 15000.00
+    }
+    ```
+
+  **Response:**
+    ```json
+    {
+      "idAccount": 1,
+      "accountType": "CAJA_AHORRO",
+      "currency": "ARS",
+      "bank": "BANCO_NACION",
+      "cbu": "1234567890123456789012",
+      "alias": "mi.cuenta",
+      "transactionLimit": 15000.00,
+      "balance": 5000.00
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the request body is missing the `transactionLimit` field or contains an invalid value.
+  - *404 Not Found:*
+    - If the account with the specified `idAccount` does not exist.
+  - *401 Unauthorized:*
+    - If the user is not authenticated or does not have permission to update the account.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+- **Get Account Balance**
+  - `GET /accounts/balance`
+
+  **Response:**
+    ```json
+    {
+      "accountArs": [
+        {
+          "idAccount": 1,
+          "accountType": "CAJA_AHORRO",
+          "currency": "ARS",
+          "bank": "BANCO_NACION",
+          "cbu": "1234567890123456789012",
+          "alias": "mi.cuenta",
+          "transactionLimit": 10000.00,
+          "balance": 5000.00
+        }
+      ],
+      "accountUsd": {
+        "idAccount": 2,
+        "accountType": "CAJA_AHORRO",
+        "currency": "USD",
+        "bank": "BANCO_NACION",
+        "cbu": "2345678901234567890123",
+        "alias": "mi.cuenta.usd",
+        "transactionLimit": 10000.00,
+        "balance": 3000.00
+      },
+      "history": [],
+      "fixedTerms": []
+    }
+    ```
+
+  **Possible Errors:**
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+- **Search Account by CBU or Alias**
+  - `GET /accounts/search`
+
+  **Request Parameters:**
+  - `CBU O ALIAS` (String)
+
+  **Response:**
+    ```json
+    {
+      "idAccount": 1,
+      "accountType": "CAJA_AHORRO",
+      "currency": "ARS",
+      "bank": "BANCO_NACION",
+      "cbu": "1234567890123456789012",
+      "alias": "mi.cuenta",
+      "transactionLimit": 10000.00,
+      "balance": 5000.00
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `CBU` or `alias` parameter is missing or invalid.
+  - *404 Not Found:*
+    - If no account matches the provided `CBU` or `alias`.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+- **Delete Account by ID**
+  - `DELETE /accounts/accountId/{id}`
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `id` parameter is missing or invalid.
+  - *404 Not Found:*
+    - If the account with the specified `id` does not exist.
+  - *401 Unauthorized:*
+    - If the user is not authenticated or does not have permission to delete the account.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+
+## FixedTerm
+
+- **Create a Fixed Term**
+  - `POST /fixedTerm`
+
+  **Request Body:**
+    ```json
+    {
+      "amount": 10000.00,
+      "closingDate": "2024-12-31"
+    }
+    ```
+
+  **Response:**
+    ```json
+    {
+      "idDeposit": 1,
+      "amount": 10000.00,
+      "interest": 5.0,
+      "creationDate": "2024-06-24T12:34:56",
+      "closingDate": "2024-12-31T12:00:00",
+      "interestTotal": 500.00,
+      "interestTodayWin": 1.37,
+      "amountTotalToReceive": 10500.00
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `amount` is less than the minimum required amount.
+    - If the `closingDate` is invalid or in the past.
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+
+- **Simulate a Fixed Term**
+  - `POST /fixedTerm/simulate`
+
+  **Request Body:**
+    ```json
+    {
+      "amount": 10000.00,
+      "closingDate": "2024-12-31"
+    }
+    ```
+
+  **Response:**
+    ```json
+    {
+      "idDeposit": null,
+      "amount": 10000.00,
+      "interest": 5.0,
+      "creationDate": "2024-06-24T12:34:56",
+      "closingDate": "2024-12-31T12:00:00",
+      "interestTotal": 500.00,
+      "interestTodayWin": 1.37,
+      "amountTotalToReceive": 10500.00
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `amount` is less than the minimum required amount.
+    - If the `closingDate` is invalid or in the past.
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+
+- **Get Fixed Terms for Logged-in User**
+  - `GET /fixedTerm`
+
+  **Request Parameters:**
+  - `page` (default: 0)
+  - `size` (default: 10)
+
+  **Response:**
+    ```json
+    {
+      "fixedTerms": [
+        {
+          "idDeposit": 1,
+          "amount": 10000.00,
+          "interest": 5.0,
+          "creationDate": "2024-06-24T12:34:56",
+          "closingDate": "2024-12-31T12:00:00",
+          "interestTotal": 500.00,
+          "interestTodayWin": 1.37,
+          "amountTotalToReceive": 10500.00
+        }
+      ],
+      "nextPage": "/fixedTerm?page=1",
+      "prevPage": null,
+      "countPages": 10
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `page` or `size` parameters are invalid.
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
 
 
 ## Test Data
