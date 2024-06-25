@@ -1,5 +1,6 @@
 package com.magicdogs.alkywall.repositories;
 
+import com.magicdogs.alkywall.entities.Account;
 import com.magicdogs.alkywall.entities.ThirdAccount;
 import com.magicdogs.alkywall.entities.User;
 import org.springframework.stereotype.Repository;
@@ -10,6 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface ThirdAccountRepository extends JpaRepository<ThirdAccount, Long> {
-    Optional<List<ThirdAccount>> findByCBUAndUser(String cbu, User user);
-    void deleteByCBU(String cbu);
+    List<ThirdAccount> findByUser(User user);
+    Optional<ThirdAccount> findByDestinationAccountAndUser(Account account, User user);
 }

@@ -62,7 +62,7 @@ public class UserUpdateControllerTest {
         token = "mockedToken";
         email = "mockedUser@example.com";
 
-        UserDTO userDto = new UserDTO("nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@email.com");
+        UserDTO userDto = new UserDTO(1L, "nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@email.com");
         when(jwtService.getJwtFromCookies(any(HttpServletRequest.class))).thenReturn(token);
         when(jwtService.extractUserId(token)).thenReturn(email);
         when(userService.update(anyLong(), anyString(), any(UserUpdateDTO.class))).thenReturn(userDto);
@@ -72,7 +72,7 @@ public class UserUpdateControllerTest {
     @Test
     @WithMockUser
     public void testUserUpdate() throws Exception {
-        UserUpdateDTO userUpdateDTO = new UserUpdateDTO("nombre", "apellido", "password");
+        UserUpdateDTO userUpdateDTO = new UserUpdateDTO("nombre", "apellido", LocalDate.of(1990, 1, 1), UserGender.MALE, "35987654", "password");
         mockMvc.perform(put("/users/"+userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userUpdateDTO)))
@@ -84,7 +84,7 @@ public class UserUpdateControllerTest {
     @Test
     @WithMockUser
     public void testUserUpdateNotFound() throws Exception {
-        UserUpdateDTO userUpdateDTO = new UserUpdateDTO("nombre", "apellido", "password");
+        UserUpdateDTO userUpdateDTO = new UserUpdateDTO("nombre", "apellido", LocalDate.of(1990, 1, 1), UserGender.MALE, "35987654", "password");
         mockMvc.perform(put("/user/"+userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userUpdateDTO)))

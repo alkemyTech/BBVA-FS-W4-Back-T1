@@ -61,7 +61,7 @@ public class LoginControllerTest {
     @DisplayName("Inicio de sesion exitoso")
     @Test
     public void testLoginSuccess() throws Exception {
-        UserDTO userReturn = new UserDTO("nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@example.com");
+        UserDTO userReturn = new UserDTO(1L, "nombre", "apellido", LocalDate.of(1992, 2, 2), UserGender.MALE, DocumentType.DNI, "35987654", "user@example.com");
 
         when(securityService.login(any(UserLoginDTO.class))).thenReturn("jwt-token");
         when(securityService.searchUser(any(UserLoginDTO.class))).thenReturn(userReturn);

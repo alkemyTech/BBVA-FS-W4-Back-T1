@@ -44,8 +44,8 @@ public class UserControllerTest {
     public void testUsersListSuccess() throws Exception {
         UserPageDTO mockUserPage = new UserPageDTO();
         mockUserPage.setUsers(List.of(
-                new UserDTO("John", "Doe", LocalDate.of(1990, 1, 1), UserGender.MALE, DocumentType.DNI, "33456789", "john.doe@example.com"),
-                new UserDTO("Jane", "Smith", LocalDate.of(1992, 2, 2), UserGender.FEMALE, DocumentType.DNI, "35987654", "jane.smith@example.com")
+                new UserDTO(1L, "John", "Doe", LocalDate.of(1990, 1, 1), UserGender.MALE, DocumentType.DNI, "33456789", "john.doe@example.com"),
+                new UserDTO(2L, "Jane", "Smith", LocalDate.of(1992, 2, 2), UserGender.FEMALE, DocumentType.DNI, "35987654", "jane.smith@example.com")
         ));
         mockUserPage.setNextPage("/users?page=1");
         mockUserPage.setPrevPage("");
