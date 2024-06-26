@@ -104,13 +104,21 @@ public class AccountService {
         return modelMapperConfig.accountToDTO(savedAccount);
     }
 
-    public AccountThirdDTO searchAccount(String value) {
+    public AccountThirdDTO searchAccount(String value, String userEmail) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
         Optional<Account> account = accountRepository.findByCbu(value);
+
         if (account.isEmpty()) {
             account = accountRepository.findByAlias(value);
         }
 
         Account foundAccount = account.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "La cuenta no existe"));
+
+        if (foundAccount.getUser().equals(user)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "No puedes ingresar una cuenta propia");
+        }
 
         return modelMapperConfig.accountThirdToDTO(foundAccount);
     }

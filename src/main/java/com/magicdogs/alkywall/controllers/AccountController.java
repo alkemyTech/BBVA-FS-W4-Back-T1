@@ -69,8 +69,10 @@ public class AccountController {
 
     @Operation(summary = "Obtener cuenta a través de CBU o Alias")
     @GetMapping("/search")
-    public ResponseEntity<?> searchAccount(@RequestParam String value){
-        var AccountThirdDTO = accountService.searchAccount(value);
+    public ResponseEntity<?> searchAccount(@RequestParam String value, HttpServletRequest request){
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var AccountThirdDTO = accountService.searchAccount(value, userEmail);
         return ResponseEntity.ok(AccountThirdDTO);
     }
 
