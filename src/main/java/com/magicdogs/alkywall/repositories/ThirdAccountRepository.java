@@ -13,4 +13,5 @@ import java.util.Optional;
 public interface ThirdAccountRepository extends JpaRepository<ThirdAccount, Long> {
     List<ThirdAccount> findByUser(User user);
     Optional<ThirdAccount> findByDestinationAccountAndUser(Account account, User user);
+    Optional<ThirdAccount> findByIdThirdAccountAndUser(Long idThirdAccount, User user);
 }
