@@ -4,6 +4,7 @@ import com.magicdogs.alkywall.config.ModelMapperConfig;
 import com.magicdogs.alkywall.dto.AccountDTO;
 import com.magicdogs.alkywall.dto.ThirdAccountCreateDTO;
 import com.magicdogs.alkywall.dto.ThirdAccountDTO;
+import com.magicdogs.alkywall.dto.ThirdAccountUpdateDTO;
 import com.magicdogs.alkywall.entities.ThirdAccount;
 import com.magicdogs.alkywall.exceptions.ApiException;
 import com.magicdogs.alkywall.repositories.AccountRepository;
@@ -31,16 +32,18 @@ public class ThirdAccountService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         var destinationAccount = accountRepository.findById(thirdAccountCreateDTO.getIdDestinationAccount())
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "CBU no encontrado"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta destino no encontrada"));
 
         var destinationUser = userRepository.findById(destinationAccount.getUser().getIdUser())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario destino no encontrado"));
 
-        if(user == null && destinationAccount == null) throw new ApiException(HttpStatus.NOT_FOUND, "CBU o usuario no encontrado");
+        if (destinationAccount.getUser().equals(user)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "No puedes agregar una cuenta propia");
+        }
 
         var oldThirdAccount = thirdAccountRepository.findByDestinationAccountAndUser(destinationAccount, user);
 
-        if(oldThirdAccount.isPresent()){ throw new ApiException(HttpStatus.NOT_FOUND, "El CBU ya se encuentra en su agenda"); }
+        if(oldThirdAccount.isPresent()){ throw new ApiException(HttpStatus.NOT_FOUND, "La cuenta ya se encuentra en su lista de contactos"); }
 
         var newThirdAccount = modelMapperConfig.ThirdAccountDTOToEntity(thirdAccountCreateDTO);
 
@@ -51,23 +54,19 @@ public class ThirdAccountService {
 
         thirdAccountRepository.save(newThirdAccount);
 
-        return "Se agregó correctamente";
+        return "Contacto guardado correctamente";
     }
 
-    public String deleteThirdAccount (Long id, String userEmail){
-
+    public String deleteThirdAccount (Long idThirdAccount, String userEmail){
         var user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        var DestinationAccount = accountRepository.findById(id)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "CBU no encontrado"));
-
-        var thirdAccount = thirdAccountRepository.findByDestinationAccountAndUser(DestinationAccount, user)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "CBU no encontrado en la agenda"));
+        var thirdAccount = thirdAccountRepository.findByIdThirdAccountAndUser(idThirdAccount, user)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada en la lista de contactos"));
 
         thirdAccountRepository.delete(thirdAccount);
 
-        return "Se eliminó correctamente";
+        return "Contacto eliminado correctamente";
     }
 
     public List<ThirdAccountDTO> getThirdAccount(String email) {
@@ -79,5 +78,22 @@ public class ThirdAccountService {
         return thirdAccountList.stream()
                 .map(modelMapperConfig::ThirdAccountToDTO)
                 .collect(Collectors.toList());
+    }
+
+    public String updateThirdAccount(ThirdAccountUpdateDTO thirdAccountUpdateDTO, String userEmail) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        var thirdAccount = thirdAccountRepository.findById(thirdAccountUpdateDTO.getIdThirdAccount())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Cuenta no encontrada"));
+
+        if (!thirdAccount.getUser().equals(user)) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "No tienes permiso para actualizar esta cuenta");
+        }
+
+        thirdAccount.setNickname(thirdAccountUpdateDTO.getNickname());
+        thirdAccountRepository.save(thirdAccount);
+
+        return "Referencia del contacto actualizada correctamente";
     }
 }

@@ -71,7 +71,7 @@ public class SecurityService {
 
     public UserDTO register(UserRegisterDTO registerRequest, RoleNameEnum roleName) {
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Ya existe un usuario registrado con ese Email");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Ese correo electrónico ya está en uso. Elige otro");
         }
 
         Role role = roleRepository.findByName(roleName)

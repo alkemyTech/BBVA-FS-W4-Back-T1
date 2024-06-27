@@ -159,7 +159,6 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
     - User not found.
     
 ### Accounts
-
 - **Get Accounts by User ID**
   - `GET /accounts/{userId}`
 

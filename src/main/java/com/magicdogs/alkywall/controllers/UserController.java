@@ -57,7 +57,7 @@ public class UserController {
         return ResponseEntity.ok(userUpdated);
     }
 
-    @Operation(summary = "Obtener datos de un usuario por ID")
+    @Operation(summary = "Obtener un usuario segun su id")
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> userDetails(@PathVariable Long id, HttpServletRequest request){
         var token = jwtService.getJwtFromCookies(request);
