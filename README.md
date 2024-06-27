@@ -27,36 +27,11 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
     cd BBVA-FS-W4-Back-T1
     ```
 
-## Usage
+# Usage
 
-### API Endpoints
+## API Endpoints
 
-#### Transactions
-- **Send Money in ARS**
-    - `POST /transactions/sendArs`
-
-  **Request Body:**
-  ```json
-    {
-    "destinationIdAccount":2,
-    "amount":100,
-    "description": "Envio de dinero en pesos"
-    }
-  ```
-
-- **Send Money in USD**
-    - `POST /transactions/sendUsd`
-
-  **Request Body:**
-  ```json
-    {
-    "destinationIdAccount":1,
-    "amount":50,
-    "description": "Envio de dinero en dolares"
-    }
-  ```
-
-#### Authentication
+### Authentication
 - **Register a User**
     - `POST /auth/register`
 
@@ -94,16 +69,96 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
     }
   ```
 
-#### Users (Requires ADMIN Role)
+### Users (Requires ADMIN Role)
 - **Get All Users**
-    - `GET /users`
+  - `GET /users`
 
+  **Request Parameters:**
+  - `page` (default: 0)
+  - `size` (default: 10)    
+    
+  **Request Body:**
+    ```json
+      {
+        "users": [
+          {
+            "idUser": 1,
+            "firstName": "Nombre",
+            "lastName": "Apellido",
+            "birthDate": ["aaaa", "mm", "dd"],
+            "gender": "MALE/FEMALE/NON_BINARY",
+            "documentType": "DNI",
+            "documentNumber": "11111111",
+            "email": "email@example.com"
+          }
+        ],
+        "nextPage": "/users?page=1",
+        "prevPage": "",
+        "totalPages": 1
+      }
+    ```
+  **Possible Errors:**
+  - *406 Not Acceptable:*
+    - Page number does not exist.
+    
+
+- **Update user by ID**
+  - `PUT /users/{id}`
+  
+  **Request Body:**
+    ```json
+      {
+        "firstName": "Nombre usuario",
+        "lastName": "Apellido usuario",
+        "birthDate": "aaaa-mm-dd",
+        "gender": "MALE/FEMALE/NON_BINARY",
+        "documentNumber": "11111111",
+        "password": "1234"
+      }
+    ```
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - Password can not be empty.
+  - *404 Not Found:*
+    - User not found.
+  - *409 Conflict:*
+    - Logged user does not match the received ID 
+    
+
+- **Delete user by ID**
+  - `DELETE /users/{id}`
+  
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - Cannot delete user because you do not have admin permission.
+  - *404 Not Found:*
+    - User authenticated not found.
+    - User about to be deleted not found.
+    
 
 - **Get User by ID**
-    - `GET /users/{id}`
+  - `GET /users/{id}`
 
-## Accounts
-
+  **Request Body:**
+    ```json
+    {
+      "idUser": 1,
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "birthDate": ["aaaa", "mm", "dd"],
+      "gender": "MALE/FEMALE/NON_BINARY",
+      "documentType": "DNI",
+      "documentNumber": "11111111",
+      "email": "email@example.com"
+    }
+    ```
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - `id` does not match authenticated user.
+  - *404 Not Found:*
+    - User not found.
+    
+### Accounts
 - **Get Accounts by User ID**
   - `GET /accounts/{userId}`
 
@@ -330,7 +385,7 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
     - If there is an error in processing the request.
 
 
-## FixedTerm
+### FixedTerm
 
 - **Create a Fixed Term**
   - `POST /fixedTerm`
@@ -438,8 +493,144 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
   - *500 Internal Server Error:*
     - If there is an error in processing the request.
 
+### Transaction
+- **Send money Ars**
+  - `POST /transactions/sendArs`
+  
+  **Request Body:**
+    ```json
+    {
+      "destinationIdAccount": 2,
+      "amount": 10000,
+      "originIdAccount": 1,
+      "concept": "VARIOS",
+      "description": "Envio dinero"
+    }
+    ```
+  **Possible Errors:**
+  - *404 Not Found:*
+    - Destination account not found.
+    - User not found.
+    - Origin account not found.
+  - *409 Conflict:*
+    - Different types of currencies.
+    - Insufficient balance.
+    - Insufficient limit.
+    
+
+- **Send money Usd**
+  - `POST /transactions/sendUsd`
+  **Request Body:**
+    ```json
+    {
+      "destinationIdAccount": 2,
+      "amount": 10000,
+      "originIdAccount": 1,
+      "concept": "VARIOS",
+      "description": "Envio dinero"
+    }
+    ```
+  **Possible Errors:**
+  - *404 Not Found:*
+    - Destination account not found.
+    - User not found.
+    - Origin account not found.
+  - *409 Conflict:*
+    - Different types of currencies.
+    - Insufficient balance.
+    - Insufficient limit.
 
 
+- **List transactions by user ID**
+  - `GET /transactions/userId/{userId}`
+  
+  **Possible Errors:**
+  - *404 Not Found:*
+    - No transactions found for user with that ID.
+    - User not found.
+    - account not found.
+    
+
+- **Transaction details by user ID**
+  - `GET /transactions/id/{id}`
+
+  **Possible Errors:**
+  - *404 Not Found:*
+    - User not found.
+    - Transaction ID does not match the logged user.
+    
+
+- **Deposit**
+  - `POST /transactions/deposit`
+  **Request Body:**
+    ```json
+    {
+      "amount": 10000,
+      "accountType": "CAJA_AHORRO/CUENTA_CORRIENTE",
+      "currency": "ARS/USD",
+      "concept": "VARIOS",
+      "description": "Deposito"
+    }
+    ```
+  **Possible Errors:**
+  - *404 Not Found:*
+    - User not found.
+    - account not found.
+    
+
+- **Payment**
+  - `POST /transactions/payment`
+  **Request Body:**
+    ```json
+    {
+      "amount": 10000,
+      "accountType": "CAJA_AHORRO/CUENTA_CORRIENTE",
+      "currency": "ARS/USD",
+      "concept": "VARIOS",
+      "description": "Deposito"
+    }
+    ```
+  **Possible Errors:**
+  - *404 Not Found:*
+    - User not found.
+    - account not found.
+  
+
+- **Update transaction**
+  - `PUT /transactions/{idTransaction}`
+  **Request Body:**
+    ```json
+    {
+      "description": "Deposito"
+    }
+    ```
+  **Possible Errors:**
+  - *404 Not Found:*
+    - User not found.
+    - Transaction ID does not match the logged user.
+    
+
+- **List transactions by user account**
+  - `GET /transactions/userAccountId/{userAccountId}`
+
+  **Possible Errors:**
+  - *404 Not Found:*
+    - User not found.
+    - No transactions found for user with that ID.
+    - Account not found for user.
+
+
+- **List filtered transactions by user account**
+  - `GET /transactions/userAccountId/{userAccountId}/filters`
+  
+  **Possible Errors:**
+  - *404 Not Found:*
+    - User not found.
+    - No transactions found for user with that ID.
+    - Account not found for user.
+    - The page number cannot be negative.
+    - The page number is out of range.
+  
 ## Test Data
 
 Test users have been created to facilitate testing of web functionalities.
