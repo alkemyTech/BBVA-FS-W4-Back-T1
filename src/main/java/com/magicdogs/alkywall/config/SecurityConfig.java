@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/transactions/userId/").hasRole("ADMIN")
                         .requestMatchers("/transactions/id/").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/transactions/userAccountId/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/transactions//{idAccount}/summaryPerMoth").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
