@@ -47,5 +47,6 @@ public class UserRegisterDTO {
 
     @Schema(description = "Contraseña del usuario")
     @NotBlank(message = "La contraseña no puede estar vacía")
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[@#$%^&+=])(?=.*\\d).{8,}$", message = "La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un símbolo")
     private String password;
 }
