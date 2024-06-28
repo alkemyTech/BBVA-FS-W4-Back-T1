@@ -71,7 +71,7 @@ public class SecurityService {
 
     public UserDTO register(UserRegisterDTO registerRequest, RoleNameEnum roleName) {
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Ya existe un usuario registrado con ese Email");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Ese correo electrónico ya está en uso. Elige otro");
         }
 
         Role role = roleRepository.findByName(roleName)
@@ -86,7 +86,7 @@ public class SecurityService {
         var accountUSD = new Account(AccountType.CAJA_AHORRO, CurrencyType.USD, AccountBank.ALKYWALL, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(newUser.getFirstName(), newUser.getLastName()), Constants.getTransactionLimitUsd(), 0.0, newUser, 0);
         accountRepository.save(accountUSD);
 
-        return modelMapper.map(registerRequest, UserDTO.class);
+        return modelMapper.map(newUser, UserDTO.class);
     }
 
     public String encryptPassword(String password) {

@@ -104,13 +104,21 @@ public class AccountService {
         return modelMapperConfig.accountToDTO(savedAccount);
     }
 
-    public AccountThirdDTO searchAccount(String value) {
+    public AccountThirdDTO searchAccount(String value, String userEmail) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
         Optional<Account> account = accountRepository.findByCbu(value);
+
         if (account.isEmpty()) {
             account = accountRepository.findByAlias(value);
         }
 
         Account foundAccount = account.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "La cuenta no existe"));
+
+        if (foundAccount.getUser().equals(user)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "No puedes ingresar una cuenta propia");
+        }
 
         return modelMapperConfig.accountThirdToDTO(foundAccount);
     }
@@ -164,4 +172,26 @@ public class AccountService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "La cuenta no corresponde a este usuario");
         }
     }
+
+    public void editarAlias(String alias, String email, Long id){
+        if(alias.isBlank() || alias.isEmpty()) throw new ApiException(HttpStatus.NOT_FOUND, "No puede estar vacio el alias");
+
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        Optional<Account> accountOptional = accountRepository.findById(id);
+        Account account = accountOptional.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "La cuenta no existe"));
+        Optional<Account> accountExisted = accountRepository.findByAlias(alias);
+
+        if (accountExisted.isPresent()) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Ya existe otra cuenta con ese alias");
+        }
+        if (!account.getUser().getIdUser().equals(user.getIdUser())) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "No puedes ingresar una cuenta que no es propia");
+        }
+
+        account.setAlias(alias);
+        accountRepository.save(account);
+    }
+
 }

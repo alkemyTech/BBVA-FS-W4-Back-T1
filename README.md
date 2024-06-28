@@ -27,36 +27,11 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
     cd BBVA-FS-W4-Back-T1
     ```
 
-## Usage
+# Usage
 
-### API Endpoints
+## API Endpoints
 
-#### Transactions
-- **Send Money in ARS**
-    - `POST /transactions/sendArs`
-
-  **Request Body:**
-  ```json
-    {
-    "destinationIdAccount":2,
-    "amount":100,
-    "description": "Envio de dinero en pesos"
-    }
-  ```
-
-- **Send Money in USD**
-    - `POST /transactions/sendUsd`
-
-  **Request Body:**
-  ```json
-    {
-    "destinationIdAccount":1,
-    "amount":50,
-    "description": "Envio de dinero en dolares"
-    }
-  ```
-
-#### Authentication
+### Authentication
 - **Register a User**
     - `POST /auth/register`
 
@@ -94,33 +69,568 @@ Alkywall is a virtual wallet backend developed in Java, designed to provide basi
     }
   ```
 
-#### Users (Requires ADMIN Role)
+### Users (Requires ADMIN Role)
 - **Get All Users**
-    - `GET /users`
+  - `GET /users`
 
+  **Request Parameters:**
+  - `page` (default: 0)
+  - `size` (default: 10)    
+    
+  **Request Body:**
+    ```json
+      {
+        "users": [
+          {
+            "idUser": 1,
+            "firstName": "Nombre",
+            "lastName": "Apellido",
+            "birthDate": ["aaaa", "mm", "dd"],
+            "gender": "MALE/FEMALE/NON_BINARY",
+            "documentType": "DNI",
+            "documentNumber": "11111111",
+            "email": "email@example.com"
+          }
+        ],
+        "nextPage": "/users?page=1",
+        "prevPage": "",
+        "totalPages": 1
+      }
+    ```
+  **Possible Errors:**
+  - *406 Not Acceptable:*
+    - Page number does not exist.
+    
+
+- **Update user by ID**
+  - `PUT /users/{id}`
+  
+  **Request Body:**
+    ```json
+      {
+        "firstName": "Nombre usuario",
+        "lastName": "Apellido usuario",
+        "birthDate": "aaaa-mm-dd",
+        "gender": "MALE/FEMALE/NON_BINARY",
+        "documentNumber": "11111111",
+        "password": "1234"
+      }
+    ```
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - Password can not be empty.
+  - *404 Not Found:*
+    - User not found.
+  - *409 Conflict:*
+    - Logged user does not match the received ID 
+    
+
+- **Delete user by ID**
+  - `DELETE /users/{id}`
+  
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - Cannot delete user because you do not have admin permission.
+  - *404 Not Found:*
+    - User authenticated not found.
+    - User about to be deleted not found.
+    
 
 - **Get User by ID**
-    - `GET /users/{id}`
+  - `GET /users/{id}`
 
-#### Accounts
+  **Request Body:**
+    ```json
+    {
+      "idUser": 1,
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "birthDate": ["aaaa", "mm", "dd"],
+      "gender": "MALE/FEMALE/NON_BINARY",
+      "documentType": "DNI",
+      "documentNumber": "11111111",
+      "email": "email@example.com"
+    }
+    ```
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - `id` does not match authenticated user.
+  - *404 Not Found:*
+    - User not found.
+    
+### Accounts
 - **Get Accounts by User ID**
-    - `GET /accounts/{userId}`
+  - `GET /accounts/{userId}`
+
+  **Request Parameters:**
+  - `page` (default: 0)
+  - `size` (default: 10)
+
+  **Response:**
+    ```json
+    {
+      "accounts": [
+        {
+          "idAccount": 1,
+          "accountType": "CAJA_AHORRO",
+          "currency": "ARS",
+          "bank": "BANCO_NACION",
+          "cbu": "1234567890123456789012",
+          "alias": "mi.cuenta",
+          "transactionLimit": 10000.00,
+          "balance": 5000.00
+        }
+      ],
+      "nextPage": "/accounts/{userId}?page=1",
+      "prevPage": null,
+      "countPages": 10
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `page` or `size` parameters are invalid.
+  - *404 Not Found:*
+    - If the user with the specified `userId` does not exist.
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+- **Get Inactive Accounts by User ID**
+  - `GET /accounts/{userId}/inactive`
+
+  **Request Parameters:**
+  - `page` (default: 0)
+  - `size` (default: 10)
+
+  **Response:**
+    ```json
+    {
+      "accounts": [
+        {
+          "idAccount": 2,
+          "accountType": "CAJA_AHORRO",
+          "currency": "ARS",
+          "bank": "BANCO_PROVINCIA",
+          "cbu": "9876543210987654321098",
+          "alias": "otra.cuenta",
+          "transactionLimit": 5000.00,
+          "balance": 0.00
+        }
+      ],
+      "nextPage": "/accounts/{userId}/inactive?page=1",
+      "prevPage": null,
+      "countPages": 5
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `page` or `size` parameters are invalid.
+  - *404 Not Found:*
+    - If the user with the specified `userId` does not exist.
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
 
 
 - **Create a New Account**
-    - `POST /accounts`
+  - `POST /accounts`
 
   **Request Body:**
-  ```json
+    ```json
     {
-    "currency": "ARS"
+      "accountType": "CAJA_AHORRO",
+      "currency": "ARS"
     }
-  ```
+    ```
 
-- **Get Account Balances**
-    - `GET /accounts/balance`
+  **Response:**
+    ```json
+    {
+      "idAccount": 3,
+      "accountType": "CAJA_AHORRO",
+      "currency": "ARS",
+      "bank": "BANCO_NACION",
+      "cbu": "2345678901234567890123",
+      "alias": "nueva.cuenta",
+      "transactionLimit": 10000.00,
+      "balance": 0.00
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the request body is missing required fields or contains invalid data.
+    - If the `accountType` or `currency` is not supported.
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+- **Update Account Transaction Limit**
+  - `PUT /accounts/{idAccount}`
+
+  **Request Body:**
+    ```json
+    {
+      "transactionLimit": 15000.00
+    }
+    ```
+
+  **Response:**
+    ```json
+    {
+      "idAccount": 1,
+      "accountType": "CAJA_AHORRO",
+      "currency": "ARS",
+      "bank": "BANCO_NACION",
+      "cbu": "1234567890123456789012",
+      "alias": "mi.cuenta",
+      "transactionLimit": 15000.00,
+      "balance": 5000.00
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the request body is missing the `transactionLimit` field or contains an invalid value.
+  - *404 Not Found:*
+    - If the account with the specified `idAccount` does not exist.
+  - *401 Unauthorized:*
+    - If the user is not authenticated or does not have permission to update the account.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+- **Get Account Balance**
+  - `GET /accounts/balance`
+
+  **Response:**
+    ```json
+    {
+      "accountArs": [
+        {
+          "idAccount": 1,
+          "accountType": "CAJA_AHORRO",
+          "currency": "ARS",
+          "bank": "BANCO_NACION",
+          "cbu": "1234567890123456789012",
+          "alias": "mi.cuenta",
+          "transactionLimit": 10000.00,
+          "balance": 5000.00
+        }
+      ],
+      "accountUsd": {
+        "idAccount": 2,
+        "accountType": "CAJA_AHORRO",
+        "currency": "USD",
+        "bank": "BANCO_NACION",
+        "cbu": "2345678901234567890123",
+        "alias": "mi.cuenta.usd",
+        "transactionLimit": 10000.00,
+        "balance": 3000.00
+      },
+      "history": [],
+      "fixedTerms": []
+    }
+    ```
+
+  **Possible Errors:**
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+- **Search Account by CBU or Alias**
+  - `GET /accounts/search`
+
+  **Request Parameters:**
+  - `CBU O ALIAS` (String)
+
+  **Response:**
+    ```json
+    {
+      "idAccount": 1,
+      "accountType": "CAJA_AHORRO",
+      "currency": "ARS",
+      "bank": "BANCO_NACION",
+      "cbu": "1234567890123456789012",
+      "alias": "mi.cuenta",
+      "transactionLimit": 10000.00,
+      "balance": 5000.00
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `CBU` or `alias` parameter is missing or invalid.
+  - *404 Not Found:*
+    - If no account matches the provided `CBU` or `alias`.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+- **Delete Account by ID**
+  - `DELETE /accounts/accountId/{id}`
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `id` parameter is missing or invalid.
+  - *404 Not Found:*
+    - If the account with the specified `id` does not exist.
+  - *401 Unauthorized:*
+    - If the user is not authenticated or does not have permission to delete the account.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
 
 
+### FixedTerm
+
+- **Create a Fixed Term**
+  - `POST /fixedTerm`
+
+  **Request Body:**
+    ```json
+    {
+      "amount": 10000.00,
+      "closingDate": "2024-12-31"
+    }
+    ```
+
+  **Response:**
+    ```json
+    {
+      "idDeposit": 1,
+      "amount": 10000.00,
+      "interest": 5.0,
+      "creationDate": "2024-06-24T12:34:56",
+      "closingDate": "2024-12-31T12:00:00",
+      "interestTotal": 500.00,
+      "interestTodayWin": 1.37,
+      "amountTotalToReceive": 10500.00
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `amount` is less than the minimum required amount.
+    - If the `closingDate` is invalid or in the past.
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+
+- **Simulate a Fixed Term**
+  - `POST /fixedTerm/simulate`
+
+  **Request Body:**
+    ```json
+    {
+      "amount": 10000.00,
+      "closingDate": "2024-12-31"
+    }
+    ```
+
+  **Response:**
+    ```json
+    {
+      "idDeposit": null,
+      "amount": 10000.00,
+      "interest": 5.0,
+      "creationDate": "2024-06-24T12:34:56",
+      "closingDate": "2024-12-31T12:00:00",
+      "interestTotal": 500.00,
+      "interestTodayWin": 1.37,
+      "amountTotalToReceive": 10500.00
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `amount` is less than the minimum required amount.
+    - If the `closingDate` is invalid or in the past.
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+
+- **Get Fixed Terms for Logged-in User**
+  - `GET /fixedTerm`
+
+  **Request Parameters:**
+  - `page` (default: 0)
+  - `size` (default: 10)
+
+  **Response:**
+    ```json
+    {
+      "fixedTerms": [
+        {
+          "idDeposit": 1,
+          "amount": 10000.00,
+          "interest": 5.0,
+          "creationDate": "2024-06-24T12:34:56",
+          "closingDate": "2024-12-31T12:00:00",
+          "interestTotal": 500.00,
+          "interestTodayWin": 1.37,
+          "amountTotalToReceive": 10500.00
+        }
+      ],
+      "nextPage": "/fixedTerm?page=1",
+      "prevPage": null,
+      "countPages": 10
+    }
+    ```
+
+  **Possible Errors:**
+  - *400 Bad Request:*
+    - If the `page` or `size` parameters are invalid.
+  - *401 Unauthorized:*
+    - If the user is not authenticated.
+  - *500 Internal Server Error:*
+    - If there is an error in processing the request.
+
+### Transaction
+- **Send money Ars**
+  - `POST /transactions/sendArs`
+  
+  **Request Body:**
+    ```json
+    {
+      "destinationIdAccount": 2,
+      "amount": 10000,
+      "originIdAccount": 1,
+      "concept": "VARIOS",
+      "description": "Envio dinero"
+    }
+    ```
+  **Possible Errors:**
+  - *404 Not Found:*
+    - Destination account not found.
+    - User not found.
+    - Origin account not found.
+  - *409 Conflict:*
+    - Different types of currencies.
+    - Insufficient balance.
+    - Insufficient limit.
+    
+
+- **Send money Usd**
+  - `POST /transactions/sendUsd`
+  **Request Body:**
+    ```json
+    {
+      "destinationIdAccount": 2,
+      "amount": 10000,
+      "originIdAccount": 1,
+      "concept": "VARIOS",
+      "description": "Envio dinero"
+    }
+    ```
+  **Possible Errors:**
+  - *404 Not Found:*
+    - Destination account not found.
+    - User not found.
+    - Origin account not found.
+  - *409 Conflict:*
+    - Different types of currencies.
+    - Insufficient balance.
+    - Insufficient limit.
+
+
+- **List transactions by user ID**
+  - `GET /transactions/userId/{userId}`
+  
+  **Possible Errors:**
+  - *404 Not Found:*
+    - No transactions found for user with that ID.
+    - User not found.
+    - account not found.
+    
+
+- **Transaction details by user ID**
+  - `GET /transactions/id/{id}`
+
+  **Possible Errors:**
+  - *404 Not Found:*
+    - User not found.
+    - Transaction ID does not match the logged user.
+    
+
+- **Deposit**
+  - `POST /transactions/deposit`
+  **Request Body:**
+    ```json
+    {
+      "amount": 10000,
+      "accountType": "CAJA_AHORRO/CUENTA_CORRIENTE",
+      "currency": "ARS/USD",
+      "concept": "VARIOS",
+      "description": "Deposito"
+    }
+    ```
+  **Possible Errors:**
+  - *404 Not Found:*
+    - User not found.
+    - account not found.
+    
+
+- **Payment**
+  - `POST /transactions/payment`
+  **Request Body:**
+    ```json
+    {
+      "amount": 10000,
+      "accountType": "CAJA_AHORRO/CUENTA_CORRIENTE",
+      "currency": "ARS/USD",
+      "concept": "VARIOS",
+      "description": "Deposito"
+    }
+    ```
+  **Possible Errors:**
+  - *404 Not Found:*
+    - User not found.
+    - account not found.
+  
+
+- **Update transaction**
+  - `PUT /transactions/{idTransaction}`
+  **Request Body:**
+    ```json
+    {
+      "description": "Deposito"
+    }
+    ```
+  **Possible Errors:**
+  - *404 Not Found:*
+    - User not found.
+    - Transaction ID does not match the logged user.
+    
+
+- **List transactions by user account**
+  - `GET /transactions/userAccountId/{userAccountId}`
+
+  **Possible Errors:**
+  - *404 Not Found:*
+    - User not found.
+    - No transactions found for user with that ID.
+    - Account not found for user.
+
+
+- **List filtered transactions by user account**
+  - `GET /transactions/userAccountId/{userAccountId}/filters`
+  
+  **Possible Errors:**
+  - *404 Not Found:*
+    - User not found.
+    - No transactions found for user with that ID.
+    - Account not found for user.
+    - The page number cannot be negative.
+    - The page number is out of range.
+  
 ## Test Data
 
 Test users have been created to facilitate testing of web functionalities.

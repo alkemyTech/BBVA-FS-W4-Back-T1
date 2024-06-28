@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +50,15 @@ public class AccountController {
         var accountDTO = accountService.createAccount(userEmail, account.getAccountType(), account.getCurrency());
         return ResponseEntity.ok(accountDTO);
     }
+    @Operation(summary = "Editar el alias de una cuenta propia")
+    @PutMapping("/editAlias/{idAccount}")
+    public ResponseEntity<?> editarAliasCuenta(@RequestBody @NotBlank String alias,@PathVariable("idAccount") Long id, HttpServletRequest request) {
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+       // var accountDTO = accountService.createAccount(userEmail, account.getAccountType(), account.getCurrency());
+        accountService.editarAlias(alias,userEmail, id);
+        return ResponseEntity.ok().body(null);
+    }
 
     @Operation(summary = "Editar límite de transacción de una cuenta")
     @PutMapping("/{idAccount}")
@@ -69,8 +79,10 @@ public class AccountController {
 
     @Operation(summary = "Obtener cuenta a través de CBU o Alias")
     @GetMapping("/search")
-    public ResponseEntity<?> searchAccount(@RequestParam String value){
-        var AccountThirdDTO = accountService.searchAccount(value);
+    public ResponseEntity<?> searchAccount(@RequestParam String value, HttpServletRequest request){
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var AccountThirdDTO = accountService.searchAccount(value, userEmail);
         return ResponseEntity.ok(AccountThirdDTO);
     }
 
