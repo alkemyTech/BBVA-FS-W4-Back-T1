@@ -26,7 +26,7 @@ public class FixedTermsBalanceDTO {
 
     @Schema(description = "Fecha y hora de cierre del depósito")
     private LocalDateTime closingDate;
-
+    @Schema(description = "Monto total a recibir")
     private Double amountTotalToReceive;
 
 }

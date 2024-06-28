@@ -86,7 +86,7 @@ public class SecurityService {
         var accountUSD = new Account(AccountType.CAJA_AHORRO, CurrencyType.USD, AccountBank.ALKYWALL, cbuGenerator.generateUniqueCbu(), aliasGenerator.generateUniqueAlias(newUser.getFirstName(), newUser.getLastName()), Constants.getTransactionLimitUsd(), 0.0, newUser, 0);
         accountRepository.save(accountUSD);
 
-        return modelMapper.map(registerRequest, UserDTO.class);
+        return modelMapper.map(newUser, UserDTO.class);
     }
 
     public String encryptPassword(String password) {

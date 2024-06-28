@@ -27,6 +27,7 @@ public class FixedTermController {
     private final FixedTermService fixedTermService;
     private final JWTService jwtService;
 
+    @Operation(summary = "Crear un plazo fijo")
     @PostMapping("")
     public ResponseEntity<?> createFixedTerm(@RequestBody @Valid FixedTermCreateDTO fixedTermCreateDTO, HttpServletRequest request) {
 
@@ -39,7 +40,7 @@ public class FixedTermController {
         return ResponseEntity.ok(fixedTermDeposit);
 
     }
-
+    @Operation(summary = "Simular plazo fijo.")
     @PostMapping("/simulate")
     public ResponseEntity<?> simulateFixedTerm (@RequestBody @Valid FixedTermCreateDTO fixedTermCreateDTO){
         var fixedTermDeposit = fixedTermService.simulateFixedTerm(fixedTermCreateDTO);
