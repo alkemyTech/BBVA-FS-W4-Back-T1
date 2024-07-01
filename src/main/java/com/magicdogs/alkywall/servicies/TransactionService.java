@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.TextStyle;
 import java.util.*;
@@ -322,46 +323,48 @@ public class TransactionService {
         List<Transaction> transactions = transactionsOptional.orElse(Collections.emptyList());
 
         // Obtener la fecha actual y la fecha hace 12 meses
-        LocalDateTime currentDate = LocalDateTime.now();
-        LocalDateTime twelveMonthsAgo = currentDate.minusMonths(12);
-
-        // Filtrar transacciones dentro de los últimos 12 meses
-        List<Transaction> filteredTransactions = transactions.stream()
-                .filter(transaction -> transaction.getTransactionDate().isAfter(twelveMonthsAgo))
-                .collect(Collectors.toList());
+        LocalDate currentDate = LocalDate.now();
+        LocalDate twelveMonthsAgo = currentDate.minusMonths(11).withDayOfMonth(1);
 
         // Crear un mapa para almacenar el resumen por mes y tipo de transacción
         Map<String, TransactionsSummaryPerMonthDTO> summaryMap = new LinkedHashMap<>();
 
-        // Iterar sobre las transacciones filtradas y sumar por mes y tipo
-        for (Transaction transaction : filteredTransactions) {
-            LocalDateTime transactionDate = transaction.getTransactionDate();
-            String monthKey = transactionDate.getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
+        // Inicializar el mapa con los últimos 12 meses
+        for (int i = 0; i < 12; i++) {
+            LocalDate month = twelveMonthsAgo.plusMonths(i);
+            String monthKey = month.getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
+            summaryMap.put(monthKey, new TransactionsSummaryPerMonthDTO(monthKey, 0.0, 0.0, 0.0));
+        }
 
-            TransactionsSummaryPerMonthDTO summaryDTO = summaryMap.computeIfAbsent(monthKey,
-                    key -> new TransactionsSummaryPerMonthDTO(key, 0.0, 0.0, 0.0));
+        // Filtrar y procesar transacciones dentro de los últimos 12 meses
+        for (Transaction transaction : transactions) {
+            LocalDate transactionDate = transaction.getTransactionDate().toLocalDate();
+            if (!transactionDate.isBefore(twelveMonthsAgo) && !transactionDate.isAfter(currentDate)) {
+                String monthKey = transactionDate.getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
+                TransactionsSummaryPerMonthDTO summaryDTO = summaryMap.get(monthKey);
 
-            switch (transaction.getType()) {
-                case DEPOSIT:
-                    summaryDTO.setDeposit(summaryDTO.getDeposit() + transaction.getAmount());
-                    break;
-                case PAYMENT:
-                    summaryDTO.setPayment(summaryDTO.getPayment() + transaction.getAmount());
-                    break;
-                case INCOME:
-                    summaryDTO.setIncome(summaryDTO.getIncome() + transaction.getAmount());
-                    break;
-                default:
-                    // Handle unexpected transaction type
-                    break;
+                switch (transaction.getType()) {
+                    case DEPOSIT:
+                        summaryDTO.setDeposit(summaryDTO.getDeposit() + transaction.getAmount());
+                        break;
+                    case PAYMENT:
+                        summaryDTO.setPayment(summaryDTO.getPayment() + transaction.getAmount());
+                        break;
+                    case INCOME:
+                        summaryDTO.setIncome(summaryDTO.getIncome() + transaction.getAmount());
+                        break;
+                    default:
+                        // Handle unexpected transaction type
+                        break;
+                }
             }
         }
 
         // Convertir el mapa a una lista ordenada por mes
         List<TransactionsSummaryPerMonthDTO> summaryList = new ArrayList<>(summaryMap.values());
 
-        // Aquí puedes hacer lo que necesites con summaryList, como devolverlo o procesarlo más.
         return summaryList;
     }
+
 
 }
