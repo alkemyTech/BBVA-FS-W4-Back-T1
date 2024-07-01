@@ -17,8 +17,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.time.format.TextStyle;
 import java.util.*;
@@ -326,8 +326,10 @@ public class TransactionService {
         LocalDate currentDate = LocalDate.now();
         LocalDate twelveMonthsAgo = currentDate.minusMonths(11).withDayOfMonth(1);
 
+
         // Crear un mapa para almacenar el resumen por mes y tipo de transacción
         Map<String, TransactionsSummaryPerMonthDTO> summaryMap = new LinkedHashMap<>();
+
 
         // Inicializar el mapa con los últimos 12 meses
         for (int i = 0; i < 12; i++) {
@@ -357,14 +359,14 @@ public class TransactionService {
                         // Handle unexpected transaction type
                         break;
                 }
+
             }
         }
 
         // Convertir el mapa a una lista ordenada por mes
         List<TransactionsSummaryPerMonthDTO> summaryList = new ArrayList<>(summaryMap.values());
-
+      
         return summaryList;
     }
 
 
-}
