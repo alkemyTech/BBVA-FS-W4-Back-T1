@@ -174,5 +174,15 @@ public class TransactionController {
                 id, userEmail, page, size, minAmount, maxAmount, type, concept);
     }
 
+    @Operation(summary = "Obtener resumenes de transacciones por mes separado por pago, deposito o ingreso")
+    @GetMapping("/{idAccount}/summaryPerMoth")
+    public ResponseEntity<?> summaryPerMoth(@PathVariable("idAccount") Long id, HttpServletRequest request){
+        var token = jwtService.getJwtFromCookies(request);
+        var userEmail = jwtService.extractUserId(token);
+        var summaryPerMonth = transactionService.resumenPorMes(userEmail,id);
+        //var AccountThirdDTO = accountService.searchAccount(value, userEmail);
+        return ResponseEntity.ok(summaryPerMonth);
+    }
+
 
 }

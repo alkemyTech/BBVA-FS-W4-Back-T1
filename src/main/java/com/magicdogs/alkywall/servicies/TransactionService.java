@@ -18,12 +18,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.TextStyle;
 import java.util.*;
 
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -303,6 +306,62 @@ public class TransactionService {
         queryParams.append("&size=").append(size);
 
         return queryParams.toString();
+    }
+
+    public List<TransactionsSummaryPerMonthDTO> resumenPorMes(String email, Long id) {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        Optional<Account> accountOptional = accountRepository.findById(id);
+        Account account = accountOptional.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "La cuenta no existe"));
+        if (!account.getUser().getIdUser().equals(user.getIdUser())) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "No puedes ingresar una cuenta que no es propia");
+        }
+
+        Optional<List<Transaction>> transactionsOptional = transactionRepository.findByAccountIdAccountOrderByTransactionDate(id);
+        List<Transaction> transactions = transactionsOptional.orElse(Collections.emptyList());
+
+        // Obtener la fecha actual y la fecha hace 12 meses
+        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime twelveMonthsAgo = currentDate.minusMonths(12);
+
+        // Filtrar transacciones dentro de los últimos 12 meses
+        List<Transaction> filteredTransactions = transactions.stream()
+                .filter(transaction -> transaction.getTransactionDate().isAfter(twelveMonthsAgo))
+                .collect(Collectors.toList());
+
+        // Crear un mapa para almacenar el resumen por mes y tipo de transacción
+        Map<String, TransactionsSummaryPerMonthDTO> summaryMap = new LinkedHashMap<>();
+
+        // Iterar sobre las transacciones filtradas y sumar por mes y tipo
+        for (Transaction transaction : filteredTransactions) {
+            LocalDateTime transactionDate = transaction.getTransactionDate();
+            String monthKey = transactionDate.getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
+
+            TransactionsSummaryPerMonthDTO summaryDTO = summaryMap.computeIfAbsent(monthKey,
+                    key -> new TransactionsSummaryPerMonthDTO(key, 0.0, 0.0, 0.0));
+
+            switch (transaction.getType()) {
+                case DEPOSIT:
+                    summaryDTO.setDeposit(summaryDTO.getDeposit() + transaction.getAmount());
+                    break;
+                case PAYMENT:
+                    summaryDTO.setPayment(summaryDTO.getPayment() + transaction.getAmount());
+                    break;
+                case INCOME:
+                    summaryDTO.setIncome(summaryDTO.getIncome() + transaction.getAmount());
+                    break;
+                default:
+                    // Handle unexpected transaction type
+                    break;
+            }
+        }
+
+        // Convertir el mapa a una lista ordenada por mes
+        List<TransactionsSummaryPerMonthDTO> summaryList = new ArrayList<>(summaryMap.values());
+
+        // Aquí puedes hacer lo que necesites con summaryList, como devolverlo o procesarlo más.
+        return summaryList;
     }
 
 }
