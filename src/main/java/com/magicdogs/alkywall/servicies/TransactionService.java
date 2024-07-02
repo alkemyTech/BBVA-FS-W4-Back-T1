@@ -218,6 +218,7 @@ public class TransactionService {
 
         return modelMapperConfig.transactionToDTO(transaction);
     }
+
     public ResponseEntity<?> getTransactionsPageByUserAccountIdWithFilters(
             Long id,
             String userEmail,
@@ -228,7 +229,8 @@ public class TransactionService {
             String type,
             String concept) {
 
-        if(page < 0 || size <= 0) throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
+        if (page < 0 || size <= 0)
+            throw new ApiException(HttpStatus.NOT_FOUND, "El numero de pagina o de size no pueden ser negativos.");
 
         var user = userRepository.findByEmail(userEmail).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
@@ -237,21 +239,21 @@ public class TransactionService {
 
 
         Optional<List<Transaction>> transactions = transactionRepository.findByAccountIdAccountOrderByTransactionDateDesc(id);
-        if(transactions.isEmpty()){
+        if (transactions.isEmpty()) {
             throw new ApiException(HttpStatus.NOT_FOUND, "No se encontraron transacciones para el usuario con ID " + id);
         }
         List<Transaction> transactionsFiltered = transactions.get();
-        if(minAmount != null){
+        if (minAmount != null) {
             transactionsFiltered = transactionsFiltered.stream().filter(t -> t.getAmount() >= minAmount).toList();
 
         }
-        if(maxAmount != null){
+        if (maxAmount != null) {
             transactionsFiltered = transactionsFiltered.stream().filter(t -> t.getAmount() <= maxAmount).toList();
         }
-        if(type != null){
+        if (type != null) {
             transactionsFiltered = transactionsFiltered.stream().filter(t -> t.getType().name().equalsIgnoreCase(type)).toList();
         }
-        if(concept != null){
+        if (concept != null) {
             transactionsFiltered = transactionsFiltered.stream().filter(t -> t.getConcept().name().equalsIgnoreCase(concept)).toList();
         }
 
@@ -273,22 +275,24 @@ public class TransactionService {
 
         String queryParams = buildQueryParams(minAmount, maxAmount, type, concept, size);
 
-        if(page > 0 && countPages > 1){
+        if (page > 0 && countPages > 1) {
             prev.append("/transactions/userAccountId/").append(id).append("/filters?page=").append(page - 1).append(queryParams);
         }
-        if(countPages > 1 && page < countPages - 1){
+        if (countPages > 1 && page < countPages - 1) {
             next.append("/transactions/userAccountId/").append(id).append("/filters?page=").append(page + 1).append(queryParams);
         }
 
         List<TransactionDTO> transactionDTOS = transactionsPage.stream().map(modelMapperConfig::transactionToDTO).toList();
         return ResponseEntity.ok(new TransactionPageDTO(transactionDTOS, next.toString(), prev.toString(), countPages, amountMax));
     }
+
     public static double findMaxAmount(List<Transaction> transactionsFiltered) {
         return transactionsFiltered.stream()
                 .max(Comparator.comparingDouble(Transaction::getAmount))
                 .orElseThrow(() -> new IllegalArgumentException("La lista está vacía"))
                 .getAmount();
     }
+
     public static double findMaxAmount2(List<TransactionDTO> transactionsFiltered) {
         return transactionsFiltered.stream()
                 .max(Comparator.comparingDouble(TransactionDTO::getAmount))
@@ -300,10 +304,10 @@ public class TransactionService {
     private String buildQueryParams(Double minAmount, Double maxAmount, String type, String concept, int size) {
         StringBuilder queryParams = new StringBuilder();
 
-        if(minAmount != null) queryParams.append("&minAmount=").append(minAmount);
-        if(maxAmount != null) queryParams.append("&maxAmount=").append(maxAmount);
-        if(type != null) queryParams.append("&type=").append(type);
-        if(concept != null) queryParams.append("&concept=").append(concept);
+        if (minAmount != null) queryParams.append("&minAmount=").append(minAmount);
+        if (maxAmount != null) queryParams.append("&maxAmount=").append(maxAmount);
+        if (type != null) queryParams.append("&type=").append(type);
+        if (concept != null) queryParams.append("&concept=").append(concept);
         queryParams.append("&size=").append(size);
 
         return queryParams.toString();
@@ -365,8 +369,9 @@ public class TransactionService {
 
         // Convertir el mapa a una lista ordenada por mes
         List<TransactionsSummaryPerMonthDTO> summaryList = new ArrayList<>(summaryMap.values());
-      
+
         return summaryList;
     }
+}
 
 
