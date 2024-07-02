@@ -21,8 +21,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -142,7 +144,15 @@ public class AccountService {
         AccountBalanceDTO accountBalanceDTO = new AccountBalanceDTO();
 
         for(Account ac: accounts){
-            accountBalanceDTO.addHistory(ac.getTransactions().stream().map(modelMapperConfig::transactionToDTO).toList());
+            List<Transaction> transactions = ac.getTransactions();
+
+            // Ordenar las transacciones por fecha descendente usando streams
+            List<Transaction> sortedTransactions = transactions.stream()
+                    .sorted((t1, t2) -> t2.getTransactionDate().compareTo(t1.getTransactionDate()))
+                    .collect(Collectors.toList());
+
+
+            accountBalanceDTO.addHistory(sortedTransactions.stream().map(modelMapperConfig::transactionToDTO).toList());
             accountBalanceDTO.addFixedTerms(ac.getFixedTermDeposits().stream().map(modelMapperConfig::fixedTermsBalanceToDTO).toList());
 
             if(ac.getCurrency().equals(CurrencyType.ARS)){
